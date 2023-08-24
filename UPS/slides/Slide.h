@@ -2,7 +2,6 @@
 #define SLIDE_H
 
 #include "SlideObject.h"
-#include "../content/AssetManager.h"
 #include "../content/primitive.h"
 
 namespace UPS {
@@ -16,11 +15,15 @@ using Transitions = std::vector<Transition>;
 using PrimitiveInSlide = std::pair<PrimitiveID,StateInSlide>;
 
 struct Slide : std::map<PrimitiveID,StateInSlide> {
-    void add(PrimitivePtr p,const StateInSlide& sis){
+    void add(PrimitivePtr p,const StateInSlide& sis = {}){
         (*this)[p->pid] = sis;
     }
     void add(PrimitivePtr p,const Vec2& pos){
-        (*this)[p->pid] = {pos,1.};
+        (*this)[p->pid] = StateInSlide{pos};
+    }
+
+    void remove(PrimitivePtr ptr) {
+        this->erase(ptr->pid);
     }
 
 };

@@ -13,7 +13,7 @@ class Text : public Primitive
 public:
     Text() {}
     using TextPtr = std::shared_ptr<Text>;
-    static TextPtr CreateText(const std::string &content,FontID font = -1);
+    static TextPtr Add(const std::string &content,FontID font = -1);
 
 private:
     scalar alpha = 1;

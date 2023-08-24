@@ -5,7 +5,7 @@ void UPS::Slideshow::nextFrame()
     if (current_slide == slides.size()-1)
         return;
     current_slide++;
-    fromClick = Time::now();
+    fromAction = Time::now();
     std::cout << "[next frame] " << current_slide << std::endl;
 }
 
@@ -16,7 +16,7 @@ void UPS::Slideshow::play() {
     if (!transitions_computed)
         precomputeTransitions();
 
-    auto t = TimeFrom(fromClick);
+    auto t = TimeFrom(fromAction);
 
     auto& CS = slides[current_slide];
 
@@ -39,27 +39,28 @@ void UPS::Slideshow::play() {
                 for (auto ub : UB){
                     Primitive::get(ub)->intro(t/transitionTime-1.,CS[ub]);
                 }
-                //slides[current_slide].intro(t/transitionTime-1.);
             }
         }
         else{
             for (auto& s : CS){
-                Primitive::get(s.first)->draw(t - 2*transitionTime,CS[s.first]);
+                Primitive::get(s.first)->play(t - 2*transitionTime,CS[s.first],current_slide);
             }
         }
     }
     else {
         if (t < transitionTime)
             for (auto s : CS){
-                std::cout << "intro" << std::endl;
                 Primitive::get(s.first)->intro(t/transitionTime,CS[s.first]);
             }
         else
             for (auto s : CS)
-                Primitive::get(s.first)->draw(t - transitionTime,CS[s.first]);
+                Primitive::get(s.first)->play(t - transitionTime,CS[s.first],current_slide);
     }
-    if (ImGui::IsKeyPressed(262)){
+    if (ImGui::IsKeyPressed(262) && t > 2*transitionTime){
         nextFrame();
+    }
+    if (ImGui::IsKeyPressed(263) && current_slide){
+        current_slide--;
     }
     ImGui::End();
 }
@@ -123,3 +124,5 @@ ImGuiWindowFlags UPS::Slideshow::ImGuiConfig()
     ImGui::SetNextWindowSize(ImVec2(io.DisplaySize.x,io.DisplaySize.y));
     return window_flags;
 }
+
+

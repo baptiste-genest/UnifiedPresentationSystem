@@ -3,12 +3,11 @@
 
 namespace UPS {
 
-Text::TextPtr Text::CreateText(const std::string &content, FontID font)
+Text::TextPtr Text::Add(const std::string &content, FontID font)
 {
-    TextPtr rslt = std::make_shared<Text>();
+    TextPtr rslt = NewPrimitive<Text>();
     rslt->content = content;
     rslt->fontID = font;
-    addPrimitive(rslt);
     return rslt;
 }
 

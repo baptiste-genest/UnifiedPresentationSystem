@@ -57,6 +57,9 @@ constexpr scalar TAU = 2*M_PI;
 using vec = Eigen::Vector<scalar,3>;
 using vecs = std::vector<vec>;
 
+using Face = std::vector<size_t>;
+using Faces = std::vector<Face>;
+
 using FontID = int;
 using FontSize = int;
 struct Font {
@@ -68,6 +71,12 @@ struct Primitive;
 using PrimitivePtr = std::shared_ptr<Primitive>;
 using PrimitiveID = size_t;
 using Primitives = std::set<PrimitiveID>;
+
+#define UPS_prefix std::string("/home/eulerson314/dev/UnifiedPresentationSystem/data/")
+
+using param = std::function<vec(scalar)>;
+using mapping = std::function<vec(const vec&)>;
+
 }
 
 #endif // UPS_H

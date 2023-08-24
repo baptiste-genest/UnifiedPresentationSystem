@@ -15,7 +15,7 @@ public:
     bool isValid() {return width != -1;}
     void display(const StateInSlide& sis) const;
 
-    static ImagePtr LoadImage(const char* filename);
+    static ImagePtr Add(const char* filename);
 
     Vec2 getSize() const {
         return Vec2(width,height);

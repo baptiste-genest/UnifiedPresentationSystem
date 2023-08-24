@@ -5,35 +5,46 @@
 
 UPS::Slideshow show;
 
+
+UPS::vec phi(const UPS::vec& x){
+    return UPS::vec(x(0) + 3.,1./(1. + x(0)*x(0) + x(2)*x(2)),x(2));
+}
+
 void init () {
     using namespace UPS;
 
-    auto img = UPS::Image::LoadImage("../../data/lateX/formula.png");
     auto CMFONTID = UPS::FontManager::addFont("/home/eulerson314/dev/UnifiedPresentationSystem/data/fonts/ComputerModernSR.ttf",60);
-
     UPS::Style::default_font = CMFONTID;
 
-    Slide S1;
-    S1.add(img,Vec2(0.5,0.5));
+    auto txt = Text::Add("Introduction à la Géométrie Différentielle Classique et Discrète ");
 
-    auto txt = Text::CreateText("Introduction to Discrete Differential Geometry");
+    show << txt->at(0.5,0.5);
 
-    Slide S2;
-    S2.add(txt,Vec2(0.5,0.1));
-    vecs P(50);
-    for (auto& p : P)
-        p = vec::Random();
-    S2.add(PointCloud::AddPointCloud(P),Vec2(0.5,0));
+    auto M = Mesh::Add(UPS_prefix + "meshes/quad_grid_50.obj");
 
-    Slide S3;
-    S3.add(txt,Vec2(0.5,0.75));
-    S3.add(img,Vec2(0.5,0.5));
+    show << inNextFrame << txt->at(0.5,0.1) << M;
+    show << inNextFrame <<M->apply(phi);
 
-    show.addSlides(S1,S2,S3);
+
+    auto circle = [](scalar t){return vec(0.5*cos(TAU*t),0,0.5*sin(TAU*t));};
+
+    auto curveParam = Curve3D::Add(circle,100,true);
+    auto circle_slow = [](scalar t){return vec(0.5*cos(t),0,0.5*sin(t));};
+    auto point_param = UPS::Point::Add(circle_slow);
+
+    show << inNextFrame << curveParam << curveParam->apply(phi,true) << point_param << point_param->apply(phi);
+
+    auto paramdef = Latex::Add(tex::center(
+                                   "Une \\textit{paramétrisation} est une fonction $\\varphi$\n" +
+                                   tex::equation("\\varphi : \\mathbb{R}^2 \\longrightarrow \\mathcal{M}")
+                                   ));
+    show << inNextFrame << paramdef->at(0.5,0.8);
 }
 
 void myCallBack() {
+
     show.play();
+    //ImGui::ShowDemoWindow();
 }
 
 
@@ -43,6 +54,7 @@ int main(int argc,char** argv) {
     polyscope::options::autoscaleStructures = false;
     polyscope::options::groundPlaneEnabled = false;
     polyscope::options::giveFocusOnShow = false;
+    polyscope::view::upDir = polyscope::view::UpDir::ZUp;
     polyscope::init();
     init();
 

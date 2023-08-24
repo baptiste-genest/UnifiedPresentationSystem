@@ -3,9 +3,12 @@
 
 #include "content/Image.h"
 #include "content/Text.h"
-#include "WidgetManager.h"
 #include "math/kernels.h"
 #include "slides/Slideshow.h"
 #include "content/PointCloud.h"
+#include "content/LateX.h"
+#include "content/Mesh.h"
+#include "content/Curve3D.h"
+#include "content/Point.h"
 
 #endif // UNIFIEDPRESENTATIONSYSTEM_H

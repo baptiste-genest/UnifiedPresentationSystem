@@ -7,17 +7,19 @@ std::vector<UPS::Image> UPS::Image::images;
 #include "../../extern/stb_image.h"
 
 
-UPS::Image::ImagePtr UPS::Image::LoadImage(const char *filename)
+UPS::Image::ImagePtr UPS::Image::Add(const char *filename)
 {
-    ImagePtr rslt = std::make_shared<Image>();
+    int w,h;
     // Load from file
-    unsigned char* image_data = stbi_load(filename, &rslt->width, &rslt->height, NULL, 4);
+    unsigned char* image_data = stbi_load(filename, &w, &h, NULL, 4);
     if (image_data == NULL){
         std::cerr << "[image] couldn't load image " << filename << std::endl;
         return ImagePtr();
     }
 
-    Primitive::addPrimitive(rslt);
+    ImagePtr rslt = NewPrimitive<Image>();
+    rslt->width = w;
+    rslt->height = h;
 
     // Create a OpenGL texture identifier
     glGenTextures(1, &rslt->texture);

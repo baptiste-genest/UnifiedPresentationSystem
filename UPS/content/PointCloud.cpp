@@ -5,32 +5,11 @@ UPS::PointCloud::PointCloud()
 
 }
 
-UPS::PointCloud::PointCloudPtr UPS::PointCloud::AddPointCloud(const vecs &P)
+UPS::PointCloud::PointCloudPtr UPS::PointCloud::Add(const vecs &P)
 {
-    auto rslt = std::make_shared<PointCloud>();
+    auto rslt = NewPrimitive<PointCloud>();
     rslt->points = P;
     rslt->pc = polyscope::registerPointCloud("PC",P);
-    rslt->pc->setEnabled(false);
-    Primitive::addPrimitive(rslt);
-    rslt->pc->setPosition(glm::vec3(1.,0,0));
+    rslt->init_polyscope_data(rslt->pc);
     return rslt;
-}
-
-void UPS::PointCloud::draw(TimeTypeSec ts, const StateInSlide &sis)
-{
-    pc->setTransparency(1);
-
-}
-
-void UPS::PointCloud::intro(parameter t, const StateInSlide &sis)
-{
-    pc->setEnabled(true);
-    pc->setTransparency(t);
-}
-
-void UPS::PointCloud::outro(parameter t, const StateInSlide &sis)
-{
-    if (t > 0.9)
-        pc->setEnabled(false);
-    pc->setTransparency(1-t);
 }
