@@ -25,21 +25,26 @@ public:
 public:
     void draw(TimeTypeSec ts, const StateInSlide &sis) override {
         polyscope_ptr->setEnabled(true);
-        polyscope_ptr->setTransparency(1);
+        polyscope_ptr->setTransparency(sis.alpha);
     }
     void intro(parameter t, const StateInSlide &sis) override {
         polyscope_ptr->setEnabled(true);
-        polyscope_ptr->setTransparency(smoothstep(t));
+        polyscope_ptr->setTransparency(smoothstep(t)*sis.alpha);
     }
     void outro(parameter t, const StateInSlide &sis) override {
         if (t > 0.9)
             polyscope_ptr->setEnabled(false);
-        polyscope_ptr->setTransparency(smoothstep(1-t));
+        polyscope_ptr->setTransparency(smoothstep(1-t)*sis.alpha);
+    }
+
+    void forceDisable() override {
+        polyscope_ptr->setEnabled(false);
     }
 
 protected:
     polyscope::Structure* polyscope_ptr;
     static size_t count;
+
 };
 
 }

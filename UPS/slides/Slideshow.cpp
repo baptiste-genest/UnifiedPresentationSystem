@@ -6,7 +6,20 @@ void UPS::Slideshow::nextFrame()
         return;
     current_slide++;
     fromAction = Time::now();
-    std::cout << "[next frame] " << current_slide << std::endl;
+    backward = false;
+}
+
+void UPS::Slideshow::previousFrame()
+{
+    if (!current_slide)
+        return;
+    for (auto& s : slides[current_slide])
+        Primitive::get(s.first)->forceDisable();
+    current_slide--;
+    for (auto& s : slides[current_slide])
+        Primitive::get(s.first)->intro(1.,s.second);
+    fromAction = Time::now();
+    backward = true;
 }
 
 void UPS::Slideshow::play() {
@@ -17,50 +30,52 @@ void UPS::Slideshow::play() {
         precomputeTransitions();
 
     auto t = TimeFrom(fromAction);
+    auto tb = TimeFrom(fromBegin);
 
     auto& CS = slides[current_slide];
 
-    if (current_slide > 0){
-        auto& PS = slides[current_slide-1];
-        auto&& [common,UA,UB] = transitions[current_slide-1];
-        if (t < 2*transitionTime){
-            for (auto c : common) {
-                Primitive::get(c)->transition(0.5*t/transitionTime,t,
-                                              PS[c],
-                                              CS[c]
-                                              );
-            }
-            if (t < transitionTime){
-                for (auto ua : UA) {
-                    Primitive::get(ua)->outro(t/transitionTime,PS[ua]);
-                }
-            }
-            else {
-                for (auto ub : UB){
-                    Primitive::get(ub)->intro(t/transitionTime-1.,CS[ub]);
-                }
-            }
-        }
-        else{
-            for (auto& s : CS){
-                Primitive::get(s.first)->play(t - 2*transitionTime,CS[s.first],current_slide);
-            }
-        }
+    if (backward) {
+        for (auto s : CS)
+            Primitive::get(s.first)->play(tb,CS[s.first],current_slide);
     }
     else {
-        if (t < transitionTime)
-            for (auto s : CS){
-                Primitive::get(s.first)->intro(t/transitionTime,CS[s.first]);
+        if (current_slide > 0){
+            auto& PS = slides[current_slide-1];
+            auto&& [common,UA,UB] = transitions[current_slide-1];
+            if (t < 2*transitionTime){
+                for (auto c : common) {
+                    auto st = transition(0.5*t/transitionTime,
+                                         PS[c],
+                                         CS[c]);
+                    Primitive::get(c)->play(tb,st,current_slide);
+                }
+                if (t < transitionTime)
+                    for (auto ua : UA)
+                        Primitive::get(ua)->outro(t/transitionTime,PS[ua]);
+                else
+                    for (auto ub : UB)
+                        Primitive::get(ub)->intro(t/transitionTime-1.,CS[ub]);
             }
-        else
-            for (auto s : CS)
-                Primitive::get(s.first)->play(t - transitionTime,CS[s.first],current_slide);
+            else
+                for (auto& s : CS)
+                    Primitive::get(s.first)->play(tb,CS[s.first],current_slide);
+        }
+        else {
+            if (t < transitionTime)
+                for (auto s : CS)
+                    Primitive::get(s.first)->intro(t/transitionTime,CS[s.first]);
+            else
+                for (auto s : CS)
+                    Primitive::get(s.first)->play(tb,CS[s.first],current_slide);
+        }
     }
+
+
     if (ImGui::IsKeyPressed(262) && t > 2*transitionTime){
         nextFrame();
     }
     if (ImGui::IsKeyPressed(263) && current_slide){
-        current_slide--;
+        previousFrame();
     }
     ImGui::End();
 }
@@ -98,14 +113,6 @@ UPS::Slideshow::TransitionSets UPS::Slideshow::computeTransitionsBetween(const S
         }
     }
     return {common,uniqueA,uniqueB};
-}
-
-bool UPS::Slideshow::belongInSlide(const Slide &S, const PrimitiveID &id)
-{
-    for (auto s : S)
-        if (s.first == id)
-            return true;
-    return false;
 }
 
 ImGuiWindowFlags UPS::Slideshow::ImGuiConfig()

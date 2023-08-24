@@ -13,12 +13,14 @@ UPS::vec phi(const UPS::vec& x){
 void init () {
     using namespace UPS;
 
-    auto CMFONTID = UPS::FontManager::addFont("/home/eulerson314/dev/UnifiedPresentationSystem/data/fonts/ComputerModernSR.ttf",60);
+    auto CMFONTID = UPS::FontManager::addFont(UPS_prefix + "fonts/ComputerModernSR.ttf",60);
     UPS::Style::default_font = CMFONTID;
 
     auto txt = Text::Add("Introduction à la Géométrie Différentielle Classique et Discrète ");
 
     show << txt->at(0.5,0.5);
+
+    auto base = show.getCurrentSlide();
 
     auto M = Mesh::Add(UPS_prefix + "meshes/quad_grid_50.obj");
 
@@ -39,6 +41,8 @@ void init () {
                                    tex::equation("\\varphi : \\mathbb{R}^2 \\longrightarrow \\mathcal{M}")
                                    ));
     show << inNextFrame << paramdef->at(0.5,0.8);
+
+    show << newFrame << Text::Add("Paramétrisation inverse ?")->at(0.5,0.1);
 }
 
 void myCallBack() {

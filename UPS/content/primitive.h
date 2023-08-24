@@ -19,6 +19,12 @@ struct StateInSlide {
     }
 };
 
+struct TimeObject {
+    TimeTypeSec time_from_begin;
+    TimeTypeSec time_from_slide;
+    TimeTypeSec inner_time;
+};
+
 
 struct Primitive {
 
@@ -63,13 +69,8 @@ struct Primitive {
     virtual void draw(TimeTypeSec ts,const StateInSlide& sis) = 0;
     virtual void intro(parameter t,const StateInSlide& sis) = 0;
     virtual void outro(parameter t,const StateInSlide& sis) = 0;
-    virtual void transition(parameter t,TimeTypeSec ts,const StateInSlide& sa,const StateInSlide& sb){
-        StateInSlide St;
-        St.relative_anchor_pos.x = std::lerp(sa.relative_anchor_pos.x,sb.relative_anchor_pos.x,smoothstep(t));
-        St.relative_anchor_pos.y = std::lerp(sa.relative_anchor_pos.y,sb.relative_anchor_pos.y,smoothstep(t));
-        St.alpha = std::lerp(sa.alpha,sb.alpha,t);
-        draw(ts,St);
-    }
+    virtual void forceDisable() {};
+
 };
 
 template <class T>
