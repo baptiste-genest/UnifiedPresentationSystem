@@ -25,7 +25,8 @@ void init () {
     auto M = Mesh::Add(UPS_prefix + "meshes/quad_grid_50.obj");
 
     show << inNextFrame << txt->at(0.5,0.1) << M;
-    show << inNextFrame <<M->apply(phi);
+    auto arrow = Latex::Add(tex::equation("\\longrightarrow"));
+    show << inNextFrame << M->apply(phi) << arrow->at(0.5,0.5);
 
 
     auto circle = [](scalar t){return vec(0.5*cos(TAU*t),0,0.5*sin(TAU*t));};
@@ -34,7 +35,9 @@ void init () {
     auto circle_slow = [](scalar t){return vec(0.5*cos(t),0,0.5*sin(t));};
     auto point_param = UPS::Point::Add(circle_slow);
 
+
     show << inNextFrame << curveParam << curveParam->apply(phi,true) << point_param << point_param->apply(phi);
+
 
     auto paramdef = Latex::Add(tex::center(
                                    "Une \\textit{paramétrisation} est une fonction $\\varphi$\n" +
@@ -42,7 +45,10 @@ void init () {
                                    ));
     show << inNextFrame << paramdef->at(0.5,0.8);
 
-    show << newFrame << Text::Add("Paramétrisation inverse ?")->at(0.5,0.1);
+    StateInSlide t = Vec2(0.5,0.5);
+    t.angle = M_PI;
+
+    show << newFrame << Text::Add("Paramétrisation inverse ?")->at(0.5,0.1) << arrow->at(t);
 }
 
 void myCallBack() {

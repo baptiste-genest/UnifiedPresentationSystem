@@ -18,6 +18,8 @@ public:
 
     void previousFrame();
 
+    void forceNextFrame();
+
     void play();
 
     void addSlide(const Slide& s) {
@@ -44,13 +46,13 @@ public:
         slides.back().add(ptr,sis);
     }
 
+    struct in_next_frame{};
+    struct new_frame{};
+
     inline Slideshow& operator<<(const Slide& S) {
         addSlide(S);
         return *this;
     }
-
-    struct in_next_frame{};
-    struct new_frame{};
 
 
     inline Slideshow& operator<<(in_next_frame) {
@@ -77,14 +79,9 @@ public:
 private:
 
     bool backward = false;
+    bool locked = true;
 
-    static StateInSlide transition(parameter t,const StateInSlide& sa,const StateInSlide& sb){
-        StateInSlide St;
-        St.relative_anchor_pos.x = std::lerp(sa.relative_anchor_pos.x,sb.relative_anchor_pos.x,smoothstep(t));
-        St.relative_anchor_pos.y = std::lerp(sa.relative_anchor_pos.y,sb.relative_anchor_pos.y,smoothstep(t));
-        St.alpha = std::lerp(sa.alpha,sb.alpha,t);
-        return St;
-    }
+    static StateInSlide transition(parameter t,const StateInSlide& sa,const StateInSlide& sb);
 
     bool transitions_computed = true;
 

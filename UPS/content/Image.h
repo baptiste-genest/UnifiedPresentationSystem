@@ -4,6 +4,7 @@
 #include "primitive.h"
 #include "GLFW/glfw3.h"
 #include "../math/kernels.h"
+#include "../math/geometry.h"
 
 namespace UPS {
 
@@ -29,6 +30,9 @@ private:
     int height     = -1;
     size_t assetId = 0;
     static size_t count;
+
+
+static void ImageRotated(ImTextureID tex_id, ImVec2 center, ImVec2 size, float angle,const RGBA& color_mult);
 
     // Primitive interface
 public:

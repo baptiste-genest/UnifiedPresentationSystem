@@ -28,7 +28,7 @@ class StateInSlide;
 using WidgetPtr = std::shared_ptr<Widget>;
 
 using Vec2 = ImVec2;
-using RGBA = ImVec4;
+using RGBA = ImColor;
 
 
 using Time = std::chrono::high_resolution_clock;

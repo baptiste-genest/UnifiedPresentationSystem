@@ -7,6 +7,7 @@ void UPS::Slideshow::nextFrame()
     current_slide++;
     fromAction = Time::now();
     backward = false;
+    locked = true;
 }
 
 void UPS::Slideshow::previousFrame()
@@ -20,6 +21,21 @@ void UPS::Slideshow::previousFrame()
         Primitive::get(s.first)->intro(1.,s.second);
     fromAction = Time::now();
     backward = true;
+    locked = true;
+}
+
+void UPS::Slideshow::forceNextFrame()
+{
+    if (current_slide == slides.size()-1)
+        return;
+    for (auto& s : slides[current_slide])
+        Primitive::get(s.first)->forceDisable();
+    current_slide++;
+    for (auto& s : slides[current_slide])
+        Primitive::get(s.first)->intro(1.,s.second);
+    fromAction = Time::now();
+    backward = false;
+    locked = false;
 }
 
 void UPS::Slideshow::play() {
@@ -34,7 +50,8 @@ void UPS::Slideshow::play() {
 
     auto& CS = slides[current_slide];
 
-    if (backward) {
+    if (backward || !locked) {
+        locked = false;
         for (auto s : CS)
             Primitive::get(s.first)->play(tb,CS[s.first],current_slide);
     }
@@ -56,28 +73,42 @@ void UPS::Slideshow::play() {
                     for (auto ub : UB)
                         Primitive::get(ub)->intro(t/transitionTime-1.,CS[ub]);
             }
-            else
+            else {
                 for (auto& s : CS)
                     Primitive::get(s.first)->play(tb,CS[s.first],current_slide);
+                locked = false;
+            }
         }
         else {
             if (t < transitionTime)
                 for (auto s : CS)
                     Primitive::get(s.first)->intro(t/transitionTime,CS[s.first]);
-            else
+            else {
                 for (auto s : CS)
                     Primitive::get(s.first)->play(tb,CS[s.first],current_slide);
+                locked = false;
+            }
         }
     }
 
-
-    if (ImGui::IsKeyPressed(262) && t > 2*transitionTime){
+    if (ImGui::IsKeyPressed(262) && !locked){
         nextFrame();
     }
-    if (ImGui::IsKeyPressed(263) && current_slide){
+    else if (ImGui::IsKeyPressed(263)){
         previousFrame();
+    }else if (ImGui::IsKeyPressed(264)){
+        forceNextFrame();
     }
     ImGui::End();
+}
+
+UPS::StateInSlide UPS::Slideshow::transition(parameter t, const StateInSlide &sa, const StateInSlide &sb){
+    StateInSlide St;
+    St.relative_anchor_pos.x = std::lerp(sa.relative_anchor_pos.x,sb.relative_anchor_pos.x,smoothstep(t));
+    St.relative_anchor_pos.y = std::lerp(sa.relative_anchor_pos.y,sb.relative_anchor_pos.y,smoothstep(t));
+    St.alpha = std::lerp(sa.alpha,sb.alpha,smoothstep(t));
+    St.angle = std::lerp(sa.angle,sb.angle,smoothstep(t));
+    return St;
 }
 
 void UPS::Slideshow::precomputeTransitions()

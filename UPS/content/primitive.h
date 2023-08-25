@@ -8,7 +8,7 @@ namespace UPS {
 
 struct StateInSlide {
     Vec2 relative_anchor_pos = {0.,0.};
-    scalar alpha = 1;
+    scalar alpha = 1,angle=0;
 
     StateInSlide() {}
     StateInSlide(const Vec2& p) : relative_anchor_pos(p) {}

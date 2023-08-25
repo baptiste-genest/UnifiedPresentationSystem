@@ -61,11 +61,38 @@ void UPS::Image::outro(parameter t, const StateInSlide &sis)
 
 void UPS::Image::display(const StateInSlide &sis) const
 {
-    auto P = sis.getAbsoluteAnchorPos();
-    P.x -= width*0.5;
-    P.y -= height*0.5;
-    ImGui::SetCursorPos(P);
     RGBA color_multiplier(1.,1.,1.,sis.alpha);
-    ImGui::Image((void*)(intptr_t)texture, getSize(), ImVec2(0.0f, 0.0f), ImVec2(1.0f, 1.0f), color_multiplier);
+    auto P = sis.getAbsoluteAnchorPos();
+    if (std::abs(sis.angle) > 0.001)
+        ImageRotated((void*)(intptr_t)texture,P,ImVec2(width,height),sis.angle,color_multiplier);
+    else {
+        P.x -= width*0.5;
+        P.y -= height*0.5;
+        ImGui::SetCursorPos(P);
+        ImGui::Image((void*)(intptr_t)texture, getSize(), ImVec2(0.0f, 0.0f), ImVec2(1.0f, 1.0f), color_multiplier);
+    }
 }
 
+void UPS::Image::ImageRotated(ImTextureID tex_id, ImVec2 center, ImVec2 size, float angle, const RGBA &color_mult)
+{
+    ImDrawList* draw_list = ImGui::GetWindowDrawList();
+
+    float cos_a = cosf(angle);
+    float sin_a = sinf(angle);
+    ImVec2 pos[4] =
+        {
+            center + ImRotate(ImVec2(-size.x * 0.5f, -size.y * 0.5f), cos_a, sin_a),
+            center + ImRotate(ImVec2(+size.x * 0.5f, -size.y * 0.5f), cos_a, sin_a),
+            center + ImRotate(ImVec2(+size.x * 0.5f, +size.y * 0.5f), cos_a, sin_a),
+            center + ImRotate(ImVec2(-size.x * 0.5f, +size.y * 0.5f), cos_a, sin_a)
+        };
+    ImVec2 uvs[4] =
+        {
+            ImVec2(0.0f, 0.0f),
+            ImVec2(1.0f, 0.0f),
+            ImVec2(1.0f, 1.0f),
+            ImVec2(0.0f, 1.0f)
+        };
+
+    draw_list->AddImageQuad(tex_id, pos[0], pos[1], pos[2], pos[3], uvs[0], uvs[1], uvs[2], uvs[3], color_mult);
+}
