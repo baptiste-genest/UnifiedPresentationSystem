@@ -73,6 +73,7 @@ using PrimitiveID = size_t;
 using Primitives = std::set<PrimitiveID>;
 
 #define UPS_prefix std::string("/home/eulerson314/dev/UnifiedPresentationSystem/data/")
+#define UPS_screen_resolution Vec2(1920,1080);
 
 using param = std::function<vec(scalar)>;
 using mapping = std::function<vec(const vec&)>;

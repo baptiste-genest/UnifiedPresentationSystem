@@ -1,7 +1,6 @@
 #ifndef SLIDE_H
 #define SLIDE_H
 
-#include "SlideObject.h"
 #include "../content/primitive.h"
 
 namespace UPS {
@@ -12,7 +11,6 @@ struct Transition{
     StateInSlide state_b;
 };
 using Transitions = std::vector<Transition>;
-using PrimitiveInSlide = std::pair<PrimitiveID,StateInSlide>;
 
 struct Slide : std::map<PrimitiveID,StateInSlide> {
     void add(PrimitivePtr p,const StateInSlide& sis = {}){

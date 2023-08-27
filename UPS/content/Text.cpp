@@ -13,13 +13,7 @@ Text::TextPtr Text::Add(const std::string &content, FontID font)
 
 void Text::display(const StateInSlide &sis) const
 {
-    if (fontID != -1){
-        ImGui::PushFont(FontManager::getFont(fontID));
-    }
-    else{
-        auto F = FontManager::getFont(Style::default_font);
-        ImGui::PushFont(F);
-    }
+    pushFont();
 
     auto size = ImGui::CalcTextSize(content.c_str());
 
@@ -36,6 +30,17 @@ void Text::display(const StateInSlide &sis) const
     ImGui::PopFont();
 }
 
+void Text::pushFont() const
+{
+    if (fontID != -1){
+        ImGui::PushFont(FontManager::getFont(fontID));
+    }
+    else{
+        auto F = FontManager::getFont(Style::default_font);
+        ImGui::PushFont(F);
+    }
+}
+
 void Text::intro(parameter t, const StateInSlide &sis)
 {
     alpha = smoothstep(t);
@@ -47,6 +52,14 @@ void Text::outro(parameter t, const StateInSlide &sis)
     alpha = 1-smoothstep(t);
     display(sis);
 
+}
+
+Primitive::Size Text::getSize() const
+{
+    pushFont();
+    auto size = ImGui::CalcTextSize(content.c_str());
+    ImGui::PopFont();
+    return size;
 }
 
 }

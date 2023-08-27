@@ -20,9 +20,12 @@ struct StateInSlide {
     }
 };
 
+using PrimitiveInSlide = std::pair<PrimitivePtr,StateInSlide>;
+
 
 struct Primitive {
 
+    using Size = ImVec2;
     using Updater = std::function<void(TimeTypeSec,PrimitiveID)>;
 
     Updater updater = [] (TimeTypeSec,PrimitiveID) {};
@@ -56,11 +59,8 @@ struct Primitive {
         return std::distance(visited_slides.begin(),visited_slides.find(in));
     }
 
-    void handleInnerTime(int slidenb) {
-        if (inner_slide != slidenb){
-            inner_time = Time::now();
-            inner_slide = slidenb;
-        }
+    void handleInnerTime() {
+        inner_time = Time::now();
     }
 
     void play(const TimeObject& t,const StateInSlide& sis) {
@@ -72,15 +72,29 @@ struct Primitive {
     virtual void intro(parameter t,const StateInSlide& sis) = 0;
     virtual void outro(parameter t,const StateInSlide& sis) = 0;
     virtual void forceDisable() {};
+    virtual Size getSize() const {return Size();}
+
+    Size getRelativeSize() const {
+        auto S = UPS_screen_resolution;
+        auto s = getSize();
+        return Vec2(s.x/S.x,s.y/S.y);
+    }
 
     TimeTypeSec getInnerTime(){
         return TimeFrom(inner_time);
     }
 
+
 private:
     TimeStamp inner_time;
-    int inner_slide = -1;
 };
+
+template<class T>
+static std::shared_ptr<T> DuplicatePrimitive(std::shared_ptr<T> ptr){
+    auto other = std::make_shared<T>(*ptr);
+    Primitive::addPrimitive(other);
+    return other;
+}
 
 template <class T>
 std::shared_ptr<T> NewPrimitive(){

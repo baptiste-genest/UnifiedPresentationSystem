@@ -6,8 +6,11 @@
 UPS::Slideshow show;
 
 
-UPS::vec phi(const UPS::vec& x){
-    return UPS::vec(x(0) + 3.,1./(1. + x(0)*x(0) + x(2)*x(2)),x(2));
+UPS::vec phi(const UPS::vec& X){
+    auto x = X(0)*M_PI;
+    auto y = X(2)*M_PI_2;
+    return UPS::vec(cos(x)*cos(y) + 3,sin(y),sin(x)*cos(y));
+    //return UPS::vec(x(0) + 3.,1./(1. + x(0)*x(0) + x(2)*x(2)),x(2));
 }
 
 void init () {
@@ -26,7 +29,8 @@ void init () {
 
     show << inNextFrame << txt->at(0.5,0.1) << M;
     auto arrow = Latex::Add(tex::equation("\\longrightarrow"));
-    show << inNextFrame << M->apply(phi) << arrow->at(0.5,0.5);
+    auto varphi = Latex::Add(tex::equation("\\varphi"));
+    show << inNextFrame << M->apply(phi) << arrow->at(CENTER) << PlaceBelow(varphi);
 
 
     auto circle = [](scalar t){return vec(0.5*cos(TAU*t),0,0.5*sin(TAU*t));};

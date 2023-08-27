@@ -17,7 +17,6 @@ add_executable(UPS imgui_main.cpp
     UnifiedPresentationSystem.h
     slides/Slideshow.h slides/Slideshow.cpp
     slides/Slide.h slides/Slide.cpp
-    slides/SlideObject.h
     content/primitive.h
     math/kernels.h
     content/Text.h content/Text.cpp
@@ -33,6 +32,7 @@ add_executable(UPS imgui_main.cpp
     content/Curve3D.h content/Curve3D.cpp
     content/Point.h content/Point.cpp
     content/TimeObject.h content/TimeObject.cpp
+    content/Placement.h content/Placement.cpp
 )
 target_link_libraries(UPS polyscope OpenGL)
 

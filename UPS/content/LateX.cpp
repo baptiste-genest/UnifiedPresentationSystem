@@ -31,7 +31,7 @@ UPS::Latex::LatexPtr UPS::Latex::Add(const TexObject &tex,bool formula)
             assert(false);
             return LatexPtr();
         }
-        if (std::system(("convert -density 300 -quality 100 formula-crop.pdf -colorspace RGB " + filename + " >>/tmp/UPS.log").c_str())) {
+        if (std::system(("convert -density 500 -quality 100 formula-crop.pdf -colorspace RGB " + filename + " >>/tmp/UPS.log").c_str())) {
             std::cerr << "[error while converting to png]" << std::endl;
             assert(false);
             return LatexPtr();

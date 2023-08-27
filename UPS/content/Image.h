@@ -18,10 +18,6 @@ public:
 
     static ImagePtr Add(const char* filename);
 
-    Vec2 getSize() const {
-        return Vec2(width,height);
-    }
-
 private:
     static std::vector<Image> images;
 
@@ -39,6 +35,7 @@ public:
     void draw(const TimeObject&, const StateInSlide &sis) override;
     void intro(parameter t, const StateInSlide &sis) override;
     void outro(parameter t, const StateInSlide &sis) override;
+    Size getSize() const override {return Size(width,height);}
 };
 
 }

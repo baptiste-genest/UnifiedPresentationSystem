@@ -2,6 +2,7 @@
 #define SLIDESHOW_H
 
 #include "Slide.h"
+#include "../content/Placement.h"
 
 namespace UPS {
 
@@ -9,9 +10,10 @@ class Slideshow
 {
 public:
 
+
     Slideshow() {
-        fromAction = Time::now();
-        fromBegin = Time::now();
+        from_action = Time::now();
+        from_begin = Time::now();
     }
 
     void nextFrame();
@@ -34,6 +36,8 @@ public:
 
     TimeTypeSec transitionTime = 0.5;
 
+    void setInnerTime();
+
 
     inline Slide& getCurrentSlide(){return slides.back();}
     inline Slide& getSlide(index i){return slides[i];}
@@ -43,6 +47,7 @@ public:
         transitions_computed = false;
         if (slides.empty())
             slides.push_back(Slide());
+        last_primitive_inserted = {ptr,sis};
         slides.back().add(ptr,sis);
     }
 
@@ -65,8 +70,14 @@ public:
         return *this;
     }
 
+    inline Slideshow& operator<<(const Placement& P) {
+        auto pos = P.computePlacement(last_primitive_inserted);
+        addToLastSlide(P.ptr,StateInSlide(pos));
+        return *this;
+    }
 
-    inline Slideshow& operator<<(std::pair<PrimitivePtr,StateInSlide> obj) {
+
+    inline Slideshow& operator<<(PrimitiveInSlide obj) {
         addToLastSlide(obj.first,obj.second);
         return *this;
     }
@@ -77,10 +88,12 @@ public:
     }
 
     inline TimeObject getTimeObject() const {
-        return TimeObject(TimeFrom(fromBegin),TimeFrom(fromAction),current_slide);
+        return TimeObject(TimeFrom(from_begin),TimeFrom(from_action),current_slide);
     }
 
 private:
+
+    PrimitiveInSlide last_primitive_inserted;
 
     bool backward = false;
     bool locked = true;
@@ -95,7 +108,10 @@ private:
 
     static ImGuiWindowFlags ImGuiConfig();
 
-    TimeStamp fromAction,fromBegin;
+    int visited_slide = -1;
+
+    TimeStamp from_action,from_begin;
+    std::vector<Primitives> appearing_primitives;
     std::vector<Slide> slides;
     std::vector<TransitionSets> transitions;
     size_t current_slide = 0;

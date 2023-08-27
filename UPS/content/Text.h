@@ -22,6 +22,7 @@ private:
     FontSize fontSize;
 
     void display(const StateInSlide& sis) const;
+    void pushFont() const;
 
     // Primitive interface
 public:
@@ -30,6 +31,7 @@ public:
     }
     void intro(parameter t, const StateInSlide &sis) override;
     void outro(parameter t, const StateInSlide &sis) override;
+    Size getSize() const override;
 };
 
 }
