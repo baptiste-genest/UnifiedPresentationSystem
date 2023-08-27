@@ -32,6 +32,7 @@ add_executable(UPS imgui_main.cpp
     math/geometry.h
     content/Curve3D.h content/Curve3D.cpp
     content/Point.h content/Point.cpp
+    content/TimeObject.h content/TimeObject.cpp
 )
 target_link_libraries(UPS polyscope OpenGL)
 

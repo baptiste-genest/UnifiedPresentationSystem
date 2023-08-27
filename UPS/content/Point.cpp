@@ -6,14 +6,14 @@ UPS::Point::PointPtr UPS::Point::Add(const param &phi,scalar r)
     vecs X = {phi(0)};
     rslt->radius = r;
     rslt->phi = phi;
-    rslt->updater = [phi](TimeTypeSec ts,int,PrimitiveID id){
+    rslt->updater = [phi](TimeTypeSec t,PrimitiveID id){
         auto p = Primitive::get<Point>(id);
-        vecs X = {phi(ts)};
+        vecs X = {phi(t)};
         p->pc->updatePointPositions(X);
     };
     rslt->pc = polyscope::registerPointCloud(getPolyscopeName(),X);
     rslt->pc->setPointRadius(r,false);
-    rslt->init_polyscope_data(rslt->pc);
+    rslt->initPolyscopeData(rslt->pc);
     return rslt;
 }
 

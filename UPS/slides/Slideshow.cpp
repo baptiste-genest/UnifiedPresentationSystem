@@ -46,14 +46,15 @@ void UPS::Slideshow::play() {
         precomputeTransitions();
 
     auto t = TimeFrom(fromAction);
-    auto tb = TimeFrom(fromBegin);
 
     auto& CS = slides[current_slide];
+
+    TimeObject tobj = getTimeObject();
 
     if (backward || !locked) {
         locked = false;
         for (auto s : CS)
-            Primitive::get(s.first)->play(tb,CS[s.first],current_slide);
+            Primitive::get(s.first)->play(tobj,CS[s.first]);
     }
     else {
         if (current_slide > 0){
@@ -64,28 +65,32 @@ void UPS::Slideshow::play() {
                     auto st = transition(0.5*t/transitionTime,
                                          PS[c],
                                          CS[c]);
-                    Primitive::get(c)->play(tb,st,current_slide);
+                    Primitive::get(c)->play(tobj,st);
                 }
                 if (t < transitionTime)
                     for (auto ua : UA)
                         Primitive::get(ua)->outro(t/transitionTime,PS[ua]);
                 else
-                    for (auto ub : UB)
+                    for (auto ub : UB){
+                        Primitive::get(ub)->handleInnerTime(current_slide);
                         Primitive::get(ub)->intro(t/transitionTime-1.,CS[ub]);
+                    }
             }
             else {
                 for (auto& s : CS)
-                    Primitive::get(s.first)->play(tb,CS[s.first],current_slide);
+                    Primitive::get(s.first)->play(tobj,CS[s.first]);
                 locked = false;
             }
         }
         else {
             if (t < transitionTime)
-                for (auto s : CS)
+                for (auto s : CS){
+                    Primitive::get(s.first)->handleInnerTime(current_slide);
                     Primitive::get(s.first)->intro(t/transitionTime,CS[s.first]);
+                }
             else {
                 for (auto s : CS)
-                    Primitive::get(s.first)->play(tb,CS[s.first],current_slide);
+                    Primitive::get(s.first)->play(tobj,CS[s.first]);
                 locked = false;
             }
         }

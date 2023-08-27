@@ -40,7 +40,7 @@ UPS::Image::ImagePtr UPS::Image::Add(const char *filename)
     return rslt;
 }
 
-void UPS::Image::draw(TimeTypeSec, const StateInSlide &sis)
+void UPS::Image::draw(const TimeObject &, const StateInSlide &sis)
 {
     display(sis);
 }

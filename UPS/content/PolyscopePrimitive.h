@@ -11,7 +11,7 @@ class PolyscopePrimitive : public Primitive
 public:
     PolyscopePrimitive() {}
 
-    void init_polyscope_data(polyscope::Structure* pcptr) {
+    void initPolyscopeData(polyscope::Structure* pcptr) {
         polyscope_ptr = pcptr;
         polyscope_ptr->setEnabled(false);
         count++;
@@ -23,15 +23,15 @@ public:
 
     // Primitive interface
 public:
-    void draw(TimeTypeSec ts, const StateInSlide &sis) override {
+    void draw(const TimeObject&, const StateInSlide &sis) override {
         polyscope_ptr->setEnabled(true);
         polyscope_ptr->setTransparency(sis.alpha);
     }
-    void intro(parameter t, const StateInSlide &sis) override {
+    void intro(parameter t,const StateInSlide &sis) override {
         polyscope_ptr->setEnabled(true);
         polyscope_ptr->setTransparency(smoothstep(t)*sis.alpha);
     }
-    void outro(parameter t, const StateInSlide &sis) override {
+    void outro(parameter t,const StateInSlide &sis) override {
         if (t > 0.9)
             polyscope_ptr->setEnabled(false);
         polyscope_ptr->setTransparency(smoothstep(1-t)*sis.alpha);
@@ -40,6 +40,7 @@ public:
     void forceDisable() override {
         polyscope_ptr->setEnabled(false);
     }
+
 
 protected:
     polyscope::Structure* polyscope_ptr;

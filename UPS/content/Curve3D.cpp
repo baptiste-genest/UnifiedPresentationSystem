@@ -8,7 +8,7 @@ UPS::Curve3D::Curve3DPtr UPS::Curve3D::Add(const vecs &nodes, bool loop)
         rslt->pc = polyscope::registerCurveNetworkLoop(getPolyscopeName(),nodes);
     else
         rslt->pc = polyscope::registerCurveNetworkLine(getPolyscopeName(),nodes);
-    rslt->init_polyscope_data(rslt->pc);
+    rslt->initPolyscopeData(rslt->pc);
     return rslt;
 }
 
@@ -27,7 +27,7 @@ UPS::Curve3D::Curve3DPtr UPS::Curve3D::Add(const param &param,int N, bool loop)
         rslt->pc = polyscope::registerCurveNetworkLoop(getPolyscopeName(),rslt->nodes);
     else
         rslt->pc = polyscope::registerCurveNetworkLine(getPolyscopeName(),rslt->nodes);
-    rslt->init_polyscope_data(rslt->pc);
+    rslt->initPolyscopeData(rslt->pc);
     return rslt;
 
 }
@@ -43,6 +43,6 @@ UPS::Curve3D::Curve3DPtr UPS::Curve3D::apply(const mapping &phi,bool loop) const
         rslt->pc = polyscope::registerCurveNetworkLoop(getPolyscopeName(),rslt->nodes);
     else
         rslt->pc = polyscope::registerCurveNetworkLine(getPolyscopeName(),rslt->nodes);
-    rslt->init_polyscope_data(rslt->pc);
+    rslt->initPolyscopeData(rslt->pc);
     return rslt;
 }

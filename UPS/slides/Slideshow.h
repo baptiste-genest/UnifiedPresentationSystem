@@ -76,6 +76,10 @@ public:
         return *this;
     }
 
+    inline TimeObject getTimeObject() const {
+        return TimeObject(TimeFrom(fromBegin),TimeFrom(fromAction),current_slide);
+    }
+
 private:
 
     bool backward = false;

@@ -13,7 +13,7 @@ UPS::Mesh::MeshPtr UPS::Mesh::Add(const std::string &objfile)
     }
 
     rslt->pc = polyscope::registerSurfaceMesh(getPolyscopeName(),rslt->vertices,rslt->faces);
-    rslt->init_polyscope_data(rslt->pc);
+    rslt->initPolyscopeData(rslt->pc);
     rslt->pc->setEdgeWidth(1.);
 
     return rslt;
@@ -27,8 +27,8 @@ UPS::Mesh::MeshPtr UPS::Mesh::apply(const mapping &phi) const
     for (auto& x : rslt->vertices)
         x = phi(x);
     rslt->pc = polyscope::registerSurfaceMesh(getPolyscopeName(),rslt->vertices,rslt->faces);
-
-    rslt->init_polyscope_data(rslt->pc);
+    
+    rslt->initPolyscopeData(rslt->pc);
     rslt->pc->setEdgeWidth(1.);
     return rslt;
 }

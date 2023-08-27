@@ -10,6 +10,6 @@ UPS::PointCloud::PointCloudPtr UPS::PointCloud::Add(const vecs &P)
     auto rslt = NewPrimitive<PointCloud>();
     rslt->points = P;
     rslt->pc = polyscope::registerPointCloud("PC",P);
-    rslt->init_polyscope_data(rslt->pc);
+    rslt->initPolyscopeData(rslt->pc);
     return rslt;
 }

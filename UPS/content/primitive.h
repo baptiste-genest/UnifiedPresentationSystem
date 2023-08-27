@@ -3,6 +3,7 @@
 
 #include "../UPS.h"
 #include "../math/kernels.h"
+#include "TimeObject.h"
 
 namespace UPS {
 
@@ -19,18 +20,12 @@ struct StateInSlide {
     }
 };
 
-struct TimeObject {
-    TimeTypeSec time_from_begin;
-    TimeTypeSec time_from_slide;
-    TimeTypeSec inner_time;
-};
-
 
 struct Primitive {
 
-    using Updater = std::function<void(TimeTypeSec,int,PrimitiveID)>;
+    using Updater = std::function<void(TimeTypeSec,PrimitiveID)>;
 
-    Updater updater = [] (TimeTypeSec,int,PrimitiveID) {};
+    Updater updater = [] (TimeTypeSec,PrimitiveID) {};
 
     PrimitiveID pid;
     static std::vector<PrimitivePtr> primitives;
@@ -61,16 +56,30 @@ struct Primitive {
         return std::distance(visited_slides.begin(),visited_slides.find(in));
     }
 
-    void play(TimeTypeSec ts,const StateInSlide& sis,int absolute_slide_nb) {
-        draw(ts,sis);
-        updater(ts,relativeSlideIndex(absolute_slide_nb),pid);
+    void handleInnerTime(int slidenb) {
+        if (inner_slide != slidenb){
+            inner_time = Time::now();
+            inner_slide = slidenb;
+        }
     }
 
-    virtual void draw(TimeTypeSec ts,const StateInSlide& sis) = 0;
+    void play(const TimeObject& t,const StateInSlide& sis) {
+        draw(t,sis);
+        updater(getInnerTime(),pid);
+    }
+
+    virtual void draw(const TimeObject& time,const StateInSlide& sis) = 0;
     virtual void intro(parameter t,const StateInSlide& sis) = 0;
     virtual void outro(parameter t,const StateInSlide& sis) = 0;
     virtual void forceDisable() {};
 
+    TimeTypeSec getInnerTime(){
+        return TimeFrom(inner_time);
+    }
+
+private:
+    TimeStamp inner_time;
+    int inner_slide = -1;
 };
 
 template <class T>

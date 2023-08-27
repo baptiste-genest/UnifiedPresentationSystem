@@ -25,7 +25,7 @@ private:
 
     // Primitive interface
 public:
-    void draw(TimeTypeSec ts, const StateInSlide &sis) override {
+    void draw(const TimeObject& t, const StateInSlide &sis) override {
         display(sis);
     }
     void intro(parameter t, const StateInSlide &sis) override;
