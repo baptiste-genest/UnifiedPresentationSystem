@@ -14,14 +14,23 @@ public:
     using MeshPtr = std::shared_ptr<Mesh>;
     Mesh() {}
 
-    static MeshPtr Add(const std::string& objfile);
+    static MeshPtr Add(const std::string& objfile,const vec& scale = vec(1.,1.,1.));
 
     MeshPtr apply(const mapping& phi) const;
+    MeshPtr applyDynamic(const time_mapping& phi) const;
+
+    using scalar_func = std::function<scalar(const vec&)>;
+    using vector_func = std::function<vec(const vec&)>;
+
+    Vec eval(const scalar_func& f) const;
+    vecs eval(const vector_func& f) const;
 
     polyscope::SurfaceMesh* pc;
 
+    void updateMesh(const vecs& X);
+
 private:
-    vecs vertices;
+    vecs vertices,original_vertices;
     Faces faces;
 };
 

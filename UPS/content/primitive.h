@@ -52,6 +52,11 @@ struct Primitive {
     inline std::pair<PrimitivePtr,StateInSlide> at(scalar x,scalar y) {
         return {get(pid),ImVec2{x,y}};
     }
+    inline std::pair<PrimitivePtr,StateInSlide> at(scalar alpha) {
+        StateInSlide sis;
+        sis.alpha = alpha;
+        return {get(pid),sis};
+    }
 
     std::set<index> visited_slides;
     index relativeSlideIndex(index in) {
@@ -72,6 +77,7 @@ struct Primitive {
     virtual void intro(parameter t,const StateInSlide& sis) = 0;
     virtual void outro(parameter t,const StateInSlide& sis) = 0;
     virtual void forceDisable() {};
+    virtual void forceEnable() {};
     virtual Size getSize() const {return Size();}
 
     Size getRelativeSize() const {

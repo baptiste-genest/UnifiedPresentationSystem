@@ -55,6 +55,9 @@ using index = size_t;
 using scalar = float;
 constexpr scalar TAU = 2*M_PI;
 using vec = Eigen::Vector<scalar,3>;
+using vec2 = Eigen::Vector<scalar,2>;
+using Vec = Eigen::Vector<scalar,-1>;
+using mat2 = Eigen::Matrix<scalar,2,2>;
 using vecs = std::vector<vec>;
 
 using Face = std::vector<size_t>;
@@ -77,6 +80,7 @@ using Primitives = std::set<PrimitiveID>;
 
 using param = std::function<vec(scalar)>;
 using mapping = std::function<vec(const vec&)>;
+using time_mapping = std::function<vec(const vec&,TimeTypeSec)>;
 
 }
 

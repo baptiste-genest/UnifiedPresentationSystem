@@ -4,14 +4,17 @@
 #include "../UPS.h"
 #include "Image.h"
 #include "io.h"
+#include <stdarg.h>
 
 namespace UPS {
 
 using TexObject = std::string;
 
+constexpr scalar TITLE = 0.07;
+
 struct Latex : public Image {
     using LatexPtr = std::shared_ptr<Image>;
-    static LatexPtr Add(const TexObject& tex,bool formula = false);
+    static LatexPtr Add(const TexObject& tex,bool formula = false,scalar height_ratio=0.04);
 };
 
 
@@ -30,6 +33,44 @@ inline TexObject equation(const TexObject& A,bool number = false) {
         return "\\begin{equation} \n" + A + "\n\\end{equation}";
     return "\\begin{equation*} \n" + A + "\n\\end{equation*}";
 }
+
+inline TexObject Vec(const std::vector<TexObject>& texs) {
+    TexObject rslt = "\\begin{pmatrix}\n";
+    for (int i= 0;i<texs.size()-1;i++)
+        rslt += texs[i] + "\\\\";
+    rslt += texs.back();
+    rslt += "\\end{pmatrix}";
+    return rslt;
+}
+
+template <typename... ARGS>
+TexObject Vec(ARGS... arguments) {
+    std::vector<TexObject> data;
+    data.reserve(sizeof...(arguments));
+    (data.emplace_back(arguments), ...);
+    return Vec(data);
+}
+
+
+/*
+inline TexObject Vec(const char* format, ...) {
+    va_list args;
+    va_start(args, format);
+
+    TexObject rslt = "\\begin{pmatrix}\n";
+    const char* arg = format;
+    while (arg != nullptr) {
+        rslt += arg;
+        arg = va_arg(args, const char*);
+        if (arg != nullptr)
+            rslt += "\\\\ ";
+    }
+    rslt += "\\end{pmatrix}";
+
+    va_end(args);
+    return rslt;
+}
+*/
 
 }
 

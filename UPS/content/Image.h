@@ -18,6 +18,8 @@ public:
 
     static ImagePtr Add(const char* filename);
 
+    static ImVec2 getSize(std::string filename);
+
 private:
     static std::vector<Image> images;
 

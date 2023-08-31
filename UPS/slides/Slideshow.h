@@ -11,7 +11,7 @@ class Slideshow
 public:
 
 
-    Slideshow() {
+    Slideshow(bool debug = false) : debug(debug) {
         from_action = Time::now();
         from_begin = Time::now();
     }
@@ -69,8 +69,8 @@ public:
         slides.push_back(Slide());
         return *this;
     }
-
-    inline Slideshow& operator<<(const Placement& P) {
+    
+    inline Slideshow& operator<<(const RelativePlacement& P) {
         auto pos = P.computePlacement(last_primitive_inserted);
         addToLastSlide(P.ptr,StateInSlide(pos));
         return *this;
@@ -91,12 +91,16 @@ public:
         return TimeObject(TimeFrom(from_begin),TimeFrom(from_action),current_slide);
     }
 
+    void init();
+
 private:
 
     PrimitiveInSlide last_primitive_inserted;
 
     bool backward = false;
     bool locked = true;
+
+    bool debug;
 
     static StateInSlide transition(parameter t,const StateInSlide& sa,const StateInSlide& sb);
 
@@ -106,7 +110,7 @@ private:
     TransitionSets computeTransitionsBetween(const Slide& A,const Slide& B);
     void precomputeTransitions();
 
-    static ImGuiWindowFlags ImGuiConfig();
+    static void ImGuiWindowConfig();
 
     int visited_slide = -1;
 
@@ -115,6 +119,7 @@ private:
     std::vector<Slide> slides;
     std::vector<TransitionSets> transitions;
     size_t current_slide = 0;
+    ImGuiWindowFlags window_flags = 0;
 };
 
 constexpr Slideshow::in_next_frame inNextFrame;

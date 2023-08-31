@@ -43,7 +43,7 @@ void UPS::Slideshow::forceNextFrame()
 }
 
 void UPS::Slideshow::play() {
-    auto window_flags = ImGuiConfig();
+    ImGuiWindowConfig();
     ImGui::Begin("Unified Presentation System",NULL,window_flags);
 
     if (!transitions_computed)
@@ -147,6 +147,8 @@ void UPS::Slideshow::precomputeTransitions()
                 ));
         appearing_primitives[i+1] = std::get<2>(transitions.back());
     }
+    if (debug)
+        current_slide = slides.size()-1;
 }
 
 UPS::Slideshow::TransitionSets UPS::Slideshow::computeTransitionsBetween(const Slide &A, const Slide &B)
@@ -172,21 +174,29 @@ UPS::Slideshow::TransitionSets UPS::Slideshow::computeTransitionsBetween(const S
     return {common,uniqueA,uniqueB};
 }
 
-ImGuiWindowFlags UPS::Slideshow::ImGuiConfig()
+void UPS::Slideshow::ImGuiWindowConfig()
 {
     ImGuiIO& io = ImGui::GetIO(); (void)io;
-    ImGuiWindowFlags window_flags = 0;
     io.WantCaptureMouse = false;
     io.WantCaptureKeyboard = true;
+    ImGui::SetNextWindowPos(ImVec2(0,0));
+    ImGui::SetNextWindowSize(ImVec2(io.DisplaySize.x,io.DisplaySize.y));
+}
+
+void UPS::Slideshow::init()
+{
+    polyscope::options::buildGui = false;
+    polyscope::options::autocenterStructures = false;
+    polyscope::options::autoscaleStructures = false;
+    polyscope::options::groundPlaneEnabled = false;
+    polyscope::options::giveFocusOnShow = false;
+    polyscope::view::upDir = polyscope::view::UpDir::YUp;
+    polyscope::init();
+    window_flags = 0;
     window_flags |= ImGuiWindowFlags_NoTitleBar;
     window_flags |= ImGuiWindowFlags_NoMove;
     window_flags |= ImGuiWindowFlags_NoResize;
     window_flags |= ImGuiWindowFlags_NoBackground;
     window_flags |= ImGuiWindowFlags_NoScrollbar;
 
-    ImGui::SetNextWindowPos(ImVec2(0,0));
-    ImGui::SetNextWindowSize(ImVec2(io.DisplaySize.x,io.DisplaySize.y));
-    return window_flags;
 }
-
-

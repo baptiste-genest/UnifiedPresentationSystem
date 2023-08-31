@@ -40,6 +40,14 @@ UPS::Image::ImagePtr UPS::Image::Add(const char *filename)
     return rslt;
 }
 
+ImVec2 UPS::Image::getSize(std::string filename)
+{
+    int w,h;
+    // Load from file
+    unsigned char* image_data = stbi_load(filename.c_str(), &w, &h, NULL, 4);
+    return ImVec2(w,h);
+}
+
 void UPS::Image::draw(const TimeObject &, const StateInSlide &sis)
 {
     display(sis);

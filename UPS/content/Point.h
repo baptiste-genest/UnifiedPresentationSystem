@@ -20,14 +20,6 @@ public:
 
     PointPtr apply(const mapping& f) const;
     scalar radius;
-
-
-    // Primitive interface
-public:
-    void intro(parameter t, const StateInSlide &sis) override{
-        PolyscopePrimitive::intro(t,sis);
-        updater(getInnerTime(),pid);
-    }
 };
 
 }

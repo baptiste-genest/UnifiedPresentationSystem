@@ -1,42 +1,37 @@
 #include "polyscope/polyscope.h"
 
-#include "UnifiedPresentationSystem.h"
+#include "../UPS/UnifiedPresentationSystem.h"
 #include "imgui.h"
 
 UPS::Slideshow show;
 
 
-UPS::vec phi(const UPS::vec& X){
-    auto x = X(0)*M_PI;
-    auto y = X(2)*M_PI_2;
-    return UPS::vec(cos(x)*cos(y) + 3,sin(y),sin(x)*cos(y));
-    //return UPS::vec(x(0) + 3.,1./(1. + x(0)*x(0) + x(2)*x(2)),x(2));
+UPS::vec phi(const UPS::vec& x){
+    return UPS::vec(x(0) + 3.,std::exp(-7*x.squaredNorm()),x(2));
 }
 
 void init () {
     using namespace UPS;
 
-    auto CMFONTID = UPS::FontManager::addFont(UPS_prefix + "fonts/ComputerModernSR.ttf",60);
+    auto CMFONTID = UPS::FontManager::addFont(UPS_prefix + "fonts/ComputerModernSR.ttf",80);
     UPS::Style::default_font = CMFONTID;
 
     auto txt = Text::Add("Introduction à la Géométrie Différentielle Classique et Discrète ");
 
-    show << txt->at(0.5,0.5);
-
-    auto base = show.getCurrentSlide();
+    show << txt->at(CENTER);
 
     auto M = Mesh::Add(UPS_prefix + "meshes/quad_grid_50.obj");
 
-    show << inNextFrame << txt->at(0.5,0.1) << M;
+    show << inNextFrame << txt->at(TOP) << M;
     auto arrow = Latex::Add(tex::equation("\\longrightarrow"));
     auto varphi = Latex::Add(tex::equation("\\varphi"));
     show << inNextFrame << M->apply(phi) << arrow->at(CENTER) << PlaceBelow(varphi);
 
 
-    auto circle = [](scalar t){return vec(0.5*cos(TAU*t),0,0.5*sin(TAU*t));};
+    auto circle = [](scalar t){return vec(0.5*cos(TAU*t) + 0.2,0,0.5*sin(TAU*t));};
 
     auto curveParam = Curve3D::Add(circle,100,true);
-    auto circle_slow = [](scalar t){return vec(0.5*cos(t),0,0.5*sin(t));};
+    auto circle_slow = [](scalar t){return vec(0.5*cos(t) + 0.2,0,0.5*sin(t));};
     auto point_param = UPS::Point::Add(circle_slow);
 
 
@@ -49,30 +44,19 @@ void init () {
                                    ));
     show << inNextFrame << paramdef->at(0.5,0.8);
 
-    StateInSlide t = Vec2(0.5,0.5);
+    StateInSlide t = Vec2(CENTER);
     t.angle = M_PI;
 
-    show << newFrame << Text::Add("Paramétrisation inverse ?")->at(0.5,0.1) << arrow->at(t);
+    show << newFrame << Text::Add("Paramétrisation inverse ?")->at(TOP) << arrow->at(t);
 }
 
-void myCallBack() {
-
-    show.play();
-    //ImGui::ShowDemoWindow();
-}
 
 
 int main(int argc,char** argv) {
-    polyscope::options::buildGui = false;
-    polyscope::options::autocenterStructures = false;
-    polyscope::options::autoscaleStructures = false;
-    polyscope::options::groundPlaneEnabled = false;
-    polyscope::options::giveFocusOnShow = false;
-    polyscope::view::upDir = polyscope::view::UpDir::ZUp;
-    polyscope::init();
+    show.init();
     init();
 
-    polyscope::state::userCallback = myCallBack;
+    polyscope::state::userCallback = [](){show.play();};
     polyscope::show();
     return 0;
 }

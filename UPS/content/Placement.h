@@ -10,17 +10,17 @@ const Vec2 TOP(0.5,0.1);
 const Vec2 BOTTOM(0.5,0.9);
 
 
-struct Placement {
+struct RelativePlacement {
 
-    Placement(PrimitivePtr ptr) : ptr(ptr) {}
+    RelativePlacement(PrimitivePtr ptr) : ptr(ptr) {}
 
     virtual Vec2 computePlacement(const PrimitiveInSlide& other) const = 0;
 
     PrimitivePtr ptr;
 };
 
-struct PlaceBelow : public Placement {
-    PlaceBelow(PrimitivePtr ptr,scalar padding = 0.01) : Placement(ptr),padding(padding) {}
+struct PlaceBelow : public RelativePlacement {
+    PlaceBelow(PrimitivePtr ptr,scalar padding = 0.01) : RelativePlacement(ptr),padding(padding) {}
 
     Vec2 computePlacement(const PrimitiveInSlide& other) const override {
         Vec2 P;
@@ -37,8 +37,8 @@ struct PlaceBelow : public Placement {
 };
 
 
-struct PlaceAbove : public Placement {
-    PlaceAbove(PrimitivePtr ptr,scalar padding = 0.01) : Placement(ptr),padding(padding) {}
+struct PlaceAbove : public RelativePlacement {
+    PlaceAbove(PrimitivePtr ptr,scalar padding = 0.01) : RelativePlacement(ptr),padding(padding) {}
 
     Vec2 computePlacement(const PrimitiveInSlide& other) const override {
         Vec2 P;
@@ -53,6 +53,20 @@ struct PlaceAbove : public Placement {
 
     scalar padding;
 };
+
+inline PrimitiveInSlide PlaceLeft(PrimitivePtr ptr,scalar y = 0.5,scalar padding = 0.01) {
+    Vec2 P;
+    P.x = ptr->getRelativeSize().x+padding;
+    P.y = y;
+    return {ptr,StateInSlide(P)};
+}
+
+inline PrimitiveInSlide PlaceRight(PrimitivePtr ptr,scalar y = 0.5,scalar padding = 0.01) {
+    Vec2 P;
+    P.x = 1-ptr->getRelativeSize().x-padding;
+    P.y = y;
+    return {ptr,StateInSlide(P)};
+}
 
 
 }
