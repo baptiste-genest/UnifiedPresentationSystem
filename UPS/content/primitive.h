@@ -102,9 +102,9 @@ static std::shared_ptr<T> DuplicatePrimitive(std::shared_ptr<T> ptr){
     return other;
 }
 
-template <class T>
-std::shared_ptr<T> NewPrimitive(){
-    auto ptr = std::make_shared<T>();
+template <class T,typename... Args>
+std::shared_ptr<T> NewPrimitive(Args&& ... args){
+    auto ptr = std::make_shared<T>(std::forward<Args>(args)...);
     Primitive::addPrimitive(ptr);
     return ptr;
 }

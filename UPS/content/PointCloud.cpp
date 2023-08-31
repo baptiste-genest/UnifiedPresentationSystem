@@ -1,15 +1,18 @@
 #include "PointCloud.h"
 
-UPS::PointCloud::PointCloud()
+UPS::PointCloud::PointCloud(const vecs &P) : points(P)
 {
-
+    PointCloud::initPolyscope();
 }
 
 UPS::PointCloud::PointCloudPtr UPS::PointCloud::Add(const vecs &P)
 {
-    auto rslt = NewPrimitive<PointCloud>();
-    rslt->points = P;
-    rslt->pc = polyscope::registerPointCloud("PC",P);
-    rslt->initPolyscopeData(rslt->pc);
+    auto rslt = NewPrimitive<PointCloud>(P);
     return rslt;
+}
+
+void UPS::PointCloud::initPolyscope()
+{
+    pc = polyscope::registerPointCloud("PC",points);
+    initPolyscopeData(pc);
 }

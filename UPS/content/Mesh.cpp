@@ -2,47 +2,32 @@
 
 UPS::Mesh::MeshPtr UPS::Mesh::Add(const std::string &objfile,const vec& scale)
 {
-    MeshPtr rslt = NewPrimitive<Mesh>();
     std::vector<std::array<double,3>> V;
-    polyscope::loadPolygonSoup(objfile,V,rslt->faces);
+    Faces F;
+    polyscope::loadPolygonSoup(objfile,V,F);
 
-    rslt->vertices.resize(V.size());
+    vecs verts(V.size());
     for (int i = 0;i<V.size();i++){
-        const auto& p = V[i];
-        rslt->vertices[i] = vec(p[0]*scale(0),p[1]*scale(1),p[2]*scale(2));
+        const auto& x = V[i];
+        verts[i] = vec(x[0]*scale(0),x[1]*scale(1),x[2]*scale(2));
     }
 
-    rslt->pc = polyscope::registerSurfaceMesh(getPolyscopeName(),rslt->vertices,rslt->faces);
-    rslt->initPolyscopeData(rslt->pc);
-    rslt->pc->setEdgeWidth(0.);
-    rslt->original_vertices = rslt->vertices;
-
+    MeshPtr rslt = NewPrimitive<Mesh>(verts,verts,F);
     return rslt;
 }
 
 UPS::Mesh::MeshPtr UPS::Mesh::apply(const mapping &phi) const
 {
-    MeshPtr rslt = NewPrimitive<Mesh>();
-    rslt->vertices = vertices;
-    rslt->faces = faces;
-    rslt->original_vertices = vertices;
-    for (auto& x : rslt->vertices)
+    auto Vphi = vertices;
+    for (auto& x : Vphi)
         x = phi(x);
-    rslt->pc = polyscope::registerSurfaceMesh(getPolyscopeName(),rslt->vertices,rslt->faces);
-    rslt->initPolyscopeData(rslt->pc);
-    rslt->pc->setEdgeWidth(0.);
+    MeshPtr rslt = NewPrimitive<Mesh>(Vphi,original_vertices,faces);
     return rslt;
 }
 
 UPS::Mesh::MeshPtr UPS::Mesh::applyDynamic(const time_mapping &phi) const
 {
-    MeshPtr rslt = NewPrimitive<Mesh>();
-    rslt->vertices = vertices;
-    rslt->faces = faces;
-    rslt->original_vertices = vertices;
-    rslt->pc = polyscope::registerSurfaceMesh(getPolyscopeName(),rslt->vertices,rslt->faces);
-    rslt->initPolyscopeData(rslt->pc);
-    rslt->pc->setEdgeWidth(0.);
+    MeshPtr rslt = NewPrimitive<Mesh>(vertices,original_vertices,faces);
     rslt->updater = [phi] (TimeTypeSec t,PrimitiveID id) {
         auto M = Primitive::get<Mesh>(id);
         auto V = M->original_vertices;
@@ -74,4 +59,19 @@ void UPS::Mesh::updateMesh(const vecs &X)
 {
     vertices = X;
     pc->updateVertexPositions(vertices);
+}
+
+void UPS::Mesh::initPolyscope()
+{
+    pc = polyscope::registerSurfaceMesh(getPolyscopeName(),vertices,faces);
+    initPolyscopeData(pc);
+    pc->setEdgeWidth(0.);
+}
+
+
+UPS::Mesh::Mesh(const vecs &vertices, const vecs &original_vertices, const Faces &faces) : vertices(vertices),
+    original_vertices(original_vertices),
+    faces(faces)
+{
+    Mesh::initPolyscope();
 }

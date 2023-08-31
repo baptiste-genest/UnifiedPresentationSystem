@@ -13,6 +13,7 @@ class Mesh : public PolyscopePrimitive
 public:
     using MeshPtr = std::shared_ptr<Mesh>;
     Mesh() {}
+    Mesh(const vecs &vertices,const vecs& original_vertices, const Faces &faces);
 
     static MeshPtr Add(const std::string& objfile,const vec& scale = vec(1.,1.,1.));
 
@@ -32,6 +33,10 @@ public:
 private:
     vecs vertices,original_vertices;
     Faces faces;
+
+    // PolyscopePrimitive interface
+public:
+    virtual void initPolyscope() override;
 };
 
 }

@@ -83,13 +83,15 @@ public:
     }
 
     inline Slideshow& operator<<(PrimitivePtr ptr) {
-        addToLastSlide(ptr,{});
+        addToLastSlide(ptr,{StateInSlide(CENTER)});
         return *this;
     }
 
     inline TimeObject getTimeObject() const {
-        return TimeObject(TimeFrom(from_begin),TimeFrom(from_action),current_slide);
+        return TimeObject{TimeFrom(from_begin),TimeFrom(from_action),(int)current_slide};
     }
+
+    void handleTransition();
 
     void init();
 
@@ -97,6 +99,7 @@ private:
 
     PrimitiveInSlide last_primitive_inserted;
 
+    bool transition_done = false;
     bool backward = false;
     bool locked = true;
 
@@ -107,6 +110,9 @@ private:
     bool transitions_computed = true;
 
     using TransitionSets = std::tuple<Primitives,Primitives,Primitives>;
+    Primitives& common(TransitionSets& S) {return std::get<0>(S);}
+    Primitives& uniquePrevious(TransitionSets& S) {return std::get<1>(S);}
+    Primitives& uniqueNext(TransitionSets& S) {return std::get<2>(S);}
     TransitionSets computeTransitionsBetween(const Slide& A,const Slide& B);
     void precomputeTransitions();
 

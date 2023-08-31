@@ -2,7 +2,7 @@
 
 UPS::Latex::LatexPtr UPS::Latex::Add(const TexObject &tex,bool formula,scalar height_ratio)
 {
-    auto H = std::hash<std::string>{}(tex);
+    auto H = std::hash<std::string>{}(tex+std::to_string(formula)+std::to_string(height_ratio));
     std::string filename = UPS_prefix + "formulas/" + std::to_string(H) + ".png";
 
     if (!io::file_exists(filename)){

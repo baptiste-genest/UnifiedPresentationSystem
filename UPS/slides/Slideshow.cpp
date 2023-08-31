@@ -4,18 +4,23 @@ void UPS::Slideshow::nextFrame()
 {
     if (current_slide == slides.size()-1)
         return;
+    for (auto& s : uniqueNext(transitions[current_slide]))
+        Primitive::get(s)->forceEnable();
     current_slide++;
     from_action = Time::now();
     backward = false;
     locked = true;
+    transition_done = false;
 }
 
 void UPS::Slideshow::previousFrame()
 {
     if (!current_slide)
         return;
-    for (auto& s : slides[current_slide])
-        Primitive::get(s.first)->forceDisable();
+    for (auto& s : uniqueNext(transitions[current_slide-1]))
+        Primitive::get(s)->forceDisable();
+    for (auto& s : uniquePrevious(transitions[current_slide-1]))
+        Primitive::get(s)->forceEnable();
     current_slide--;
     for (auto& s : slides[current_slide]){
         auto p = Primitive::get(s.first);
@@ -30,8 +35,10 @@ void UPS::Slideshow::forceNextFrame()
 {
     if (current_slide == slides.size()-1)
         return;
-    for (auto& s : slides[current_slide])
-        Primitive::get(s.first)->forceDisable();
+    for (auto& s : uniquePrevious(transitions[current_slide]))
+        Primitive::get(s)->forceDisable();
+    for (auto& s : uniqueNext(transitions[current_slide]))
+        Primitive::get(s)->forceEnable();
     current_slide++;
     for (auto& s : slides[current_slide]){
         auto p = Primitive::get(s.first);
@@ -79,6 +86,7 @@ void UPS::Slideshow::play() {
                     for (auto ua : UA)
                         Primitive::get(ua)->outro(t/transitionTime,PS[ua]);
                 else {
+                    handleTransition();
                     for (auto ub : UB){
                         Primitive::get(ub)->intro(t/transitionTime-1.,CS[ub]);
                     }
@@ -122,6 +130,15 @@ void UPS::Slideshow::setInnerTime()
     for (auto& p : appearing_primitives[current_slide])
         Primitive::get(p)->handleInnerTime();
     visited_slide = current_slide;
+}
+
+void UPS::Slideshow::handleTransition()
+{
+    if (transition_done || current_slide == 0)
+        return;
+    transition_done = true;
+    for (auto& s : std::get<1>(transitions[current_slide-1]))
+        Primitive::get(s)->forceDisable();
 }
 
 UPS::StateInSlide UPS::Slideshow::transition(parameter t, const StateInSlide &sa, const StateInSlide &sb){
@@ -185,13 +202,17 @@ void UPS::Slideshow::ImGuiWindowConfig()
 
 void UPS::Slideshow::init()
 {
-    polyscope::options::buildGui = false;
+    polyscope::init();
+    //polyscope::options::buildGui = false;
     polyscope::options::autocenterStructures = false;
     polyscope::options::autoscaleStructures = false;
     polyscope::options::groundPlaneEnabled = false;
     polyscope::options::giveFocusOnShow = false;
+    polyscope::options::automaticallyComputeSceneExtents = false;
+    polyscope::state::lengthScale = 2.;
+    polyscope::state::boundingBox =
+        std::tuple<glm::vec3, glm::vec3>{ {-1., -1., -1.}, {1., 1., 1.} };
     polyscope::view::upDir = polyscope::view::UpDir::YUp;
-    polyscope::init();
     window_flags = 0;
     window_flags |= ImGuiWindowFlags_NoTitleBar;
     window_flags |= ImGuiWindowFlags_NoMove;

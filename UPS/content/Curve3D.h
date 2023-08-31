@@ -17,10 +17,18 @@ public:
 
     polyscope::CurveNetwork* pc;
 
-    vecs nodes;
 
     Curve3DPtr apply(const mapping& phi,bool loop = false) const;
 
+private:
+    bool loop;
+    vecs nodes;
+
+    // PolyscopePrimitive interface
+public:
+    Curve3D(const vecs &nodes,bool loop);
+    Curve3D(const param& param,int N = 100,bool loop = false);
+    virtual void initPolyscope() override;
 };
 
 }

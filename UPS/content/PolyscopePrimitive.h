@@ -75,6 +75,8 @@ public:
         count++;
     }
 
+    virtual void initPolyscope() = 0;
+
     inline static std::string getPolyscopeName() {
         return "polyscope_obj" + std::to_string(count);
     }
@@ -82,23 +84,25 @@ public:
     // Primitive interface
 public:
     void draw(const TimeObject&, const StateInSlide &sis) override {
-        polyscope_ptr->setEnabled(true);
-        polyscope_ptr->setTransparency(sis.alpha);
     }
     void intro(parameter t,const StateInSlide &sis) override {
-        polyscope_ptr->setEnabled(true);
         polyscope_ptr->setTransparency(smoothstep(t)*sis.alpha);
         updater(getInnerTime(),pid);
     }
     void outro(parameter t,const StateInSlide &sis) override {
-        if (t > 0.9)
-            polyscope_ptr->setEnabled(false);
         polyscope_ptr->setTransparency(smoothstep(1-t)*sis.alpha);
         updater(getInnerTime(),pid);
     }
 
     void forceDisable() override {
         polyscope_ptr->setEnabled(false);
+        //polyscope_ptr->remove();
+    }
+
+    void forceEnable() override {
+        polyscope_ptr->setEnabled(true);
+        polyscope_ptr->setTransparency(0);
+        //initPolyscope();
     }
 
 

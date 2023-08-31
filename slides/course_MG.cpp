@@ -4,7 +4,7 @@
 #include "imgui.h"
 
 using namespace UPS;
-UPS::Slideshow show(true);
+UPS::Slideshow show(false);
 
 PrimitiveID explorer_id;
 
@@ -14,6 +14,10 @@ vec point_explore(scalar t) {
 
 vec phi(vec x) {
     return vec(x(0),std::sin(x(0))*std::sin(x(2)),x(2));
+}
+
+vec phi2(vec x) {
+    return vec(x(0)+1.5,std::sin(x(0))*std::sin(x(2)),x(2));
 }
 
 vec2 gradient(vec X) {
@@ -58,6 +62,7 @@ void init () {
 
     auto grid = Mesh::Add(UPS_prefix + "meshes/quad_grid_50.obj");
     auto disk = Mesh::Add(UPS_prefix + "meshes/disk_remesh.obj",vec(0.5,0.5,0.5));
+    polyscope::view::resetCameraToHomeView();
 
     show << Latex::Add("Les opérateurs différentiels sont vos amis.",false,TITLE)->at(CENTER);
 
@@ -78,6 +83,53 @@ void init () {
         show << newFrame << title << Latex::Add("Idée générale des approches différentielles :\\\\ Approcher une objet complexe par un ensemble d'objets simples (linéaires)")->at(CENTER);
     }
 
+    if (true)
+    {
+        auto title = Latex::Add(tex::center("Variétés différentielles et paramétrisation"));
+        show << newFrame << title;
+        show << inNextFrame << title->at(TOP);
+        auto offset = [](vec x){
+                return x + vec(-1.5,0,0);
+        };
+
+        auto grid_param = grid;//->apply(offset);
+        grid_param->pc->setEdgeWidth(0.1);
+        show <<  grid_param;
+        auto arrow = Latex::Add(tex::equation("\\longrightarrow"));
+        auto varphi = Latex::Add(tex::equation("\\varphi"));
+        show << inNextFrame << grid->apply(phi2) << arrow->at(CENTER) << PlaceBelow(varphi);
+
+
+        auto circle = [](scalar t){return vec(0.5*cos(TAU*t) + 0.2,0,0.5*sin(TAU*t));};
+
+        auto curveParam = Curve3D::Add(circle,100,true);
+        auto circle_slow = [](scalar t){return vec(0.5*cos(t) + 0.2,0,0.5*sin(t));};
+        auto point_param = UPS::Point::Add(circle_slow);
+
+
+        show << inNextFrame << curveParam->apply(offset,true) << curveParam->apply(phi2,true) << point_param->apply(offset) << point_param->apply(phi2);
+
+
+        auto paramdef = Latex::Add(tex::center(
+                           "Une \\textit{paramétrisation} est une fonction $\\varphi$\n" +
+                           tex::equation("\\varphi : \\mathbb{R}^2 \\longrightarrow \\mathcal{M}")
+                           ));
+        show << inNextFrame << paramdef->at(0.5,0.8);
+
+        StateInSlide t = Vec2(CENTER);
+        t.angle = M_PI;
+
+        show << newFrame << Text::Add("Paramétrisation inverse ?")->at(TOP) << arrow->at(t);
+
+    }
+
+    {
+        auto title = Latex::Add(tex::center("Représentation discrète des formes et fonctions\\\\ pour le calcul scientifique"));
+        show << newFrame << title;
+        show << inNextFrame << title->at(TOP);
+    }
+
+    if (true)
     {
         auto f = [](const vec& X) {
             auto x = X(0);auto y = X(2);
@@ -94,7 +146,7 @@ void init () {
         auto GF = grid->eval(gradf);
 
         using namespace tex;
-        auto title = Latex::Add("Focus sur le gradient : $\\nabla$",false,0.07);
+        auto title = Latex::Add("Retour sur le gradient : $\\nabla$",false,0.07);
         show << newFrame << title->at(CENTER);
         show << inNextFrame << title->at(TOP);
         auto grad = Latex::Add("\\nabla f(x,y) = " + tex::Vec(frac("\\partial f","\\partial x")+"(x,y)",frac("\\partial f","\\partial y")+"(x,y)"),true);
@@ -119,8 +171,6 @@ void init () {
         show << PolyscopeQuantity<polyscope::SurfaceVertexVectorQuantity>::Add(gfval);
     }
 
-    {
-    }
 }
 
 

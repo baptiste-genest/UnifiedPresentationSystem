@@ -9,17 +9,25 @@ namespace UPS {
 class Point : public PolyscopePrimitive
 {
 public:
+    Point(const param &phi, scalar radius);
+
     Point() {}
     using PointPtr = std::shared_ptr<Point>;
 
     static PointPtr Add(const param& phi,scalar rad = 0.05);
 
-    param phi;
     polyscope::PointCloud* pc;
 
 
     PointPtr apply(const mapping& f) const;
+    // PolyscopePrimitive interface
+public:
+    virtual void initPolyscope() override;
+private:
+    vec x;
+    param phi;
     scalar radius;
+
 };
 
 }
