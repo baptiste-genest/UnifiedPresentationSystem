@@ -65,10 +65,12 @@ void init () {
     polyscope::view::resetCameraToHomeView();
 
     show << Latex::Add("Les opérateurs différentiels sont vos amis.",false,TITLE)->at(CENTER);
+    show << "Intro";
 
     {
         auto title = Latex::Add("Philosophie générale : Approximation de Taylor",false,0.07)->at(TOP);
         show << newFrame << title;
+        show << "Taylor";
         show << PlaceBelow(Latex::Add("f(x+h) = f(x) + f'(x) h + f''(x) \\frac{h^2}{2}  + o(h^2)",true),0.05);
         show << PlaceBelow(Latex::Add("f(x+h) = f(x) + h^t \\nabla f(x) + \\frac{1}{2} h^t H_f(x)h + o(||h||^2)",true),0.01);
         auto plot = grid->apply(phi);
@@ -143,7 +145,6 @@ void init () {
             return x*x+y*y;
         };
         auto gradf = [](const vec& X) {
-            auto x = X(0);auto y = X(1);
             return 2*X;
         };
         auto lift = [f](const vec& X) {
@@ -183,10 +184,12 @@ void init () {
 
 
 int main(int argc,char** argv) {
-    show.init();
+    show.init(UPS_prefix + "../scripts/course_MG.txt");
     init();
 
-    polyscope::state::userCallback = [](){show.play();};
+    polyscope::state::userCallback = [](){
+        show.play();
+    };
     polyscope::show();
     return 0;
 }

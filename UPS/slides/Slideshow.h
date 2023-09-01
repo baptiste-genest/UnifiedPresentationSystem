@@ -3,6 +3,7 @@
 
 #include "Slide.h"
 #include "../content/Placement.h"
+#include "prompter.h"
 
 namespace UPS {
 
@@ -41,6 +42,7 @@ public:
 
     inline Slide& getCurrentSlide(){return slides.back();}
     inline Slide& getSlide(index i){return slides[i];}
+
     void duplicateLastSlide(){slides.push_back(slides.back());}
 
     void addToLastSlide(PrimitivePtr ptr,const StateInSlide& sis) {
@@ -87,15 +89,59 @@ public:
         return *this;
     }
 
+
+    inline Slideshow& operator<<(promptTag tag) {
+        if (prompter_ptr == nullptr){
+            std::cerr << " [ Must set prompt file ]" << std::endl;
+            assert(0);
+        }
+        if (slides.empty()){
+            std::cerr << "[ NO CURRENT SLIDE ]" << std::endl;
+            assert(0);
+        }
+        if (!scripts_ranges.empty())
+            if (scripts_ranges.back().end == -1)
+                scripts_ranges.back().end = slides.size()-1;
+        scripts_ranges.emplace_back(slides.size()-1,-1,tag);
+        return *this;
+    }
+
+    struct ClosePromptTag {};
+    inline Slideshow& operator<<(ClosePromptTag) {
+        if (prompter_ptr == nullptr){
+            std::cerr << " [ Must set prompt file ]" << std::endl;
+            assert(0);
+        }
+        scripts_ranges.back().end = slides.size()-1;
+        return *this;
+    }
+
+
     inline TimeObject getTimeObject() const {
         return TimeObject{TimeFrom(from_begin),TimeFrom(from_action),(int)current_slide};
     }
 
+    void prompt();
+
     void handleTransition();
 
-    void init();
+    void init(std::string script_file ="");
+
+    void setScriptFile(std::string file);
 
 private:
+
+    struct prompt_range {
+        int begin,end;
+        promptTag tag;
+        bool inRange(int c) const {
+            if (end == -1)
+                return begin <= c;
+            return (begin <= c) && (c <= end);
+        }
+    };
+    std::vector<prompt_range> scripts_ranges;
+    std::unique_ptr<Prompter> prompter_ptr;
 
     PrimitiveInSlide last_primitive_inserted;
 

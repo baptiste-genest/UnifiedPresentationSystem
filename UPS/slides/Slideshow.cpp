@@ -112,6 +112,8 @@ void UPS::Slideshow::play() {
         }
     }
 
+    prompt();
+
     if (ImGui::IsKeyPressed(262) && !locked){
         nextFrame();
     }
@@ -130,6 +132,17 @@ void UPS::Slideshow::setInnerTime()
     for (auto& p : appearing_primitives[current_slide])
         Primitive::get(p)->handleInnerTime();
     visited_slide = current_slide;
+}
+
+void UPS::Slideshow::prompt()
+{
+    if (prompter_ptr == nullptr)
+        return;
+    for (const auto& R : scripts_ranges)
+        if (R.inRange(current_slide)){
+            prompter_ptr->write(R.tag);
+            return;
+        }
 }
 
 void UPS::Slideshow::handleTransition()
@@ -153,6 +166,8 @@ UPS::StateInSlide UPS::Slideshow::transition(parameter t, const StateInSlide &sa
 void UPS::Slideshow::precomputeTransitions()
 {
     transitions_computed = true;
+    if (prompter_ptr != nullptr)
+        prompter_ptr->loadScript();
     appearing_primitives.resize(slides.size());
     for (auto& p : slides[0])
         appearing_primitives[0].insert(p.first);
@@ -200,8 +215,10 @@ void UPS::Slideshow::ImGuiWindowConfig()
     ImGui::SetNextWindowSize(ImVec2(io.DisplaySize.x,io.DisplaySize.y));
 }
 
-void UPS::Slideshow::init()
+void UPS::Slideshow::init(std::string script_file)
 {
+    if (!script_file.empty())
+        setScriptFile(script_file);
     polyscope::init();
     polyscope::options::buildGui = false;
     polyscope::options::autocenterStructures = false;
@@ -220,5 +237,11 @@ void UPS::Slideshow::init()
     window_flags |= ImGuiWindowFlags_NoResize;
     window_flags |= ImGuiWindowFlags_NoBackground;
     window_flags |= ImGuiWindowFlags_NoScrollbar;
+
+}
+
+void UPS::Slideshow::setScriptFile(std::string file)
+{
+    prompter_ptr = std::make_unique<Prompter>(file);
 
 }
