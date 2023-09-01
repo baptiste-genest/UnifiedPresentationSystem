@@ -1,2 +1,2 @@
 # UnifiedPresentationSystem
-Something between manim, keynote and after effect from 3D math presentations. 
+Something between manim, keynote and after effect for 3D math presentations. 
