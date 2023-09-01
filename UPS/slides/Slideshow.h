@@ -101,7 +101,7 @@ public:
         }
         if (!scripts_ranges.empty())
             if (scripts_ranges.back().end == -1)
-                scripts_ranges.back().end = slides.size()-1;
+                scripts_ranges.back().end = slides.size()-2;
         scripts_ranges.emplace_back(slides.size()-1,-1,tag);
         return *this;
     }

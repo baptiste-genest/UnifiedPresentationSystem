@@ -25,8 +25,9 @@ public:
         //pkill(prompt_pid, SIGTERM);
     }
 
-    void write(promptTag tag) const;
+    void write(promptTag tag,TimeStamp fromBegin) const;
     void loadScript();
+    void erase(TimeStamp fromBegin) const;
 
 private:
     pid_t prompt_pid;

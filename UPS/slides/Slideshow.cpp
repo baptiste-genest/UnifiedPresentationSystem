@@ -140,9 +140,10 @@ void UPS::Slideshow::prompt()
         return;
     for (const auto& R : scripts_ranges)
         if (R.inRange(current_slide)){
-            prompter_ptr->write(R.tag);
+            prompter_ptr->write(R.tag,from_begin);
             return;
         }
+    prompter_ptr->erase(from_begin);
 }
 
 void UPS::Slideshow::handleTransition()

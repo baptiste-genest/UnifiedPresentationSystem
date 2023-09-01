@@ -87,6 +87,7 @@ void init () {
 
     if (true)
     {
+        show << "manifold";
         auto title = Latex::Add(tex::center("Variétés différentielles et paramétrisation"));
         show << newFrame << title;
         show << inNextFrame << title->at(TOP);
@@ -140,6 +141,7 @@ void init () {
 
     if (true)
     {
+        show << "gradient";
         auto f = [](const vec& X) {
             auto x = X(0);auto y = X(1);
             return x*x+y*y;
@@ -186,6 +188,8 @@ void init () {
 int main(int argc,char** argv) {
     show.init(UPS_prefix + "../scripts/course_MG.txt");
     init();
+        const auto& S = show;
+        int a = 2;
 
     polyscope::state::userCallback = [](){
         show.play();
