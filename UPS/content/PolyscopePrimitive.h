@@ -75,10 +75,8 @@ public:
         count++;
     }
 
-    virtual void initPolyscope() = 0;
-
-    inline static std::string getPolyscopeName() {
-        return "polyscope_obj" + std::to_string(count);
+    inline std::string getPolyscopeName() const {
+        return "polyscope_obj" + std::to_string(pid);
     }
 
     // Primitive interface

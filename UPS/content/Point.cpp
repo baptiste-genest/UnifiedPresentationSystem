@@ -27,7 +27,6 @@ UPS::Point::Point(const param &phi, scalar radius) : x(phi(0)),
     phi(phi),
     radius(radius)
 {
-    initPolyscope();
     updater = [phi](TimeTypeSec t,PrimitiveID id){
         auto p = Primitive::get<Point>(id);
         vecs X = {phi(t)};

@@ -11,32 +11,22 @@ class CameraView : public Primitive
 public:
     using CameraViewPtr = std::shared_ptr<CameraView>;
     CameraView(){}
-    static CameraViewPtr Add(const vec& from,const vec& to);
+    static CameraViewPtr Add(const vec& from,const vec& to,const vec& up = vec(0,1,0));
 
     // Primitive interface
 public:
     void draw(const TimeObject &time, const StateInSlide &sis) override {}
-    void intro(parameter, const StateInSlide &) override {
-        if (!active){
-            active = true;
-            polyscope::view::lookAt(from,to,glm::vec3(0,0,1),true);
-        }
-    }
-    void outro(parameter t, const StateInSlide &sis) override {
-        if (active){
-            active = false;
-            polyscope::view::resetCameraToHomeView();
-        }
+    void intro(parameter, const StateInSlide &) override {    }
+    void outro(parameter t, const StateInSlide &sis) override {    }
+    virtual void forceEnable() override {
+        polyscope::view::lookAt(from,to,up,true);
     }
     void forceDisable() override {
         polyscope::view::resetCameraToHomeView();
-        active = false;
     }
 
-    glm::vec3 from,to;
+    glm::vec3 from,to,up;
 private:
-    bool active = false;
-    polyscope::CameraParameters old;
 };
 
 

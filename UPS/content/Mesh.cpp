@@ -66,6 +66,7 @@ void UPS::Mesh::initPolyscope()
     pc = polyscope::registerSurfaceMesh(getPolyscopeName(),vertices,faces);
     initPolyscopeData(pc);
     pc->setEdgeWidth(0.);
+    pc->setSmoothShade(true);
 }
 
 
@@ -73,5 +74,4 @@ UPS::Mesh::Mesh(const vecs &vertices, const vecs &original_vertices, const Faces
     original_vertices(original_vertices),
     faces(faces)
 {
-    Mesh::initPolyscope();
 }

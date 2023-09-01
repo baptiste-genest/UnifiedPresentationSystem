@@ -15,11 +15,14 @@ public:
     static Curve3DPtr Add(const vecs& nodes, bool loop = false);
     static Curve3DPtr Add(const param& param,int N = 100,bool loop = false);
 
+    void setRadius(scalar r);
+
     polyscope::CurveNetwork* pc;
 
 
     Curve3DPtr apply(const mapping& phi,bool loop = false) const;
 
+    scalar radius = 1;
 private:
     bool loop;
     vecs nodes;

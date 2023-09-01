@@ -203,16 +203,17 @@ void UPS::Slideshow::ImGuiWindowConfig()
 void UPS::Slideshow::init()
 {
     polyscope::init();
-    //polyscope::options::buildGui = false;
+    polyscope::options::buildGui = false;
     polyscope::options::autocenterStructures = false;
     polyscope::options::autoscaleStructures = false;
     polyscope::options::groundPlaneEnabled = false;
     polyscope::options::giveFocusOnShow = false;
     polyscope::options::automaticallyComputeSceneExtents = false;
+    polyscope::options::transparencyMode = polyscope::TransparencyMode::Pretty;
     polyscope::state::lengthScale = 2.;
     polyscope::state::boundingBox =
         std::tuple<glm::vec3, glm::vec3>{ {-1., -1., -1.}, {1., 1., 1.} };
-    polyscope::view::upDir = polyscope::view::UpDir::YUp;
+    polyscope::view::upDir = polyscope::view::UpDir::ZUp;
     window_flags = 0;
     window_flags |= ImGuiWindowFlags_NoTitleBar;
     window_flags |= ImGuiWindowFlags_NoMove;

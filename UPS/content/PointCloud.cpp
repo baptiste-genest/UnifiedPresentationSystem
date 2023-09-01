@@ -2,7 +2,6 @@
 
 UPS::PointCloud::PointCloud(const vecs &P) : points(P)
 {
-    PointCloud::initPolyscope();
 }
 
 UPS::PointCloud::PointCloudPtr UPS::PointCloud::Add(const vecs &P)

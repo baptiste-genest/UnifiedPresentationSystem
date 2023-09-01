@@ -79,6 +79,7 @@ struct Primitive {
     virtual void forceDisable() {};
     virtual void forceEnable() {};
     virtual Size getSize() const {return Size();}
+    virtual void initPolyscope() {}
 
     Size getRelativeSize() const {
         auto S = UPS_screen_resolution;
@@ -99,6 +100,7 @@ template<class T>
 static std::shared_ptr<T> DuplicatePrimitive(std::shared_ptr<T> ptr){
     auto other = std::make_shared<T>(*ptr);
     Primitive::addPrimitive(other);
+    other->initPolyscope();
     return other;
 }
 
@@ -106,6 +108,7 @@ template <class T,typename... Args>
 std::shared_ptr<T> NewPrimitive(Args&& ... args){
     auto ptr = std::make_shared<T>(std::forward<Args>(args)...);
     Primitive::addPrimitive(ptr);
+    ptr->initPolyscope();
     return ptr;
 }
 
