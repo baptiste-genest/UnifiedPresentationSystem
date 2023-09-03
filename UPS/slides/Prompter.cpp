@@ -1,4 +1,4 @@
-#include "prompter.h"
+#include "Prompter.h"
 #include <iostream>
 #include <cstdlib>
 #include <unistd.h>

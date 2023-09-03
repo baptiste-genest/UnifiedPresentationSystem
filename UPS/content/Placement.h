@@ -56,14 +56,14 @@ struct PlaceAbove : public RelativePlacement {
 
 inline PrimitiveInSlide PlaceLeft(PrimitivePtr ptr,scalar y = 0.5,scalar padding = 0.01) {
     Vec2 P;
-    P.x = ptr->getRelativeSize().x+padding;
+    P.x = ptr->getRelativeSize().x*0.5+padding;
     P.y = y;
     return {ptr,StateInSlide(P)};
 }
 
 inline PrimitiveInSlide PlaceRight(PrimitivePtr ptr,scalar y = 0.5,scalar padding = 0.01) {
     Vec2 P;
-    P.x = 1-ptr->getRelativeSize().x-padding;
+    P.x = 1-ptr->getRelativeSize().x*0.5-padding;
     P.y = y;
     return {ptr,StateInSlide(P)};
 }

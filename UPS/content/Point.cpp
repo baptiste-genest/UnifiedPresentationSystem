@@ -2,8 +2,37 @@
 
 UPS::Point::PointPtr UPS::Point::Add(const param &phi,scalar r)
 {
-    PointPtr rslt = NewPrimitive<Point>(phi,r);
-    return rslt;
+    return NewPrimitive<Point>(phi,r);
+}
+
+UPS::Point::PointPtr UPS::Point::Add(const vec &x, scalar rad)
+{
+    return NewPrimitive<Point>(x,rad);
+}
+
+UPS::Point::VectorQuantity::PCQuantityPtr UPS::Point::addVector(const param &phiX)
+{
+    vecs X = {phiX(0)};
+    auto name = getPolyscopeName() + std::to_string(vectors.size());
+    auto V = VectorQuantity::Add(pc->addVectorQuantity(name,X));
+    vectors.push_back({V,phiX});
+    V->q->setVectorLengthScale(X[0].norm(),false);
+    V->q->setVectorRadius(0.02,false);
+    return V;
+}
+
+void UPS::Point::updateVectors()
+{
+    for (int i = 0;i<vectors.size();i++){
+        if (vectors[i].first->q->isEnabled()){
+            vecs X = {vectors[i].second(getInnerTime())};
+            //std::cout << "norm " << X[0].transpose() << std::endl;
+            auto name = getPolyscopeName() + std::to_string(i);
+            vectors[i].first->q = pc->addVectorQuantity(name,X);
+            vectors[i].first->q->setVectorLengthScale(X[0].norm(),false);
+            vectors[i].first->q->setVectorRadius(0.02,false);
+        }
+    }
 }
 
 UPS::Point::PointPtr UPS::Point::apply(const mapping &f) const
@@ -29,7 +58,9 @@ UPS::Point::Point(const param &phi, scalar radius) : x(phi(0)),
 {
     updater = [phi](TimeTypeSec t,PrimitiveID id){
         auto p = Primitive::get<Point>(id);
-        vecs X = {phi(t)};
+        p->x = phi(t);
+        vecs X = {p->x};
         p->pc->updatePointPositions(X);
+        p->updateVectors();
     };
 }

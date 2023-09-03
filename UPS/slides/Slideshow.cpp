@@ -4,8 +4,6 @@ void UPS::Slideshow::nextFrame()
 {
     if (current_slide == slides.size()-1)
         return;
-    for (auto& s : uniqueNext(transitions[current_slide]))
-        Primitive::get(s)->forceEnable();
     current_slide++;
     from_action = Time::now();
     backward = false;
@@ -151,8 +149,10 @@ void UPS::Slideshow::handleTransition()
     if (transition_done || current_slide == 0)
         return;
     transition_done = true;
-    for (auto& s : std::get<1>(transitions[current_slide-1]))
+    for (auto& s : uniquePrevious(transitions[current_slide-1]))
         Primitive::get(s)->forceDisable();
+    for (auto& s : uniqueNext(transitions[current_slide-1]))
+        Primitive::get(s)->forceEnable();
 }
 
 UPS::StateInSlide UPS::Slideshow::transition(parameter t, const StateInSlide &sa, const StateInSlide &sb){
@@ -180,8 +180,14 @@ void UPS::Slideshow::precomputeTransitions()
                 ));
         appearing_primitives[i+1] = std::get<2>(transitions.back());
     }
-    if (debug)
+    if (debug){
         current_slide = slides.size()-1;
+        for (auto& s : slides.back()){
+            Primitive::get(s.first)->forceEnable();
+            Primitive::get(s.first)->handleInnerTime();
+            Primitive::get(s.first)->intro(1.,s.second);
+        }
+    }
 }
 
 UPS::Slideshow::TransitionSets UPS::Slideshow::computeTransitionsBetween(const Slide &A, const Slide &B)

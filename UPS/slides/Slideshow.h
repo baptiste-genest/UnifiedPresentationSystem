@@ -3,14 +3,13 @@
 
 #include "Slide.h"
 #include "../content/Placement.h"
-#include "prompter.h"
+#include "Prompter.h"
 
 namespace UPS {
 
 class Slideshow
 {
 public:
-
 
     Slideshow(bool debug = false) : debug(debug) {
         from_action = Time::now();
@@ -89,6 +88,11 @@ public:
         return *this;
     }
 
+    inline Slideshow& operator<<(const PrimitiveGroup& G) {
+        for (const auto& ps : G)
+            addToLastSlide(ps.first,ps.second);
+        return *this;
+    }
 
     inline Slideshow& operator<<(promptTag tag) {
         if (prompter_ptr == nullptr){
@@ -120,6 +124,26 @@ public:
     inline TimeObject getTimeObject() const {
         return TimeObject{TimeFrom(from_begin),TimeFrom(from_action),(int)current_slide};
     }
+
+    void removeFromCurrentSlide(PrimitivePtr ptr) {
+        slides.back().remove(ptr);
+    }
+
+    void removeFromCurrentSlide(const PrimitiveGroup& G) {
+        for (const auto& ps : G)
+            removeFromCurrentSlide(ps.first);
+    }
+
+    inline Slideshow& operator>>(PrimitivePtr ptr) {
+        removeFromCurrentSlide(ptr);
+        return *this;
+    }
+
+    inline Slideshow& operator>>(const PrimitiveGroup& G) {
+        removeFromCurrentSlide(G);
+        return *this;
+    }
+
 
     void prompt();
 

@@ -9,16 +9,30 @@ UPS::Slideshow show(false);
 PrimitiveID explorer_id;
 
 vec point_explore(scalar t) {
-    return vec(cos(t),sin(t),0)*0.2;
+    return vec(cos(t),sin(t),0)*0.1;
 }
 
 vec phi(vec x) {
     return vec(x(0),x(1),std::sin(x(0))*std::sin(x(1)));
 }
 
-vec phi2(vec x) {
-    return vec(x(0)+1.5,x(1),std::sin(x(0))*std::sin(x(1)));
+vec phi_offset(vec x) {
+    return phi(x) + vec(1.5,0,0);
 }
+
+vec sphere(vec x) {
+    auto t1 = x(0)*M_PI_2;
+    auto t2 = x(1)*M_PI;
+    return vec(
+               -sin(t1),
+               cos(t1)*sin(t2),
+               cos(t1)*cos(t2)
+                );
+}
+vec sphere_offset(vec x) {
+    return sphere(x) + vec(1.5,0,0);
+}
+
 
 vec2 gradient(vec X) {
     auto x = X(0);
@@ -67,8 +81,9 @@ void init () {
     show << Latex::Add("Les opérateurs différentiels sont vos amis.",false,TITLE)->at(CENTER);
     show << "Intro";
 
+    if (false)
     {
-        auto title = Latex::Add("Philosophie générale : Approximation de Taylor",false,0.07)->at(TOP);
+        auto title = Title("Calcul différentiel et approximation de Taylor")->at(TOP);
         show << newFrame << title;
         show << "Taylor";
         show << PlaceBelow(Latex::Add("f(x+h) = f(x) + f'(x) h + f''(x) \\frac{h^2}{2}  + o(h^2)",true),0.05);
@@ -82,13 +97,13 @@ void init () {
         auto S1 = show.getCurrentSlide();
         show << S1 << disk->applyDynamic(taylor1);
         show << S1 << disk->applyDynamic(taylor2);
-        show << newFrame << title << Latex::Add("Idée générale des approches différentielles :\\\\ Approcher un objet complexe localement par un objet simple (linéaire)")->at(CENTER);
+        show << newFrame << title << Latex::Add("Idée générale des approches différentielles :\\\\ Approcher localement un objet complexe par un objet simple (linéaire)")->at(CENTER);
     }
 
     if (true)
     {
         show << "manifold";
-        auto title = Latex::Add(tex::center("Variétés différentielles et paramétrisation"));
+        auto title = Title(tex::center("Variétés différentielles et paramétrisation"));
         show << newFrame << title;
         show << inNextFrame << title->at(TOP);
         mapping offset = [](vec x){
@@ -98,27 +113,31 @@ void init () {
 
         auto grid_param = grid->apply(offset);
         grid_param->pc->setEdgeWidth(1);
-        show << CameraView::Add(vec(0,0,5),vec(0,0,0),vec(0,1,0));
+        auto cam = CameraView::Add(vec(0,0.6,5),vec(0,0.6,0),vec(0,1,0));
+        show << cam;
         show << grid_param;
         auto arrow = Latex::Add(tex::equation("\\longrightarrow"));
         auto varphi = Latex::Add(tex::equation("\\varphi"));
-        auto mani = grid->apply(phi2);
+        auto mani = grid->apply(sphere_offset);
         mani->pc->setEdgeWidth(1);
-        show << inNextFrame << mani << arrow->at(CENTER) << PlaceBelow(varphi);
+        auto arrowp = arrow->at(0.5,0.65);
+        show << inNextFrame << mani << arrowp << PlaceBelow(varphi);
 
+        PrimitiveGroup manifold;
+        manifold << grid_param << mani << arrowp << cam;
 
-        auto circle = [](scalar t){return vec(0.5*cos(TAU*t) + 0.2,0.5*sin(TAU*t),0);};
+        auto circle = [](scalar t){return vec(0.3*cos(TAU*t) + 0.2,0.3*sin(TAU*t),0);};
 
         auto curveParam = Curve3D::Add(circle,100,true);
         curveParam->setRadius(0.008);
-        auto circle_slow = [](scalar t){return vec(0.5*cos(t) + 0.2,0.5*sin(t),0);};
+        auto circle_slow = [](scalar t){return vec(0.3*cos(t) + 0.2,0.3*sin(t),0);};
         auto point_param = UPS::Point::Add(circle_slow);
 
         show << inNextFrame <<
                 curveParam->apply(offset,true)
-             << curveParam->apply(phi2,true)
+             << curveParam->apply(sphere_offset,true)
              << point_param->apply(offset)
-             << point_param->apply(phi2);
+             << point_param->apply(sphere_offset);
 
         auto paramdef = Latex::Add(tex::center(
                            "Une \\textit{paramétrisation} est une fonction $\\varphi$\n" +
@@ -126,20 +145,68 @@ void init () {
                            ));
         show << inNextFrame << paramdef->at(0.5,0.8);
 
-        StateInSlide t = Vec2(CENTER);
+    {
+        StateInSlide t = arrowp.second;
         t.angle = M_PI;
 
-        show << newFrame << Text::Add("Paramétrisation inverse ?")->at(TOP) << arrow->at(t);
+        show << inNextFrame >> title << Title("Paramétrisation inverse ?")->at(TOP) << arrow->at(t);
+        show << newFrame <<
+            Title("Vecteurs tangents")->at(TOP) << manifold << mani->at(0.7);
+        auto P = Point::Add(vec(0,0,0));
+        auto step = [] (scalar t) {
+            return periodic01(0.3*t)*0.3+0.01;
+        };
+        auto dx = [step](scalar t){
+            return vec(step(t),0,0);
+        };
+        auto step_dx = Point::Add(dx);
+        auto Pdx = step_dx->apply(offset);
+        auto dy = [step](scalar t){
+            return vec(0,step(t),0);
+        };
+        auto step_dy = Point::Add(dy);
+        auto Pdy = step_dy->apply(offset);
+        auto pp = P->apply(offset);
+        auto pm = P->apply(sphere_offset);
+        show << pp << pm;
+        show << inNextFrame;
+        show << Pdx << step_dx->apply(sphere_offset) << pm->addVector([Pdx](scalar t){
+            auto X = sphere(Pdx->getCurrentPos()+vec(1.5,0,0));
+            auto O = sphere(vec(0,0,0));
+            vec rslt = 0.5*(X-O).normalized();
+            return rslt;
+    });
+        auto dpx = Latex::Add(tex::frac("\\varphi(x+dx)-\\varphi(x)","dx"),true);
+        show << PlaceLeft(dpx,0.2,0);
+        show << inNextFrame >> dpx;
+        auto dpy = Latex::Add(tex::frac("\\varphi(x+dy)-\\varphi(x)","dy"),true);
+        show << PlaceLeft(dpy,0.2,0);
+        show << Pdy << step_dy->apply(sphere_offset) << pm->addVector([Pdy](scalar t){
+            auto X = sphere(Pdy->getCurrentPos()+vec(1.5,0,0));
+            auto O = sphere(vec(0,0,0));
+            vec rslt = 0.5*(X-O).normalized();
+            return rslt;
+    });
+        {
+            using namespace tex;
+        show << newFrame << Title("Espace tangent")->at(TOP) << manifold;
+        auto parphi = "\\partial \\varphi";
+        auto plane = Latex::Add("T\\mathcal{M} = \\text{Vect}(" + frac(parphi,"\\partial x")+","+frac(parphi,"\\partial y")+")",true);
+        show << PlaceLeft(plane,0.3);
+        }
+    }
+
 
     }
 
+    if (false)
     {
         auto title = Latex::Add(tex::center("Représentation discrète des formes et fonctions"));
         show << newFrame << title;
         show << inNextFrame << title->at(TOP);
     }
 
-    if (true)
+    if (false)
     {
         show << "gradient";
         auto f = [](const vec& X) {
@@ -156,7 +223,7 @@ void init () {
         auto GF = grid->eval(gradf);
 
         using namespace tex;
-        auto title = Latex::Add("Retour sur le gradient : $\\nabla$",false,0.07);
+        auto title = Title("Retour sur le gradient : $\\nabla$");
         show << newFrame << title->at(CENTER);
         show << inNextFrame << title->at(TOP);
         auto grad = Latex::Add("\\nabla f(x,y) = " + tex::Vec(frac("\\partial f","\\partial x")+"(x,y)",frac("\\partial f","\\partial y")+"(x,y)"),true);
@@ -169,12 +236,13 @@ void init () {
         show << S << gl;
 
         show << PlaceLeft(Latex::Add("f(x,y) = "+ frac("x^2+y^2","2"),true),0.5);
-        show << inNextFrame  << CameraView::Add(vec(0,0.5,4),vec(0,0.5,0));
+        show << inNextFrame  << CameraView::Add(vec(0,0.5,4),vec(0,0.5,0),vec(0,1,0),true);
         show.getCurrentSlide().remove(gl);
 
         auto fval = grid_edge->pc->addVertexScalarQuantity("f000",F);
         fval->setColorMap("jet");
         auto gfval = grid_edge->pc->addVertexVectorQuantity("V000",GF);
+        gfval->setVectorRadius(0.01,false);
 
         show << PolyscopeQuantity<polyscope::SurfaceVertexScalarQuantity>::Add(fval);
         show << inNextFrame << PlaceRight(Latex::Add("\\nabla f(x,y) = "+ tex::Vec("x","y"),true),0.5);

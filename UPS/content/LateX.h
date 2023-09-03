@@ -17,6 +17,10 @@ struct Latex : public Image {
     static LatexPtr Add(const TexObject& tex,bool formula = false,scalar height_ratio=0.04);
 };
 
+inline Latex::LatexPtr Title(TexObject s) {
+    return Latex::Add(s,false,0.07);
+}
+
 
 namespace tex {
 

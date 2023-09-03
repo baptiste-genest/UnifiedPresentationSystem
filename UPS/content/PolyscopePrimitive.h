@@ -11,8 +11,8 @@ template<class T>
 class PolyscopeQuantity : public Primitive
 {
 public :
-    using PCQuantity = std::shared_ptr<PolyscopeQuantity>;
-    static PCQuantity Add(T* ptr) {
+    using PCQuantityPtr = std::shared_ptr<PolyscopeQuantity>;
+    static PCQuantityPtr Add(T* ptr) {
         auto rslt = NewPrimitive<PolyscopeQuantity<T>>();
         rslt->q = ptr;
         rslt->q->setEnabled(false);
@@ -82,6 +82,7 @@ public:
     // Primitive interface
 public:
     void draw(const TimeObject&, const StateInSlide &sis) override {
+        polyscope_ptr->setTransparency(sis.alpha);
     }
     void intro(parameter t,const StateInSlide &sis) override {
         polyscope_ptr->setTransparency(smoothstep(t)*sis.alpha);
