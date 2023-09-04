@@ -4,7 +4,7 @@
 #include "imgui.h"
 
 using namespace UPS;
-UPS::Slideshow show(false);
+UPS::Slideshow show(true);
 
 PrimitiveID explorer_id;
 
@@ -24,9 +24,9 @@ vec sphere(vec x) {
     auto t1 = x(0)*M_PI_2;
     auto t2 = x(1)*M_PI;
     return vec(
-               -sin(t1),
-               cos(t1)*sin(t2),
-               cos(t1)*cos(t2)
+                -sin(t1),
+                cos(t1)*sin(t2),
+                cos(t1)*cos(t2)
                 );
 }
 vec sphere_offset(vec x) {
@@ -134,7 +134,7 @@ void init () {
         auto point_param = UPS::Point::Add(circle_slow);
 
         show << inNextFrame <<
-                curveParam->apply(offset,true)
+            curveParam->apply(offset,true)
              << curveParam->apply(sphere_offset,true)
              << point_param->apply(offset)
              << point_param->apply(sphere_offset);
@@ -145,56 +145,96 @@ void init () {
                            ));
         show << inNextFrame << paramdef->at(0.5,0.8);
 
-    {
-        StateInSlide t = arrowp.second;
-        t.angle = M_PI;
-
-        show << inNextFrame >> title << Title("Paramétrisation inverse ?")->at(TOP) << arrow->at(t);
-        show << newFrame <<
-            Title("Vecteurs tangents")->at(TOP) << manifold << mani->at(0.7);
-        auto P = Point::Add(vec(0,0,0));
-        auto step = [] (scalar t) {
-            return periodic01(0.3*t)*0.3+0.01;
-        };
-        auto dx = [step](scalar t){
-            return vec(step(t),0,0);
-        };
-        auto step_dx = Point::Add(dx);
-        auto Pdx = step_dx->apply(offset);
-        auto dy = [step](scalar t){
-            return vec(0,step(t),0);
-        };
-        auto step_dy = Point::Add(dy);
-        auto Pdy = step_dy->apply(offset);
-        auto pp = P->apply(offset);
-        auto pm = P->apply(sphere_offset);
-        show << pp << pm;
-        show << inNextFrame;
-        show << Pdx << step_dx->apply(sphere_offset) << pm->addVector([Pdx](scalar t){
-            auto X = sphere(Pdx->getCurrentPos()+vec(1.5,0,0));
-            auto O = sphere(vec(0,0,0));
-            vec rslt = 0.5*(X-O).normalized();
-            return rslt;
-    });
-        auto dpx = Latex::Add(tex::frac("\\varphi(x+dx)-\\varphi(x)","dx"),true);
-        show << PlaceLeft(dpx,0.2,0);
-        show << inNextFrame >> dpx;
-        auto dpy = Latex::Add(tex::frac("\\varphi(x+dy)-\\varphi(x)","dy"),true);
-        show << PlaceLeft(dpy,0.2,0);
-        show << Pdy << step_dy->apply(sphere_offset) << pm->addVector([Pdy](scalar t){
-            auto X = sphere(Pdy->getCurrentPos()+vec(1.5,0,0));
-            auto O = sphere(vec(0,0,0));
-            vec rslt = 0.5*(X-O).normalized();
-            return rslt;
-    });
         {
-            using namespace tex;
-        show << newFrame << Title("Espace tangent")->at(TOP) << manifold;
-        auto parphi = "\\partial \\varphi";
-        auto plane = Latex::Add("T\\mathcal{M} = \\text{Vect}(" + frac(parphi,"\\partial x")+","+frac(parphi,"\\partial y")+")",true);
-        show << PlaceLeft(plane,0.3);
+            StateInSlide t = arrowp.second;
+            t.angle = M_PI;
+
+            show << inNextFrame >> title << Title("Paramétrisation inverse ?")->at(TOP) << arrow->at(t);
+            show << newFrame <<
+                Title("Vecteurs tangents")->at(TOP) << manifold << mani->at(0.7);
+            auto P = Point::Add(vec(0,0,0));
+            auto step = [] (scalar t) {
+                return periodic01(0.3*t)*0.3+0.01;
+            };
+            auto dx = [step](scalar t){
+                return vec(step(t),0,0);
+            };
+            auto step_dx = Point::Add(dx);
+            auto Pdx = step_dx->apply(offset);
+            auto dy = [step](scalar t){
+                return vec(0,step(t),0);
+            };
+            auto step_dy = Point::Add(dy);
+            auto Pdy = step_dy->apply(offset);
+            auto pp = P->apply(offset);
+            auto pm = P->apply(sphere_offset);
+            show << pp << pm;
+            show << inNextFrame;
+            show << Pdx << step_dx->apply(sphere_offset) << pm->addVector([Pdx](scalar t){
+                auto X = sphere(Pdx->getCurrentPos()+vec(1.5,0,0));
+                auto O = sphere(vec(0,0,0));
+                vec rslt = 0.5*(X-O).normalized();
+                return rslt;
+        });
+            auto dpx = Latex::Add(tex::frac("\\varphi(p+"+tex::Vec("dx","0")+")-\\varphi(p)","dx"),true);
+            show << PlaceLeft(dpx,0.2);
+            show << inNextFrame >> dpx;
+            auto dpy = Latex::Add(tex::frac("\\varphi(p+"+tex::Vec("0","dy")+")-\\varphi(p)","dy"),true);
+            show << PlaceLeft(dpy,0.2);
+            show << Pdy << step_dy->apply(sphere_offset) << pm->addVector([Pdy](scalar t){
+                auto X = sphere(Pdy->getCurrentPos()+vec(1.5,0,0));
+                auto O = sphere(vec(0,0,0));
+                vec rslt = 0.5*(X-O).normalized();
+                return rslt;
+        });
+            {
+                using namespace tex;
+                show << newFrame << Title("Espace tangent")->at(TOP) << manifold;
+                std::string parphi = "\\partial \\varphi";
+                auto delx = frac(parphi,"\\partial x");
+                auto dely = frac(parphi,"\\partial y");
+                auto plane = Latex::Add("T\\mathcal{M}_p = \\text{Vect}(" + delx+"(p),"+dely+"(p))",true);
+                auto P = Point::Add(vec(0,0,0))->apply(offset);
+                auto po = point_param->apply(offset);
+                auto ps = point_param->apply(sphere_offset);
+                show << PlaceLeft(plane,0.3) << po << ps;
+                auto TM =  grid->applyDynamic([po](vec x,TimeTypeSec){
+                    vec p = po->getCurrentPos() + vec(1.5,0,0);
+                        auto h = 1e-3;
+                    vec dx = (sphere(p+vec(h,0,0))-sphere(p)).normalized()*0.4;
+                    vec dy = (sphere(p+vec(0,h,0))-sphere(p)).normalized()*0.4;
+                    vec t = sphere_offset(p) + dx*x(0) + dy*x(1);
+                    return t;
+            });
+                TM->pc->setEdgeWidth(1);
+                show << TM;
+                show << inNextFrame << po->addVector([](scalar){
+                        vec rslt= vec(2,3,0)*0.1;
+                        return rslt;
+            }) << ps->addVector([po](scalar){
+                    vec p = po->getCurrentPos() + vec(1.5,0,0);
+                        auto h = 1e-3;
+                    vec dx = (sphere(p+vec(h,0,0))-sphere(p)).normalized()*0.4;
+                    vec dy = (sphere(p+vec(0,h,0))-sphere(p)).normalized()*0.4;
+                    vec t = (dx*2 + dy*3)*0.2;
+                    return t;
+
+            });
+                show << PlaceRight(Latex::Add("v \\longrightarrow \\begin{pmatrix} " + delx + "(p)," + dely +"(p)\\end{pmatrix} v = J_{\\varphi}(p)v",true),0.3,0.1);
+            }
         }
-    }
+        {
+            std::string J = "J_{\\varphi}(p)";
+            show << newFrame;// << Title("Tenseur métrique");
+            auto dot = Latex::Add("u \\cdot v = u^t v",true)->at(0.5,0.4);
+            show << dot;
+            auto Jdot = Latex::Add(J + "u \\cdot " + J + " v = ("+ J + "u)^t" + J + "v",true);
+            auto arrowp = PlaceLeft(arrow);
+            show << inNextFrame << arrowp << PlaceAbove(varphi) << PlaceABelowB(Latex::Add("p",true),arrowp) << PlaceABelowB(Jdot,dot,0.05);
+            auto g = Latex::Add("= u^t" + tex::transpose(J) + J + "v = u^t g(p) v",true);
+            show << inNextFrame << PlaceBelow(g,0.05) << Title("Tenseur métrique")->at(TOP);
+            show << newFrame << Title("Tenseur métrique")->at(TOP) << PlaceBelow(Latex::Add("Disque de poincaré",false,0.05));
+        }
 
 
     }
@@ -256,8 +296,8 @@ void init () {
 int main(int argc,char** argv) {
     show.init(UPS_prefix + "../scripts/course_MG.txt");
     init();
-        const auto& S = show;
-        int a = 2;
+    const auto& S = show;
+    int a = 2;
 
     polyscope::state::userCallback = [](){
         show.play();

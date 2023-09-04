@@ -28,6 +28,10 @@ inline TexObject frac(const TexObject& A,const TexObject& B) {
     return "\\frac{" + A +"}{" + B + "}";
 }
 
+inline TexObject transpose(const TexObject& A) {
+    return A + "^t";
+}
+
 inline TexObject center(const TexObject& A) {
     return "\\begin{center} \n" + A + "\n\\end{center}";
 }

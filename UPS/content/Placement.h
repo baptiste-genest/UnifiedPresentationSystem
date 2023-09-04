@@ -19,22 +19,27 @@ struct RelativePlacement {
     PrimitivePtr ptr;
 };
 
+inline PrimitiveInSlide PlaceABelowB(PrimitivePtr ptr,const PrimitiveInSlide& other,scalar padding = 0.01) {
+    Vec2 P;
+    P.x = other.second.relative_anchor_pos.x;
+    P.y = other.second.relative_anchor_pos.y
+            + other.first->getRelativeSize().y*0.5
+            + padding
+            + ptr->getRelativeSize().y*0.5
+            ;
+    return {ptr,P};
+}
+
 struct PlaceBelow : public RelativePlacement {
     PlaceBelow(PrimitivePtr ptr,scalar padding = 0.01) : RelativePlacement(ptr),padding(padding) {}
 
     Vec2 computePlacement(const PrimitiveInSlide& other) const override {
-        Vec2 P;
-        P.x = other.second.relative_anchor_pos.x;
-        P.y = other.second.relative_anchor_pos.y
-              + other.first->getRelativeSize().y*0.5
-              + padding
-              + ptr->getRelativeSize().y*0.5
-            ;
-        return P;
+        return PlaceABelowB(ptr,other,padding).second.relative_anchor_pos;
     }
 
     scalar padding;
 };
+
 
 
 struct PlaceAbove : public RelativePlacement {
@@ -54,7 +59,7 @@ struct PlaceAbove : public RelativePlacement {
     scalar padding;
 };
 
-inline PrimitiveInSlide PlaceLeft(PrimitivePtr ptr,scalar y = 0.5,scalar padding = 0.01) {
+inline PrimitiveInSlide PlaceLeft(PrimitivePtr ptr,scalar y = 0.5,scalar padding = 0.1) {
     Vec2 P;
     P.x = ptr->getRelativeSize().x*0.5+padding;
     P.y = y;

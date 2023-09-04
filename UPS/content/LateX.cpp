@@ -22,7 +22,7 @@ UPS::Latex::LatexPtr UPS::Latex::Add(const TexObject &tex,bool formula,scalar he
 
         auto latex_cmd = "pdflatex /tmp/formula.tex >>/tmp/UPS.log";
         if (std::system(latex_cmd)) {
-            std::cerr << "[error while generating latex] " << latex_cmd << std::endl;
+            std::cerr << "[error while generating latex] " <<  std::endl;
             assert(false);
             return LatexPtr();
         }
