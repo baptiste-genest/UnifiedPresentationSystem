@@ -14,6 +14,7 @@ public:
     }
     CameraView(const glm::vec3 &from, const glm::vec3 &to, const glm::vec3 &up,bool flyTo = false);
 
+    CameraView() {}
     using CameraViewPtr = std::shared_ptr<CameraView>;
     static CameraViewPtr Add(const vec& from,const vec& to,const vec& up = vec(0,1,0),bool flyTo = false);
 
@@ -33,6 +34,7 @@ private:
     glm::vec3 from,to,up;
     bool flyTo;
 };
+
 
 
 }
