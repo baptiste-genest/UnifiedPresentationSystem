@@ -303,6 +303,9 @@ void init () {
             auto cam = CameraView::Add(vec(-0.5,2,8),vec(-0.5,2,0),vec::UnitY());
             show << cam << inNextFrame >> bunny_pc >> bunny_off;
             show << newFrame << bco << cam << Title("Topologie d'un maillage")->at(TOP);
+            show << inNextFrame << PlaceBelow(Formula::Add("V - E + F = 2(1-g)"),0.05);
+            show << inNextFrame << PlaceBelow(Latex::Add(tex::center("On définit donc des fonctions sur des maillages par"))) <<
+                                                                     PlaceBelow(Formula::Add("f : V \\longrightarrow \\mathbb{R}^n"));
         }
         if (false)
         {
