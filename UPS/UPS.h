@@ -16,6 +16,7 @@
 #include <functional>
 
 #include "eigen3/Eigen/Dense"
+#include "eigen3/Eigen/Sparse"
 
 #include "polyscope/polyscope.h"
 
@@ -52,11 +53,13 @@ using Animation = std::function<void(TimeTypeSec,const StateInSlide&)>;
 
 using index = size_t;
 
-using scalar = float;
+using scalar = double;
 constexpr scalar TAU = 2*M_PI;
 using vec = Eigen::Vector<scalar,3>;
 using vec2 = Eigen::Vector<scalar,2>;
 using Vec = Eigen::Vector<scalar,-1>;
+using Mat = Eigen::Matrix<scalar,-1,-1>;
+using SMat = Eigen::SparseMatrix<scalar>;
 using mat2 = Eigen::Matrix<scalar,2,2>;
 using vecs = std::vector<vec>;
 

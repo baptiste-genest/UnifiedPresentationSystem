@@ -17,6 +17,7 @@ public:
     PointCloudPtr apply(const mapping& phi);
 
     polyscope::PointCloud* pc;
+    const vecs& getPoints() const {return points;}
 private:
     vecs points;
 

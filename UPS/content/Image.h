@@ -16,7 +16,7 @@ public:
     bool isValid() {return width != -1;}
     void display(const StateInSlide& sis) const;
 
-    static ImagePtr Add(const char* filename);
+    static ImagePtr Add(std::string filename);
 
     static ImVec2 getSize(std::string filename);
 

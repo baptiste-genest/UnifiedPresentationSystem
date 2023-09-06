@@ -18,6 +18,7 @@ void UPS::generate_latex(const std::string &filename, const TexObject &tex, bool
     formula_file << "\\usepackage{standalone}" << std::endl;
     formula_file << "\\usepackage{amsmath}"<< std::endl;
     formula_file << "\\usepackage{amsfonts}"<< std::endl;
+    formula_file << "\\usepackage{aligned-overset}"<< std::endl;
     formula_file << "\\usepackage{ragged2e}"<< std::endl;
     formula_file << "\\begin{document}"<< std::endl;
     if (formula)

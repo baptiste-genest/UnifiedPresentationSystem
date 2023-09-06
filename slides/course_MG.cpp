@@ -1,7 +1,11 @@
 #include "polyscope/polyscope.h"
 
 #include "../UPS/UnifiedPresentationSystem.h"
+#include "geometrycentral/surface/vertex_position_geometry.h"
+#include "geometrycentral/surface/meshio.h"
 #include "imgui.h"
+#include <Eigen/SparseCholesky>
+#include <Eigen/IterativeLinearSolvers>
 
 using namespace UPS;
 UPS::Slideshow show(true);
@@ -90,6 +94,36 @@ mapping offset(const vec& x){
     return [x] (const vec& X){return X+x;};
 }
 
+#include "geometrycentral/numerical/linear_solvers.h"
+Vec illustratePoissonProblem(std::string filename) {
+    using namespace geometrycentral::surface;
+    std::unique_ptr<ManifoldSurfaceMesh> mesh;
+    std::unique_ptr<VertexPositionGeometry> position_geometry;
+    std::tie(mesh, position_geometry) = readManifoldSurfaceMesh(UPS_prefix + "meshes/bunny_coarse.obj");
+    ExtrinsicGeometryInterface& geometry = *position_geometry;
+    geometry.requireCotanLaplacian();
+    geometry.requireVertexLumpedMassMatrix();
+    SMat L = geometry.cotanLaplacian;
+    //Eigen::SimplicialLDLT solver(L);
+    Eigen::ConjugateGradient<SMat, Eigen::Lower|Eigen::Upper> solver(L);
+    std::cout << solver.info() << std::endl;
+    SMat M = geometry.vertexLumpedMassMatrix;
+    auto N = mesh->nVertices();
+    Vec B = Vec::Ones(N);
+    for (int i = 0;i<10;i++)
+        //B.row(rand()%N) = ((vec::Random() + vec::Ones())*0.5).transpose();
+        B(rand()%N) = polyscope::randomUnit();
+    Vec rhs = M*B;
+    return geometrycentral::solvePositiveDefinite(L,rhs);
+    Mat X = Mat::Ones(N,3);
+    for (int i = 0;i<3;i++){
+        Vec rhs = M*B.col(i);
+        Vec rslt = solver.solve(rhs);
+        X.col(i) = rslt;
+        std::cout << solver.info() << std::endl;
+    }
+    return X;
+}
 
 void init () {
 
@@ -212,6 +246,7 @@ void init () {
                 vec rslt = 0.5*(X-O).normalized();
                 return rslt;
         });
+
             {
                 using namespace tex;
                 show << newFrame << Title("Espace tangent")->at(TOP) << manifold;
@@ -248,6 +283,7 @@ void init () {
                 show << PlaceRight(Formula::Add("v \\longrightarrow \\begin{pmatrix} " + delx + "(p)," + dely +"(p)\\end{pmatrix} v = J_{\\varphi}(p)v"),0.3,0.1);
             }
         }
+
         {
             std::string J = "J_{\\varphi}(p)";
             show << newFrame;// << Title("Tenseur métrique");
@@ -290,7 +326,6 @@ void init () {
 
         {
             show << newFrame << Title("Représentation discrète des formes et fonctions")->at(CENTER) << inNextFrame << TOP;
-                show << PlaceBelow(Latex::Add("Plein de manière de représenter une forme"));
             scalar off = 3;
                 auto bunny_off = bunny->apply(offset(vec(off,0,0)));
             show << bunny_off;
@@ -298,14 +333,47 @@ void init () {
             bco->pc->setEdgeWidth(1.);
             bco->pc->setSmoothShade(false);
             show << bco;
-            auto bunny_pc = PointCloud::Add(bunny_coarse->getVertices())->apply(offset(vec(-off,0,0)));
-            show << bunny_pc;
+            auto bunny_pc = PointCloud::Add(bunny_coarse->getVertices());
+            auto bunny_pco = bunny_pc->apply(offset(vec(-off,0,0)));
+            show << bunny_pco;
             auto cam = CameraView::Add(vec(-0.5,2,8),vec(-0.5,2,0),vec::UnitY());
-            show << cam << inNextFrame >> bunny_pc >> bunny_off;
+            show << cam << inNextFrame >> bunny_pco >> bunny_off;
             show << newFrame << bco << cam << Title("Topologie d'un maillage")->at(TOP);
             show << inNextFrame << PlaceBelow(Formula::Add("V - E + F = 2(1-g)"),0.05);
             show << inNextFrame << PlaceBelow(Latex::Add(tex::center("On définit donc des fonctions sur des maillages par"))) <<
                                                                      PlaceBelow(Formula::Add("f : V \\longrightarrow \\mathbb{R}^n"));
+            auto F = Vec::Random(bunny_pc->getPoints().size());
+            auto bpc = DuplicatePrimitive(bunny_pc);
+            bpc->pc->setPointRadius(0.03,false);
+            auto Fq = PolyscopeQuantity<polyscope::PointCloudScalarQuantity>::Add(bpc->pc->addScalarQuantity("V0000",F));
+            show << inNextFrame << bpc << Fq;
+            show << inNextFrame << PlaceRight(Formula::Add(tex::Vec("1.21","0.32", "\\vdots", "5.2","3.24"),0.05),0.6,0.1);
+        }
+
+        {
+            show << newFrame << Title("Discrétisation des opérateurs différentiels")->at(TOP);
+            show << inNextFrame << PlaceLeft(Latex::Add(tex::center("Opérateurs différentiels classiques")));
+            show << PlaceBelow(Formula::Add("\\partial (f + g) = \\partial f + \\partial g")) << inNextFrame << PlaceRelative(Formula::Add(tex::AaboveB("?","\\longrightarrow"),0.06),UPS::CENTER_X,SAME_Y);
+            show << inNextFrame << PlaceRight(Latex::Add(tex::center("Opérateurs différentiels discrets")));
+            show << PlaceBelow(Formula::Add("AX"));
+        }
+
+        {
+            using namespace tex;
+            show << newFrame << Title("Exemple : Le laplacien $\\Delta$")->at(TOP);
+            auto df = "\\partial^2 f";
+            auto lapdef = Formula::Add("\\Delta f = " + frac(df,del<2>(0)) + "+" + frac(df,del<2>(1)),0.06);
+            show << inNextFrame << lapdef->at(CENTER);
+            show << inNextFrame >> lapdef << Latex::Add(equation("(Lf)_i = \\sum_{n \\in N_i}" + frac("f_n","|N_i|") + " - f_i"),0.06)->at(CENTER);
+            show << inNextFrame << Vec2(0.5,0.3);
+            show << PlaceLeft(Image::Add(UPS_prefix + "images/simple_graph.png"),0.6,0.2);
+            show << PlaceRelative(Image::Add(UPS_prefix + "images/simple_lap_mat.png"),UPS::REL_RIGHT,SAME_Y);
+            show << newFrame << Title("Problème de Poisson")->at(TOP);
+                                UPS::Vec C = illustratePoissonProblem("");
+           std::cout << C << std::endl;
+            //auto PP = PolyscopeQuantity<polyscope::SurfaceColorQuantity>::Add(bunny_coarse->pc->addVertexColorQuantity("V0000",C));
+            auto PP = PolyscopeQuantity<polyscope::SurfaceScalarQuantity>::Add(bunny_coarse->pc->addVertexScalarQuantity("V0000",C));
+                                show << bunny_coarse << PP;
         }
         if (false)
         {
@@ -366,7 +434,7 @@ void init () {
 
 
 int main(int argc,char** argv) {
-    show.init(UPS_prefix + "../scripts/course_MG.txt");
+    show.init();//UPS_prefix + "../scripts/course_MG.txt");
     init();
     const auto& S = show;
     int a = 2;

@@ -7,8 +7,9 @@ std::vector<UPS::Image> UPS::Image::images;
 #include "../../extern/stb_image.h"
 
 
-UPS::Image::ImagePtr UPS::Image::Add(const char *filename)
+UPS::Image::ImagePtr UPS::Image::Add(std::string file)
 {
+    auto filename = file.c_str();
     int w,h;
     // Load from file
     unsigned char* image_data = stbi_load(filename, &w, &h, NULL, 4);
@@ -69,7 +70,7 @@ void UPS::Image::outro(parameter t, const StateInSlide &sis)
 
 void UPS::Image::display(const StateInSlide &sis) const
 {
-    RGBA color_multiplier(1.,1.,1.,sis.alpha);
+    RGBA color_multiplier = ImColor(1.f,1.f,1.f,sis.alpha);
     auto P = sis.getAbsoluteAnchorPos();
     if (std::abs(sis.angle) > 0.001)
         ImageRotated((void*)(intptr_t)texture,P,ImVec2(width,height),sis.angle,color_multiplier);

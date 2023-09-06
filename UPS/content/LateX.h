@@ -57,6 +57,31 @@ inline TexObject pow(const TexObject& A,const TexObject& B) {
     return A + "^{" + B + "}";
 }
 
+inline TexObject AaboveB(const TexObject& A,const TexObject& B) {
+    return "\\overset{" + A + "}{" + B + "}";
+}
+
+inline TexObject AbelowB(const TexObject& A,const TexObject& B) {
+    return "\\underset{" + A + "}{" + B + "}";
+}
+
+template<int N = 1>
+inline TexObject del(int i,bool xyz = true) {
+    TexObject D;
+    if (N == 1)
+        D = "\\partial ";
+    else
+        D = "\\partial^{" + std::to_string(N) + "}";
+    if (xyz) {
+        if (i == 0)
+            return D + "x";
+        else if (i == 1)
+            return D + "y";
+        return D + "z";
+    }
+    return D + "x_{"+std::to_string(i)+"}";
+}
+
 inline TexObject Vec(const std::vector<TexObject>& texs) {
     TexObject rslt = "\\begin{pmatrix}\n";
     for (int i= 0;i<texs.size()-1;i++)

@@ -152,7 +152,7 @@ inline PrimitiveInSlide PlaceLeft(PrimitivePtr ptr,scalar y = 0.5,scalar padding
 }
 
 
-inline PrimitiveInSlide PlaceRight(PrimitivePtr ptr,scalar y = 0.5,scalar padding = 0.01) {
+inline PrimitiveInSlide PlaceRight(PrimitivePtr ptr,scalar y = 0.5,scalar padding = 0.1) {
     Vec2 P;
     P.x = 1-ptr->getRelativeSize().x*0.5-padding;
     P.y = y;
