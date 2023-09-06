@@ -88,6 +88,12 @@ public:
         return *this;
     }
 
+    inline Slideshow& operator<<(const StateInSlide& sis) {
+        slides.back()[last_primitive_inserted.first->pid] = sis;
+        last_primitive_inserted.second = sis;
+        return *this;
+    }
+
     inline Slideshow& operator<<(const PrimitiveGroup& G) {
         for (const auto& ps : G)
             addToLastSlide(ps.first,ps.second);

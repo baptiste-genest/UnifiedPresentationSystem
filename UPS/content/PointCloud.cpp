@@ -6,12 +6,19 @@ UPS::PointCloud::PointCloud(const vecs &P) : points(P)
 
 UPS::PointCloud::PointCloudPtr UPS::PointCloud::Add(const vecs &P)
 {
-    auto rslt = NewPrimitive<PointCloud>(P);
-    return rslt;
+    return NewPrimitive<PointCloud>(P);
+}
+
+UPS::PointCloud::PointCloudPtr UPS::PointCloud::apply(const mapping &phi)
+{
+    auto NP = points;
+    for (auto& x : NP)
+        x = phi(x);
+    return Add(NP);
 }
 
 void UPS::PointCloud::initPolyscope()
 {
-    pc = polyscope::registerPointCloud("PC",points);
+    pc = polyscope::registerPointCloud(getPolyscopeName(),points);
     initPolyscopeData(pc);
 }

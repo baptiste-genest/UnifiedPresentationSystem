@@ -14,6 +14,7 @@ public:
     using PointCloudPtr = std::shared_ptr<PointCloud>;
 
     static PointCloudPtr Add(const vecs& P);
+    PointCloudPtr apply(const mapping& phi);
 
     polyscope::PointCloud* pc;
 private:

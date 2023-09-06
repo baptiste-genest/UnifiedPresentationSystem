@@ -1,47 +1,59 @@
 #include "LateX.h"
 
-UPS::Latex::LatexPtr UPS::Latex::Add(const TexObject &tex,bool formula,scalar height_ratio)
+UPS::Latex::LatexPtr UPS::Latex::Add(const TexObject &tex,scalar height_ratio)
 {
-    auto H = std::hash<std::string>{}(tex+std::to_string(formula)+std::to_string(height_ratio));
+    auto H = std::hash<std::string>{}(tex+"0"+std::to_string(height_ratio));
     std::string filename = UPS_prefix + "formulas/" + std::to_string(H) + ".png";
 
     if (!io::file_exists(filename)){
-        std::ofstream formula_file("/tmp/formula.tex");
-        formula_file << "\\documentclass[varwidth,border=3pt]{standalone}" << std::endl;
-        formula_file << "\\usepackage{standalone}" << std::endl;
-        formula_file << "\\usepackage{amsmath}"<< std::endl;
-        formula_file << "\\usepackage{amsfonts}"<< std::endl;
-        formula_file << "\\usepackage{ragged2e}"<< std::endl;
-        formula_file << "\\begin{document}"<< std::endl;
-        if (formula)
-            formula_file << "\\begin{align*}"<< std::endl;
-        formula_file << tex  << std::endl;
-        if (formula)
-            formula_file << "\\end{align*}"<< std::endl;
-        formula_file << "\\end{document}"<< std::endl;
+        generate_latex(filename,tex,false,height_ratio);
+    }
+    return Image::Add(filename.c_str());
+}
 
-        auto latex_cmd = "pdflatex /tmp/formula.tex >>/tmp/UPS.log";
-        if (std::system(latex_cmd)) {
-            std::cerr << "[error while generating latex] " <<  std::endl;
-            assert(false);
-            return LatexPtr();
-        }
-        if (std::system("pdfcrop formula.pdf >>/tmp/UPS.log")){
-            std::cerr << "[error while croping pdf] " << std::endl;
-            assert(false);
-            return LatexPtr();
-        }
-        if (std::system(("convert -density 800 -quality 100 formula-crop.pdf -colorspace RGB " + filename + " >>/tmp/UPS.log").c_str())) {
-            std::cerr << "[error while converting to png]" << std::endl;
-            assert(false);
-            return LatexPtr();
-        }
-        int h = 1080*height_ratio*Image::getSize(filename).y/99.;
-        if (std::system(("convert " + filename + " -resize x" + std::to_string(h) + " " + filename + " >>/tmp/UPS.log").c_str())){
-            std::cerr << "[error while resizing]" << std::endl;
-            assert(false);
-            return LatexPtr();
-        }
+void UPS::generate_latex(const std::string &filename, const TexObject &tex, bool formula, scalar height_ratio)
+{
+    std::ofstream formula_file("/tmp/formula.tex");
+    formula_file << "\\documentclass[varwidth,border=3pt]{standalone}" << std::endl;
+    formula_file << "\\usepackage{standalone}" << std::endl;
+    formula_file << "\\usepackage{amsmath}"<< std::endl;
+    formula_file << "\\usepackage{amsfonts}"<< std::endl;
+    formula_file << "\\usepackage{ragged2e}"<< std::endl;
+    formula_file << "\\begin{document}"<< std::endl;
+    if (formula)
+        formula_file << "\\begin{align*}"<< std::endl;
+    formula_file << tex  << std::endl;
+    if (formula)
+        formula_file << "\\end{align*}"<< std::endl;
+    formula_file << "\\end{document}"<< std::endl;
+
+    auto latex_cmd = "pdflatex /tmp/formula.tex >>/tmp/UPS.log";
+    if (std::system(latex_cmd)) {
+        std::cerr << "[error while generating latex] " <<  std::endl;
+        assert(false);
+    }
+    if (std::system("pdfcrop formula.pdf >>/tmp/UPS.log")){
+        std::cerr << "[error while croping pdf] " << std::endl;
+        assert(false);
+    }
+    if (std::system(("convert -density 800 -quality 100 formula-crop.pdf -colorspace RGB " + filename + " >>/tmp/UPS.log").c_str())) {
+        std::cerr << "[error while converting to png]" << std::endl;
+        assert(false);
+    }
+    int h = 1080*height_ratio*Image::getSize(filename).y/99.;
+    if (std::system(("convert " + filename + " -resize x" + std::to_string(h) + " " + filename + " >>/tmp/UPS.log").c_str())){
+        std::cerr << "[error while resizing]" << std::endl;
+        assert(false);
+    }
+}
+
+UPS::Formula::LatexPtr UPS::Formula::Add(const TexObject &tex, scalar height_ratio)
+{
+    auto H = std::hash<std::string>{}(tex+"1"+std::to_string(height_ratio));
+    std::string filename = UPS_prefix + "formulas/" + std::to_string(H) + ".png";
+
+    if (!io::file_exists(filename)){
+        generate_latex(filename,tex,true,height_ratio);
     }
     return Image::Add(filename.c_str());
 }

@@ -69,6 +69,28 @@ vec taylor1(vec H,TimeTypeSec) {
 }
 
 
+using complex = std::complex<double>;
+complex toComp(const vec& x){
+    return complex(x(0),x(1));
+}
+vec toVec(const complex& x){
+    return vec(x.real(),x.imag(),0);
+}
+
+vec hyperbolic_geodesic(const vec& pv,const vec& qv,scalar t) {
+    auto p = toComp(pv);
+    auto q = toComp(qv);
+    auto n = (q-p)/(1.-std::conj(p)*q);
+    n /= std::abs(n);
+    auto wn = n*std::tanh(t*0.5);
+    return toVec((wn + p)/(1.+ std::conj(p)*wn));
+}
+
+mapping offset(const vec& x){
+    return [x] (const vec& X){return X+x;};
+}
+
+
 void init () {
 
     auto CMFONTID = UPS::FontManager::addFont(UPS_prefix + "fonts/ComputerModernSR.ttf",50);
@@ -76,20 +98,24 @@ void init () {
 
     auto grid = Mesh::Add(UPS_prefix + "meshes/grid_quad_50.obj");
     auto disk = Mesh::Add(UPS_prefix + "meshes/disk_coarse.obj",vec(0.5,0.5,0.5));
+    auto bunny = Mesh::Add(UPS_prefix + "meshes/bunny.obj");
+    auto bunny_coarse = Mesh::Add(UPS_prefix + "meshes/bunny_coarse.obj");
     polyscope::view::resetCameraToHomeView();
 
-    show << Latex::Add("Les opérateurs différentiels sont vos amis.",false,TITLE)->at(CENTER);
+    auto cam = CameraView::Add(vec(0,0.6,5),vec(0,0.6,0),vec(0,1,0));
+
+    show << Latex::Add("Les opérateurs différentiels sont vos amis.",TITLE)->at(CENTER);
     show << "Intro";
 
-    if (false)
+    if (true)
     {
         auto title = Title("Calcul différentiel et approximation de Taylor")->at(TOP);
         show << newFrame << title;
         show << "Taylor";
-        show << PlaceBelow(Latex::Add("f(x+h) = f(x) + f'(x) h + f''(x) \\frac{h^2}{2}  + o(h^2)",true),0.05);
-        show << PlaceBelow(Latex::Add("f(x+h) = f(x) + h^t \\nabla f(x) + \\frac{1}{2} h^t H_f(x)h + o(||h||^2)",true),0.01);
+        show << PlaceBelow(Formula::Add("f(x+h) = f(x) + f'(x) h + f''(x) \\frac{h^2}{2}  + o(h^2)"),0.05);
+        show << inNextFrame << PlaceBelow(Formula::Add("f(x+h) = f(x) + h^t \\nabla f(x) + \\frac{1}{2} h^t H_f(x)h + o(||h||^2)"),0.01);
         auto plot = grid->apply(phi);
-        show << inNextFrame << plot->at(0.5);
+        show << inNextFrame << plot;//->at(0.5);
         auto explorer = Point::Add(point_explore,0.1)->apply(phi);
         show << explorer;
         explorer_id = explorer->pid;
@@ -97,7 +123,7 @@ void init () {
         auto S1 = show.getCurrentSlide();
         show << S1 << disk->applyDynamic(taylor1);
         show << S1 << disk->applyDynamic(taylor2);
-        show << newFrame << title << Latex::Add("Idée générale des approches différentielles :\\\\ Approcher localement un objet complexe par un objet simple (linéaire)")->at(CENTER);
+        show << newFrame << title << Latex::Add("Idée générale des approches différentielles :\\\\ Approcher localement un objet complexe par un objet simple (polynomial)")->at(CENTER);
     }
 
     if (true)
@@ -113,11 +139,10 @@ void init () {
 
         auto grid_param = grid->apply(offset);
         grid_param->pc->setEdgeWidth(1);
-        auto cam = CameraView::Add(vec(0,0.6,5),vec(0,0.6,0),vec(0,1,0));
         show << cam;
         show << grid_param;
-        auto arrow = Latex::Add(tex::equation("\\longrightarrow"));
-        auto varphi = Latex::Add(tex::equation("\\varphi"));
+        auto arrow = Formula::Add("\\longrightarrow");
+        auto varphi = Formula::Add("\\varphi");
         auto mani = grid->apply(sphere_offset);
         mani->pc->setEdgeWidth(1);
         auto arrowp = arrow->at(0.5,0.65);
@@ -176,10 +201,10 @@ void init () {
                 vec rslt = 0.5*(X-O).normalized();
                 return rslt;
         });
-            auto dpx = Latex::Add(tex::frac("\\varphi(p+"+tex::Vec("dx","0")+")-\\varphi(p)","dx"),true);
+            auto dpx = Formula::Add(tex::frac("\\varphi(p+"+tex::Vec("dx","0")+")-\\varphi(p)","dx"));
             show << PlaceLeft(dpx,0.2);
             show << inNextFrame >> dpx;
-            auto dpy = Latex::Add(tex::frac("\\varphi(p+"+tex::Vec("0","dy")+")-\\varphi(p)","dy"),true);
+            auto dpy = Formula::Add(tex::frac("\\varphi(p+"+tex::Vec("0","dy")+")-\\varphi(p)","dy"));
             show << PlaceLeft(dpy,0.2);
             show << Pdy << step_dy->apply(sphere_offset) << pm->addVector([Pdy](scalar t){
                 auto X = sphere(Pdy->getCurrentPos()+vec(1.5,0,0));
@@ -193,7 +218,7 @@ void init () {
                 std::string parphi = "\\partial \\varphi";
                 auto delx = frac(parphi,"\\partial x");
                 auto dely = frac(parphi,"\\partial y");
-                auto plane = Latex::Add("T\\mathcal{M}_p = \\text{Vect}(" + delx+"(p),"+dely+"(p))",true);
+                auto plane = Formula::Add("T\\mathcal{M}_p = \\text{Vect}(" + delx+"(p),"+dely+"(p))");
                 auto P = Point::Add(vec(0,0,0))->apply(offset);
                 auto po = point_param->apply(offset);
                 auto ps = point_param->apply(sphere_offset);
@@ -219,31 +244,73 @@ void init () {
                     vec t = (dx*2 + dy*3)*0.2;
                     return t;
 
-            });
-                show << PlaceRight(Latex::Add("v \\longrightarrow \\begin{pmatrix} " + delx + "(p)," + dely +"(p)\\end{pmatrix} v = J_{\\varphi}(p)v",true),0.3,0.1);
+                });
+                show << PlaceRight(Formula::Add("v \\longrightarrow \\begin{pmatrix} " + delx + "(p)," + dely +"(p)\\end{pmatrix} v = J_{\\varphi}(p)v"),0.3,0.1);
             }
         }
         {
             std::string J = "J_{\\varphi}(p)";
             show << newFrame;// << Title("Tenseur métrique");
-            auto dot = Latex::Add("u \\cdot v = u^t v",true)->at(0.5,0.4);
+            auto dot = Formula::Add("u \\cdot v = u^t v")->at(0.5,0.4);
             show << dot;
-            auto Jdot = Latex::Add(J + "u \\cdot " + J + " v = ("+ J + "u)^t" + J + "v",true);
+            auto Jdot = Formula::Add(J + "u \\cdot " + J + " v = ("+ J + "u)^t" + J + "v");
             auto arrowp = PlaceLeft(arrow);
-            show << inNextFrame << arrowp << PlaceAbove(varphi) << PlaceABelowB(Latex::Add("p",true),arrowp) << PlaceABelowB(Jdot,dot,0.05);
-            auto g = Latex::Add("= u^t" + tex::transpose(J) + J + "v = u^t g(p) v",true);
-            show << inNextFrame << PlaceBelow(g,0.05) << Title("Tenseur métrique")->at(TOP);
-            show << newFrame << Title("Tenseur métrique")->at(TOP) << PlaceBelow(Latex::Add("Disque de poincaré",false,0.05));
+            show << inNextFrame << arrowp << PlaceAbove(varphi) << PlaceABelowB(Formula::Add("p"),arrowp) << PlaceABelowB(Jdot,dot,0.05);
+            auto g = Formula::Add("= u^t" + tex::transpose(J) + J + "v");
+            auto title = Title("Tenseur métrique")->at(TOP);
+                         show << inNextFrame << PlaceBelow(g,0.05);
+            show << inNextFrame << PlaceBelow(Formula::Add("g(p) = " + tex::transpose(J) + J,0.06),0.05) << title;
+                         auto cam = CameraView::Add(vec(0,0.3,2),vec(0,0.3,0),vec(0,1,0));
+            show << newFrame << title << PlaceBelow(Latex::Add("Disque de poincaré",0.05)) << cam << disk;
+                             auto gval = disk->eval([](const vec& x) {
+                return 1./std::pow(1-x.squaredNorm(),2);
+            });
+            auto gplot = disk->pc->addVertexScalarQuantity("norm",gval);
+                             gplot->setColorMap("coolwarm");
+            show << inNextFrame << Formula::Add("g(z) = " + tex::frac("1",tex::pow("(1-||z||^2)","2")) + tex::Mat<2,2>("1","0","0","1"))->at(0.5,0.3);
+                             show << PolyscopeQuantity<polyscope::SurfaceVertexScalarQuantity>::Add(gplot);
+            show << inNextFrame;
+            for (int i = 0;i<6;i++){
+                vec p = point_explore(polyscope::randomUnit()*M_PI*2)*5;
+                vec q = point_explore(polyscope::randomUnit()*M_PI*2)*5;
+                auto gamma = [q,p](scalar t){
+                    t = periodic01(t*0.15)*15;
+                    vec rslt = hyperbolic_geodesic(q,p,t-5.)*0.5;
+                    return rslt;
+                };
+                show << Point::Add(gamma,0.02);
+            }
+            show << newFrame << Title("Récap 1")->at(TOP);
+            show << inNextFrame << PlaceLeft(Latex::Add("Approche différentielle : approximation locale par des polynômes"),0.4);
+            show << inNextFrame << PlaceRelative(Latex::Add("Paramétrisation : fonction d'exploration de la variété"),ABS_LEFT,REL_BOTTOM,0.1);
+            show << inNextFrame << PlaceRelative(Latex::Add("Espace tangent : plan tangent à un point de la variété"),ABS_LEFT,REL_BOTTOM,0.1);
+            show << inNextFrame << PlaceRelative(Latex::Add("Tenseur métrique : changement dans le calul des angles et longueur sur la surface"),ABS_LEFT,REL_BOTTOM,0.1);
         }
-
-
     }
+
+        {
+            show << newFrame << Title("Représentation discrète des formes et fonctions")->at(CENTER) << inNextFrame << TOP;
+                show << PlaceBelow(Latex::Add("Plein de manière de représenter une forme"));
+            scalar off = 3;
+                auto bunny_off = bunny->apply(offset(vec(off,0,0)));
+            show << bunny_off;
+            auto bco =bunny_coarse;
+            bco->pc->setEdgeWidth(1.);
+            bco->pc->setSmoothShade(false);
+            show << bco;
+            auto bunny_pc = PointCloud::Add(bunny_coarse->getVertices())->apply(offset(vec(-off,0,0)));
+            show << bunny_pc;
+            auto cam = CameraView::Add(vec(-0.5,2,8),vec(-0.5,2,0),vec::UnitY());
+            show << cam << inNextFrame >> bunny_pc >> bunny_off;
+            show << newFrame << bco << cam << Title("Topologie d'un maillage")->at(TOP);
+        }
+        if (false)
+        {
+            show << newFrame << Title("Courbures")->at(CENTER);
+        }
 
     if (false)
     {
-        auto title = Latex::Add(tex::center("Représentation discrète des formes et fonctions"));
-        show << newFrame << title;
-        show << inNextFrame << title->at(TOP);
     }
 
     if (false)
@@ -266,7 +333,7 @@ void init () {
         auto title = Title("Retour sur le gradient : $\\nabla$");
         show << newFrame << title->at(CENTER);
         show << inNextFrame << title->at(TOP);
-        auto grad = Latex::Add("\\nabla f(x,y) = " + tex::Vec(frac("\\partial f","\\partial x")+"(x,y)",frac("\\partial f","\\partial y")+"(x,y)"),true);
+        auto grad = Formula::Add("\\nabla f(x,y) = " + tex::Vec(frac("\\partial f","\\partial x")+"(x,y)",frac("\\partial f","\\partial y")+"(x,y)"));
         show << PlaceBelow(grad);
         auto grid_edge = DuplicatePrimitive(grid);
         grid_edge->pc->setEdgeWidth(1);
@@ -275,7 +342,7 @@ void init () {
         auto gl = grid_edge->apply(lift);
         show << S << gl;
 
-        show << PlaceLeft(Latex::Add("f(x,y) = "+ frac("x^2+y^2","2"),true),0.5);
+        show << PlaceLeft(Formula::Add("f(x,y) = "+ frac("x^2+y^2","2")),0.5);
         show << inNextFrame  << CameraView::Add(vec(0,0.5,4),vec(0,0.5,0),vec(0,1,0),true);
         show.getCurrentSlide().remove(gl);
 
@@ -285,8 +352,10 @@ void init () {
         gfval->setVectorRadius(0.01,false);
 
         show << PolyscopeQuantity<polyscope::SurfaceVertexScalarQuantity>::Add(fval);
-        show << inNextFrame << PlaceRight(Latex::Add("\\nabla f(x,y) = "+ tex::Vec("x","y"),true),0.5);
+        show << inNextFrame << PlaceRight(Formula::Add("\\nabla f(x,y) = "+ tex::Vec("x","y")),0.5);
         show << PolyscopeQuantity<polyscope::SurfaceVertexVectorQuantity>::Add(gfval);
+
+
     }
 
 }
@@ -301,6 +370,7 @@ int main(int argc,char** argv) {
 
     polyscope::state::userCallback = [](){
         show.play();
+        //ImGui::ShowDemoWindow();
     };
     polyscope::show();
     return 0;

@@ -72,7 +72,7 @@ struct Font {
 
 struct Primitive;
 using PrimitivePtr = std::shared_ptr<Primitive>;
-using PrimitiveID = size_t;
+using PrimitiveID = long;
 using Primitives = std::set<PrimitiveID>;
 
 #define UPS_prefix std::string("/home/eulerson314/dev/UnifiedPresentationSystem/data/")
