@@ -1,13 +1,49 @@
+[intro]
 
+Traitement de la géométrie : analyse et synthèse.
 
-[Intro]
+diagramme de Venn:
+maths pures : grandes notions, théorème, monde des idées, aucune limite
+maths appliquées : rendre ces notions calculables en pratique
+informatique : le faire de manière efficace et surtout réutilisable par d'autres -> génie logiciel
 
-coucou les loulous;
+[taylor]
 
-[Taylor]
+approximation polynomiale d'une fonction/surface plus complexe
 
+essentiel car rend approchable par un polynome -> seule chose qu'on sait calculer.
 
-Tah les polynomes!
+idée des approches différentielles : exploration des surfaces par approximation locale simple
 
 [manifold]
+
+dérivée de la paramétrisation 
+par rapport à x : premier vecteur tangent
+par rapport à y : deuxieme "" "" 
+plan généré par les deux : plan tangent à la surface en x
+
+idée importante : l'espace tangent dépend de l'endroit à l'on se trouve, des vecteurs intrinseques dépendent du point de support, pas comparable comme tel.
+
+Pour aller plus loin : connexion, dépend du chemin, etc...
+
+De manière générale, si on a un vecteur dans l'espace des paramètres, il est transformé par la jacobienne de la param
+
+regardons évolution du produit scalaire, u^t v -> u^t J^tJ v -> J^tJ = g tenseur métrique
+-> la manière dont on mesure les angles et les longueurs dépend du point où on se trouve
+
+[metric]
+
+exemple : disque de poincaré -> relativité générale
+
+[curvature]
+
+approximation polynomiale d'ordre 2 -> première déviation par rapport à un espace plat -> notion de courbure
+-> notion intrinsèque, ne dépend pas de la paramétrisation, discrétisation angle deflect.
+Grandes directions de la parabole -> direction de courbures min max
+moyenne des deux -> courbure moyenne
+produit des deux -> courbure de gauss
+
+
+
+
 

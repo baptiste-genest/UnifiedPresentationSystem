@@ -96,6 +96,7 @@ public:
 
     inline Slideshow& operator<<(promptTag tag) {
         if (prompter_ptr == nullptr){
+            return *this;
             std::cerr << " [ Must set prompt file ]" << std::endl;
             assert(0);
         }
