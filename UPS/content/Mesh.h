@@ -28,6 +28,8 @@ public:
 
     polyscope::SurfaceMesh* pc;
 
+    const vecs& getVertices() const {return vertices;}
+
     void updateMesh(const vecs& X);
 
 private:

@@ -91,6 +91,10 @@ struct Primitive {
     }
 
 
+    bool exclusive = false;
+    bool isExclusive() const {
+        return exclusive;
+    }
 private:
     TimeStamp inner_time;
 };

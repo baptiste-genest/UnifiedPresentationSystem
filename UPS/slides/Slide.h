@@ -14,15 +14,22 @@ using Transitions = std::vector<Transition>;
 
 struct Slide : std::map<PrimitiveID,StateInSlide> {
     void add(PrimitivePtr p,const StateInSlide& sis = {}){
+        if (p->isExclusive()){
+            if (exclusive_prim != -1)
+                this->erase(exclusive_prim);
+            exclusive_prim = p->pid;
+        }
         (*this)[p->pid] = sis;
     }
     void add(PrimitivePtr p,const Vec2& pos){
-        (*this)[p->pid] = StateInSlide{pos};
+        add(p,StateInSlide{pos});
     }
 
     void remove(PrimitivePtr ptr) {
         this->erase(ptr->pid);
     }
+
+    PrimitiveID exclusive_prim = -1;
 
 };
 

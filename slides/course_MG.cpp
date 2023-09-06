@@ -86,6 +86,10 @@ vec hyperbolic_geodesic(const vec& pv,const vec& qv,scalar t) {
     return toVec((wn + p)/(1.+ std::conj(p)*wn));
 }
 
+mapping offset(const vec& x){
+    return [x] (const vec& X){return X+x;};
+}
+
 
 void init () {
 
@@ -94,6 +98,8 @@ void init () {
 
     auto grid = Mesh::Add(UPS_prefix + "meshes/grid_quad_50.obj");
     auto disk = Mesh::Add(UPS_prefix + "meshes/disk_coarse.obj",vec(0.5,0.5,0.5));
+    auto bunny = Mesh::Add(UPS_prefix + "meshes/bunny.obj");
+    auto bunny_coarse = Mesh::Add(UPS_prefix + "meshes/bunny_coarse.obj");
     polyscope::view::resetCameraToHomeView();
 
     auto cam = CameraView::Add(vec(0,0.6,5),vec(0,0.6,0),vec(0,1,0));
@@ -280,15 +286,31 @@ void init () {
             show << inNextFrame << PlaceRelative(Latex::Add("Espace tangent : plan tangent à un point de la variété"),ABS_LEFT,REL_BOTTOM,0.1);
             show << inNextFrame << PlaceRelative(Latex::Add("Tenseur métrique : changement dans le calul des angles et longueur sur la surface"),ABS_LEFT,REL_BOTTOM,0.1);
         }
-
-
     }
+
+        {
+            show << newFrame << Title("Représentation discrète des formes et fonctions")->at(CENTER) << inNextFrame << TOP;
+                show << PlaceBelow(Latex::Add("Plein de manière de représenter une forme"));
+            scalar off = 3;
+                auto bunny_off = bunny->apply(offset(vec(off,0,0)));
+            show << bunny_off;
+            auto bco =bunny_coarse;
+            bco->pc->setEdgeWidth(1.);
+            bco->pc->setSmoothShade(false);
+            show << bco;
+            auto bunny_pc = PointCloud::Add(bunny_coarse->getVertices())->apply(offset(vec(-off,0,0)));
+            show << bunny_pc;
+            auto cam = CameraView::Add(vec(-0.5,2,8),vec(-0.5,2,0),vec::UnitY());
+            show << cam << inNextFrame >> bunny_pc >> bunny_off;
+            show << newFrame << bco << cam << Title("Topologie d'un maillage")->at(TOP);
+        }
+        if (false)
+        {
+            show << newFrame << Title("Courbures")->at(CENTER);
+        }
 
     if (false)
     {
-        auto title = Latex::Add(tex::center("Représentation discrète des formes et fonctions"));
-        show << newFrame << title;
-        show << inNextFrame << title->at(TOP);
     }
 
     if (false)
@@ -348,6 +370,7 @@ int main(int argc,char** argv) {
 
     polyscope::state::userCallback = [](){
         show.play();
+        //ImGui::ShowDemoWindow();
     };
     polyscope::show();
     return 0;

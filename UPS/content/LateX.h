@@ -27,7 +27,9 @@ struct Formula {
 
 
 inline Latex::LatexPtr Title(TexObject s) {
-    return Latex::Add(s,0.07);
+    auto rslt = Latex::Add(s,TITLE);
+    rslt->exclusive = true;
+    return rslt;
 }
 
 
