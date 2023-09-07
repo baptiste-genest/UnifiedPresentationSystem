@@ -13,15 +13,17 @@ class Mesh : public PolyscopePrimitive
 public:
     using MeshPtr = std::shared_ptr<Mesh>;
     Mesh() {}
-    Mesh(const vecs &vertices,const vecs& original_vertices, const Faces &faces);
+    Mesh(const vecs &vertices,const vecs& original_vertices, const Faces &faces,bool smooth = false);
 
-    static MeshPtr Add(const std::string& objfile,const vec& scale = vec(1.,1.,1.));
-    static MeshPtr Add(const std::string& objfile,scalar scale){
-        return Add(objfile,vec::Ones()*scale);
+    static MeshPtr Add(const std::string& objfile,const vec& scale = vec(1.,1.,1.),bool smooth = false);
+    static MeshPtr Add(const std::string& objfile,scalar scale,bool smooth = false){
+        return Add(objfile,vec::Ones()*scale,smooth);
     }
 
-    MeshPtr apply(const mapping& phi) const;
-    MeshPtr applyDynamic(const time_mapping& phi) const;
+    MeshPtr apply(const mapping& phi,bool smooth = true) const;
+    MeshPtr applyDynamic(const time_mapping& phi,bool smooth = true) const;
+
+    void setSmooth(bool set);
 
     using scalar_func = std::function<scalar(const vec&)>;
     using vector_func = std::function<vec(const vec&)>;
@@ -37,6 +39,7 @@ public:
 
 private:
     vecs vertices,original_vertices;
+    bool smooth = false;
     Faces faces;
 
     // PolyscopePrimitive interface

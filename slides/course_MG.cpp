@@ -3,9 +3,12 @@
 #include "../UPS/UnifiedPresentationSystem.h"
 #include "geometrycentral/surface/vertex_position_geometry.h"
 #include "geometrycentral/surface/meshio.h"
+#include "../UPS/content/io.h"
 #include "imgui.h"
 #include <Eigen/SparseCholesky>
 #include <Eigen/IterativeLinearSolvers>
+
+#include "geometrycentral/numerical/linear_solvers.h"
 
 using namespace UPS;
 UPS::Slideshow show(true);
@@ -28,10 +31,10 @@ vec sphere(vec x) {
     auto t1 = x(0)*M_PI_2;
     auto t2 = x(1)*M_PI;
     return vec(
-                -sin(t1),
-                cos(t1)*sin(t2),
-                cos(t1)*cos(t2)
-                );
+            -sin(t1),
+            cos(t1)*sin(t2),
+            cos(t1)*cos(t2)
+            );
 }
 vec sphere_offset(vec x) {
     return sphere(x) + vec(1.5,0,0);
@@ -94,13 +97,15 @@ mapping offset(const vec& x){
     return [x] (const vec& X){return X+x;};
 }
 
-#include "geometrycentral/numerical/linear_solvers.h"
-Mat illustratePoissonProblem(std::string filename) {
-    using namespace geometrycentral::surface;
-    std::unique_ptr<ManifoldSurfaceMesh> mesh;
-    std::unique_ptr<VertexPositionGeometry> position_geometry;
-    std::tie(mesh, position_geometry) = readManifoldSurfaceMesh(UPS_prefix + "meshes/bunny_coarse.obj");
-    ExtrinsicGeometryInterface& geometry = *position_geometry;
+std::unique_ptr<geometrycentral::surface::ManifoldSurfaceMesh> mesh;
+std::unique_ptr<geometrycentral::surface::VertexPositionGeometry> position_geometry;
+
+Mat illustratePoissonProblem() {
+    Mat B;
+    std::string cache = UPS_prefix + "cache/poisson.csv";
+    if (io::MatrixCache(cache,B))
+        return B;
+    geometrycentral::surface::ExtrinsicGeometryInterface& geometry = *position_geometry;
     geometry.requireCotanLaplacian();
     geometry.requireVertexGalerkinMassMatrix();
     auto N = mesh->nVertices();
@@ -110,25 +115,55 @@ Mat illustratePoissonProblem(std::string filename) {
     Eigen::SimplicialLDLT<SMat> solver(L);
     std::cout << solver.info() << std::endl;
     SMat M = geometry.vertexGalerkinMassMatrix;
-    Mat B = Mat::Zero(N,2);
+    B = Mat::Zero(N,2);
     B(114) = 1;
     Vec rhs = M*B.col(0);
     B.col(1) = solver.solve(rhs);
     if (solver.info() != Eigen::Success)
         std::cout << "error eigen solve" << solver.info() << std::endl;
+    io::SaveMatrix(cache,B);
     return B;
+}
+
+Mat EigenLaplace() {
+    Mat Eig;
+    std::string cache = UPS_prefix + "cache/eig.csv";
+    if (io::MatrixCache(cache,Eig))
+        return Eig;
+
+    std::unique_ptr<geometrycentral::surface::ManifoldSurfaceMesh> mesh;
+    std::unique_ptr<geometrycentral::surface::VertexPositionGeometry> position_geometry;
+    std::tie(mesh, position_geometry) = geometrycentral::surface::readManifoldSurfaceMesh(UPS_prefix + "meshes/human.obj");
+    geometrycentral::surface::ExtrinsicGeometryInterface& geometry = *position_geometry;
+    geometry.requireCotanLaplacian();
+    geometry.requireVertexGalerkinMassMatrix();
+    auto N = mesh->nVertices();
+    SMat I(N,N);
+    I.setIdentity();
+    SMat L = geometry.cotanLaplacian + 1e-5*I;
+    int k = 5;
+    auto E = geometrycentral::smallestKEigenvectorsPositiveDefinite(L,geometry.vertexGalerkinMassMatrix,k,50);
+    Eig = Mat(N,k);
+    for (int i = 0;i<k;i++)
+        Eig.col(i) = E[i];
+    io::SaveMatrix(cache,Eig);
+    return Eig;
 }
 
 void init () {
 
+    const auto& SHOW = show;
     auto CMFONTID = UPS::FontManager::addFont(UPS_prefix + "fonts/ComputerModernSR.ttf",50);
     UPS::Style::default_font = CMFONTID;
 
     auto grid = Mesh::Add(UPS_prefix + "meshes/grid_quad_50.obj");
-    auto disk = Mesh::Add(UPS_prefix + "meshes/disk_coarse.obj",0.5);
+    auto disk = Mesh::Add(UPS_prefix + "meshes/disk_coarse.obj",0.5,true);
     auto bunny = Mesh::Add(UPS_prefix + "meshes/bunny.obj");
     auto bunny_coarse = Mesh::Add(UPS_prefix + "meshes/bunny_coarse.obj");
+    auto human = Mesh::Add(UPS_prefix + "meshes/human.obj",0.2);
     polyscope::view::resetCameraToHomeView();
+
+    auto arrow = Formula::Add("\\longrightarrow");
 
     auto top_cam = CameraView::Add(vec(0,0.6,5),vec(0,0.6,0),vec(0,1,0));
 
@@ -169,7 +204,6 @@ void init () {
         grid_param->pc->setEdgeWidth(1);
         show << top_cam;
         show << grid_param;
-        auto arrow = Formula::Add("\\longrightarrow");
         auto varphi = Formula::Add("\\varphi");
         auto mani = grid->apply(sphere_offset);
         mani->pc->setEdgeWidth(1);
@@ -188,14 +222,14 @@ void init () {
 
         show << inNextFrame <<
             curveParam->apply(offset,true)
-             << curveParam->apply(sphere_offset,true)
-             << point_param->apply(offset)
-             << point_param->apply(sphere_offset);
+            << curveParam->apply(sphere_offset,true)
+            << point_param->apply(offset)
+            << point_param->apply(sphere_offset);
 
         auto paramdef = Latex::Add(tex::center(
-                           "Une \\textit{paramétrisation} est une fonction $\\varphi$\n" +
-                           tex::equation("\\varphi : \\mathbb{R}^2 \\longrightarrow \\mathcal{M}")
-                           ));
+                    "Une \\textit{paramétrisation} est une fonction $\\varphi$\n" +
+                    tex::equation("\\varphi : \\mathbb{R}^2 \\longrightarrow \\mathcal{M}")
+                    ));
         show << inNextFrame << paramdef->at(0.5,0.8);
 
         {
@@ -224,22 +258,22 @@ void init () {
             show << pp << pm;
             show << inNextFrame;
             show << Pdx << step_dx->apply(sphere_offset) << pm->addVector([Pdx](scalar t){
-                auto X = sphere(Pdx->getCurrentPos()+vec(1.5,0,0));
-                auto O = sphere(vec(0,0,0));
-                vec rslt = 0.5*(X-O).normalized();
-                return rslt;
-        });
+                    auto X = sphere(Pdx->getCurrentPos()+vec(1.5,0,0));
+                    auto O = sphere(vec(0,0,0));
+                    vec rslt = 0.5*(X-O).normalized();
+                    return rslt;
+                    });
             auto dpx = Formula::Add(tex::frac("\\varphi(p+"+tex::Vec("dx","0")+")-\\varphi(p)","dx"));
             show << PlaceLeft(dpx,0.2);
             show << inNextFrame >> dpx;
             auto dpy = Formula::Add(tex::frac("\\varphi(p+"+tex::Vec("0","dy")+")-\\varphi(p)","dy"));
             show << PlaceLeft(dpy,0.2);
             show << Pdy << step_dy->apply(sphere_offset) << pm->addVector([Pdy](scalar t){
-                auto X = sphere(Pdy->getCurrentPos()+vec(1.5,0,0));
-                auto O = sphere(vec(0,0,0));
-                vec rslt = 0.5*(X-O).normalized();
-                return rslt;
-        });
+                    auto X = sphere(Pdy->getCurrentPos()+vec(1.5,0,0));
+                    auto O = sphere(vec(0,0,0));
+                    vec rslt = 0.5*(X-O).normalized();
+                    return rslt;
+                    });
 
             {
                 using namespace tex;
@@ -253,27 +287,27 @@ void init () {
                 auto ps = point_param->apply(sphere_offset);
                 show << PlaceLeft(plane,0.3) << po << ps;
                 auto TM =  grid->applyDynamic([po](vec x,TimeTypeSec){
-                    vec p = po->getCurrentPos() + vec(1.5,0,0);
+                        vec p = po->getCurrentPos() + vec(1.5,0,0);
                         auto h = 1e-3;
-                    vec dx = (sphere(p+vec(h,0,0))-sphere(p)).normalized()*0.4;
-                    vec dy = (sphere(p+vec(0,h,0))-sphere(p)).normalized()*0.4;
-                    vec t = sphere_offset(p) + dx*x(0) + dy*x(1);
-                    return t;
-            });
+                        vec dx = (sphere(p+vec(h,0,0))-sphere(p)).normalized()*0.4;
+                        vec dy = (sphere(p+vec(0,h,0))-sphere(p)).normalized()*0.4;
+                        vec t = sphere_offset(p) + dx*x(0) + dy*x(1);
+                        return t;
+                        });
                 TM->pc->setEdgeWidth(1);
                 show << TM;
                 show << inNextFrame << po->addVector([](scalar){
                         vec rslt= vec(2,3,0)*0.1;
                         return rslt;
-            }) << ps->addVector([po](scalar){
-                    vec p = po->getCurrentPos() + vec(1.5,0,0);
-                        auto h = 1e-3;
-                    vec dx = (sphere(p+vec(h,0,0))-sphere(p)).normalized()*0.4;
-                    vec dy = (sphere(p+vec(0,h,0))-sphere(p)).normalized()*0.4;
-                    vec t = (dx*2 + dy*3)*0.2;
-                    return t;
+                        }) << ps->addVector([po](scalar){
+                            vec p = po->getCurrentPos() + vec(1.5,0,0);
+                            auto h = 1e-3;
+                            vec dx = (sphere(p+vec(h,0,0))-sphere(p)).normalized()*0.4;
+                            vec dy = (sphere(p+vec(0,h,0))-sphere(p)).normalized()*0.4;
+                            vec t = (dx*2 + dy*3)*0.2;
+                            return t;
 
-                });
+                            });
                 show << PlaceRight(Formula::Add("v \\longrightarrow \\begin{pmatrix} " + delx + "(p)," + dely +"(p)\\end{pmatrix} v = J_{\\varphi}(p)v"),0.3,0.1);
             }
         }
@@ -288,17 +322,17 @@ void init () {
             show << inNextFrame << arrowp << PlaceAbove(varphi) << PlaceABelowB(Formula::Add("p"),arrowp) << PlaceABelowB(Jdot,dot,0.05);
             auto g = Formula::Add("= u^t" + tex::transpose(J) + J + "v");
             auto title = Title("Tenseur métrique")->at(TOP);
-                         show << inNextFrame << PlaceBelow(g,0.05);
+            show << inNextFrame << PlaceBelow(g,0.05);
             show << inNextFrame << PlaceBelow(Formula::Add("g(p) = " + tex::transpose(J) + J,0.06),0.05) << title;
-                         auto cam = CameraView::Add(vec(0,0.3,2),vec(0,0.3,0),vec(0,1,0));
+            auto cam = CameraView::Add(vec(0,0.3,2),vec(0,0.3,0),vec(0,1,0));
             show << newFrame << title << PlaceBelow(Latex::Add("Disque de poincaré",0.05)) << cam << disk;
-                             auto gval = disk->eval([](const vec& x) {
-                return 1./std::pow(1-x.squaredNorm(),2);
-            });
+            auto gval = disk->eval([](const vec& x) {
+                    return 1./std::pow(1-x.squaredNorm(),2);
+                    });
             auto gplot = disk->pc->addVertexScalarQuantity("norm",gval);
-                             gplot->setColorMap("coolwarm");
+            gplot->setColorMap("coolwarm");
             show << inNextFrame << Formula::Add("g(z) = " + tex::frac("1",tex::pow("(1-||z||^2)","2")) + tex::Mat<2,2>("1","0","0","1"))->at(0.5,0.3);
-                             show << PolyscopeQuantity<polyscope::SurfaceVertexScalarQuantity>::Add(gplot);
+            show << PolyscopeQuantity<polyscope::SurfaceVertexScalarQuantity>::Add(gplot);
             show << inNextFrame;
             for (int i = 0;i<6;i++){
                 vec p = point_explore(polyscope::randomUnit()*M_PI*2)*5;
@@ -318,108 +352,125 @@ void init () {
         }
     }
 
-        {
-            show << newFrame << Title("Représentation discrète des formes et fonctions")->at(CENTER) << inNextFrame << TOP;
-            scalar off = 3;
-                auto bunny_off = bunny->apply(offset(vec(off,0,0)));
-            show << bunny_off;
-            auto bco =bunny_coarse;
-            bco->pc->setEdgeWidth(1.);
-            bco->pc->setSmoothShade(false);
-            show << bco;
-            auto bunny_pc = PointCloud::Add(bunny_coarse->getVertices());
-            auto bunny_pco = bunny_pc->apply(offset(vec(-off,0,0)));
-            show << bunny_pco;
-            auto cam = CameraView::Add(vec(-0.5,2,8),vec(-0.5,2,0),vec::UnitY());
-            show << cam << inNextFrame >> bunny_pco >> bunny_off;
-            show << newFrame << bco << cam << Title("Topologie d'un maillage")->at(TOP);
-            show << inNextFrame << PlaceBelow(Formula::Add("V - E + F = 2(1-g)"),0.05);
-            show << inNextFrame << PlaceBelow(Latex::Add(tex::center("On définit donc des fonctions sur des maillages par"))) <<
-                                                                     PlaceBelow(Formula::Add("f : V \\longrightarrow \\mathbb{R}^n"));
-            auto F = Vec::Random(bunny_pc->getPoints().size());
-            auto bpc = DuplicatePrimitive(bunny_pc);
-            bpc->pc->setPointRadius(0.03,false);
-            auto Fq = PolyscopeQuantity<polyscope::PointCloudScalarQuantity>::Add(bpc->pc->addScalarQuantity("V0000",F));
-            show << inNextFrame << bpc << Fq;
-            show << inNextFrame << PlaceRight(Formula::Add(tex::Vec("1.21","0.32", "\\vdots", "5.2","3.24"),0.05),0.6,0.1);
-        }
+    {
+        show << newFrame << Title("Représentation discrète des formes et fonctions")->at(CENTER) << inNextFrame << TOP;
+        scalar off = 3;
+        auto bunny_off = bunny->apply(offset(vec(off,0,0)));
+        show << bunny_off;
+        auto bco =bunny_coarse;
+        bco->pc->setEdgeWidth(1.);
+        bco->pc->setSmoothShade(false);
+        show << bco;
+        auto bunny_pc = PointCloud::Add(bunny_coarse->getVertices());
+        auto bunny_pco = bunny_pc->apply(offset(vec(-off,0,0)));
+        show << bunny_pco;
+        auto cam = CameraView::Add(vec(-0.5,2,8),vec(-0.5,2,0),vec::UnitY());
+        show << cam << inNextFrame >> bunny_pco >> bunny_off;
+        show << newFrame << bco << cam << Title("Topologie d'un maillage")->at(TOP);
+        show << inNextFrame << PlaceBelow(Formula::Add("V - E + F = 2(1-g)"),0.05);
+        show << inNextFrame << PlaceBelow(Latex::Add(tex::center("On définit donc des fonctions sur des maillages par"))) <<
+            PlaceBelow(Formula::Add("f : V \\longrightarrow \\mathbb{R}^n"));
+        auto F = Vec::Random(bunny_pc->getPoints().size());
+        auto bpc = DuplicatePrimitive(bunny_pc);
+        bpc->pc->setPointRadius(0.03,false);
+        auto Fq = PolyscopeQuantity<polyscope::PointCloudScalarQuantity>::Add(bpc->pc->addScalarQuantity("V0000",F));
+        show << inNextFrame << bpc << Fq;
+        show << inNextFrame << PlaceRight(Formula::Add(tex::Vec("1.21","0.32", "\\vdots", "5.2","3.24"),0.05),0.6,0.1);
+    }
 
-        {
-            show << newFrame << Title("Discrétisation des opérateurs différentiels")->at(TOP);
-            show << inNextFrame << PlaceLeft(Latex::Add(tex::center("Opérateurs différentiels classiques")));
-            show << PlaceBelow(Formula::Add("\\partial (f + g) = \\partial f + \\partial g")) << inNextFrame << PlaceRelative(Formula::Add(tex::AaboveB("?","\\longrightarrow"),0.06),UPS::CENTER_X,SAME_Y);
-            show << inNextFrame << PlaceRight(Latex::Add(tex::center("Opérateurs différentiels discrets")));
-            show << PlaceBelow(Formula::Add("AX"));
-        }
+    {
+        show << newFrame << Title("Discrétisation des opérateurs différentiels")->at(TOP);
+        show << inNextFrame << PlaceLeft(Latex::Add(tex::center("Opérateurs différentiels classiques")));
+        show << PlaceBelow(Formula::Add("\\partial (f + g) = \\partial f + \\partial g")) << inNextFrame << PlaceRelative(Formula::Add(tex::AaboveB("?","\\longrightarrow"),0.06),UPS::CENTER_X,SAME_Y);
+        show << inNextFrame << PlaceRight(Latex::Add(tex::center("Opérateurs différentiels discrets")));
+        show << PlaceBelow(Formula::Add("AX"));
+    }
 
+    {
+        using namespace tex;
+        show << newFrame << Title("Exemple : Le laplacien $\\Delta$")->at(TOP);
+        auto df = "\\partial^2 f";
+        auto lapdef = Formula::Add("\\Delta f = " + frac(df,del<2>(0)) + "+" + frac(df,del<2>(1)),0.06);
+        show << inNextFrame << lapdef->at(CENTER);
+        auto topolap = Latex::Add(equation("(Lf)_i = \\sum_{n \\in N_i}" + frac("f_n","|N_i|") + " - f_i"),0.06);
+        show << inNextFrame >> lapdef << topolap->at(CENTER);
+        show << inNextFrame << Vec2(0.5,0.3);
+        show << PlaceLeft(Image::Add(UPS_prefix + "images/simple_graph.png"),0.6,0.2);
+        show << PlaceRelative(Image::Add(UPS_prefix + "images/simple_lap_mat.png"),UPS::REL_RIGHT,SAME_Y);
         {
+            show << newFrame << Title("Une discrétisation imparfaite ?")->at(TOP);
+            show << CameraView::Add(vec(2,0.5,4),vec(2,0.5,0),vec(0,1,0));
+            vecs X = {
+                vec(0,0,0),
+                vec(0,1,0),
+                vec(1,1,0)
+            };
+            vecs Y = {
+                vec(2,0,0),
+                vec(2,0.5,0),
+                vec(4,0.5,0)};
+            auto pcx = PointCloud::Add(X); pcx->pc->setPointRadius(.02);
+            auto pcy = PointCloud::Add(Y); pcy->pc->setPointRadius(.02);
+            show << inNextFrame << Curve3D::Add(X) << Curve3D::Add(Y) << pcx << pcy;
+            show << newFrame << Title("Discrétisation du laplacien par éléments finis")->at(TOP);
+            show << inNextFrame << PlaceBelow(Formula::Add("\\varphi_v(x_i) = " + cases("1","v=i","0",text("sinon")),0.05),0.05);
+            show << PlaceRelative(Latex::Add(center("Fonction linéaire \\\\ par morceau telle que")),UPS::REL_LEFT,UPS::SAME_Y);
+            auto diskverycoarse = Mesh::Add(UPS_prefix + "meshes/disk_very_coarse.obj",1.3);
+            diskverycoarse->pc->setEdgeWidth(1);
+            UPS::Vec fem_basis = UPS::Vec::Zero(diskverycoarse->getVertices().size());
+            auto i = rand()%diskverycoarse->getVertices().size();
+            fem_basis(i) = 1;
+            auto Q = PolyscopeQuantity<polyscope::SurfaceVertexScalarQuantity>::Add(diskverycoarse->pc->addVertexScalarQuantity("FEM",fem_basis));
+            show << top_cam << diskverycoarse << Q;
+            vecs V = diskverycoarse->getVertices();
+            V[i] = vec(V[i](0),V[i](1),0.3);
+            diskverycoarse->updateMesh(V);
             using namespace tex;
-            show << newFrame << Title("Exemple : Le laplacien $\\Delta$")->at(TOP);
-            auto df = "\\partial^2 f";
-            auto lapdef = Formula::Add("\\Delta f = " + frac(df,del<2>(0)) + "+" + frac(df,del<2>(1)),0.06);
-            show << inNextFrame << lapdef->at(CENTER);
-            auto topolap = Latex::Add(equation("(Lf)_i = \\sum_{n \\in N_i}" + frac("f_n","|N_i|") + " - f_i"),0.06);
-            show << inNextFrame >> lapdef << topolap->at(CENTER);
-            show << inNextFrame << Vec2(0.5,0.3);
-            show << PlaceLeft(Image::Add(UPS_prefix + "images/simple_graph.png"),0.6,0.2);
-            show << PlaceRelative(Image::Add(UPS_prefix + "images/simple_lap_mat.png"),UPS::REL_RIGHT,SAME_Y);
-            {
-                show << newFrame << Title("Une discrétisation imparfaite ?")->at(TOP);
-                                show << CameraView::Add(vec(2,0.5,4),vec(2,0.5,0),vec(0,1,0));
-                    vecs X = {
-                    vec(0,0,0),
-                    vec(0,1,0),
-                    vec(1,1,0)
-                    };
-                    vecs Y = {
-                    vec(2,0,0),
-                    vec(2,0.5,0),
-                    vec(4,0.5,0)};
-                    auto pcx = PointCloud::Add(X); pcx->pc->setPointRadius(.02);
-                    auto pcy = PointCloud::Add(Y); pcy->pc->setPointRadius(.02);
-                    show << inNextFrame << Curve3D::Add(X) << Curve3D::Add(Y) << pcx << pcy;
-                    show << newFrame << Title("Discrétisation du laplacien par éléments finis")->at(TOP);
-                    show << inNextFrame << PlaceBelow(Formula::Add("\\varphi_v(x_i) = " + cases("1","v=i","0",text("sinon")),0.05),0.05);
-                    show << PlaceRelative(Latex::Add(center("Fonction linéaire \\\\ par morceau telle que")),UPS::REL_LEFT,UPS::SAME_Y);
-                    auto diskverycoarse = Mesh::Add(UPS_prefix + "meshes/disk_very_coarse.obj",1.3);
-                    diskverycoarse->pc->setEdgeWidth(1);
-                    UPS::Vec fem_basis = UPS::Vec::Zero(diskverycoarse->getVertices().size());
-                    auto i = rand()%diskverycoarse->getVertices().size();
-                    fem_basis(i) = 1;
-                    auto Q = PolyscopeQuantity<polyscope::SurfaceVertexScalarQuantity>::Add(diskverycoarse->pc->addVertexScalarQuantity("FEM",fem_basis));
-                    show << top_cam << diskverycoarse << Q;
-                    vecs V = diskverycoarse->getVertices();
-                    V[i] = vec(V[i](0),V[i](1),0.3);
-                    diskverycoarse->updateMesh(V);
-                    using namespace tex;
 
-                    show << inNextFrame << PlaceRight(Formula::Add("A_{ij} = \\int_{\\Omega} \\nabla \\varphi_i(x)\\cdot\\nabla \\varphi_j(x) dx"));
-                    show << newFrameSameTitle << PlaceBelow(Image::Add(UPS_prefix + "images/cotan_angles.png"),0.1);
-                    show << PlaceBelow(Formula::Add("(Lf)_i =" + frac("1","A_i") + "\\sum_{(i,j)\\in E}"+frac("cot(\\alpha_{ij}) + cot(\\beta_{ij})","2")+"(f_i-f_j)"));
-                    show << inNextFrame << PlaceRight(Image::Add(UPS_prefix + "images/cot_plot.png"));
-            }
-            show << newFrame << Title("Problème de Poisson")->at(TOP);
-            UPS::Mat C = illustratePoissonProblem("");
-            auto PP = PolyscopeQuantity<polyscope::SurfaceScalarQuantity>::Add(bunny_coarse->pc->addVertexScalarQuantity("V0000",C));
-            show << bunny_coarse << PP;
-            auto title = Title("Applications du laplacien");
-            show << newFrame << title->at(TOP);
-            show << PlaceBelow(Latex::Add("Energie de Dirichlet",0.05));
+            show << inNextFrame << PlaceRight(Formula::Add("A_{ij} = \\int_{\\Omega} \\nabla \\varphi_i(x)\\cdot\\nabla \\varphi_j(x) dx"));
+            show << newFrameSameTitle << PlaceBelow(Image::Add(UPS_prefix + "images/cotan_angles.png"),0.1);
+            show << PlaceBelow(Formula::Add("(Lf)_i =" + frac("1","A_i") + "\\sum_{(i,j)\\in E}"+frac("cot(\\alpha_{ij}) + cot(\\beta_{ij})","2")+"(f_i-f_j)"));
+            show << inNextFrame << PlaceRight(Image::Add(UPS_prefix + "images/cot_plot.png"));
+        }
+
+
+        {
+            show << newFrame << Title("Applications du laplacien");
+            auto cam = CameraView::Add(vec(-0.5,2,9),vec(-0.5,2,0),vec::UnitY());
+            show << newFrameSameTitle << TOP << PlaceBelow(Latex::Add("Problème de Poisson",0.05));
+            show << PlaceBelow(Formula::Add("\\Delta u = y",0.06),0.1);
+            show << PlaceLeft(Formula::Add("y",0.05),0.35,0.3);
+            UPS::Mat C = illustratePoissonProblem();
+            auto off = vec(2.5,0,0);
+            auto bunnyY = DuplicatePrimitive(bunny_coarse)->apply(offset(-off));
+            bunnyY->pc->setSmoothShade(false);
+            bunnyY->pc->setEdgeWidth(1.);
+            auto bunnyX = DuplicatePrimitive(bunny_coarse)->apply(offset(off));
+            bunnyX->pc->setSmoothShade(false);
+            bunnyX->pc->setEdgeWidth(1.);
+            auto QY = PolyscopeQuantity<polyscope::SurfaceVertexScalarQuantity>::Add(bunnyY->pc->addVertexScalarQuantity("Y",C.col(0)));
+            auto QX = PolyscopeQuantity<polyscope::SurfaceVertexScalarQuantity>::Add(bunnyX->pc->addVertexScalarQuantity("X",C.col(1)));
+            show << cam << bunnyY << QY;
+            show << inNextFrame << Formula::Add(tex::AaboveB("\\Delta^{-1}","\\longrightarrow"),0.06);
+            show << bunnyX << QX;
+            show << PlaceRight(Formula::Add("u",0.05),0.35,0.3);
+            show << newFrameSameTitle << PlaceBelow(Latex::Add("Energie de Dirichlet",0.05));
             show << inNextFrame << PlaceBelow(Formula::Add("E(f) = \\int_\\Omega ||\\nabla f||^2 dx",0.07),0.1);
 
-            show << newFrame << title->at(TOP) << PlaceBelow(Latex::Add("Décomposition spectrale",0.05));
-            show << inNextFrame << PlaceBelow(Formula::Add("\\Delta u = \\lambda u",0.07),0.1);
-            //show << inNextFrame << PlaceBelow(Formula::Add("\\Delta u = 0",0.07),0.1);
+            show << newFrameSameTitle << PlaceBelow(Latex::Add("Décomposition spectrale",0.05));
+            show << PlaceBelow(Formula::Add("\\Delta u = \\lambda u",0.07),0.1);
+            auto cam2 = CameraView::Add(vec(-0.5,4,12),vec(-0.5,4,0),vec::UnitY());
+            show << inNextFrame << cam2;
+            auto eig = EigenLaplace();
+            for (int i = 0;i<eig.cols();i++){
+                auto human_eig = human->apply(offset(vec(-6 + 3*i,0,0)));
+                human_eig->setSmooth(true);
+                auto E = PolyscopeQuantity<polyscope::SurfaceVertexScalarQuantity>::Add(human_eig->pc->addVertexScalarQuantity("eig",eig.col(i)));
+                show << human_eig << E;
+            }
+
 
         }
-
-        if (false)
-        {
-            show << newFrame << Title("Courbures")->at(CENTER);
-        }
-
-    if (false)
-    {
     }
 
     if (false)
@@ -472,6 +523,7 @@ void init () {
 
 int main(int argc,char** argv) {
     //show.init(UPS_prefix + "../scripts/course_MG.txt");
+    std::tie(mesh, position_geometry) = geometrycentral::surface::readManifoldSurfaceMesh(UPS_prefix + "meshes/bunny_coarse.obj");
     show.init();
     init();
 

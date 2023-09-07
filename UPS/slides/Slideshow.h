@@ -73,8 +73,9 @@ public:
         if (nf.same_title){
             int i = slides.size()-2;
             auto ex = slides[i].exclusive_prim;
-            if (ex != -1)
+            if (ex != -1){
                 addToLastSlide(Primitive::get(ex),slides[i-1][ex]);
+            }
         }
         return *this;
     }
@@ -214,7 +215,7 @@ private:
 };
 
 constexpr Slideshow::in_next_frame inNextFrame;
-constexpr Slideshow::new_frame newFrame;
+constexpr Slideshow::new_frame newFrame{false};
 constexpr Slideshow::new_frame newFrameSameTitle{true};
 
 }

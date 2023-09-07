@@ -12,7 +12,7 @@ struct Transition{
 };
 using Transitions = std::vector<Transition>;
 
-struct Slide : std::map<PrimitiveID,StateInSlide> {
+struct Slide : public std::map<PrimitiveID,StateInSlide> {
     void add(PrimitivePtr p,const StateInSlide& sis = {}){
         if (p->isExclusive()){
             if (exclusive_prim != -1)

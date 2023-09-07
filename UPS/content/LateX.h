@@ -144,28 +144,6 @@ TexObject Mat(ARGS... arguments) {
     return Mat<col,row>(data);
 }
 
-
-
-/*
-inline TexObject Vec(const char* format, ...) {
-    va_list args;
-    va_start(args, format);
-
-    TexObject rslt = "\\begin{pmatrix}\n";
-    const char* arg = format;
-    while (arg != nullptr) {
-        rslt += arg;
-        arg = va_arg(args, const char*);
-        if (arg != nullptr)
-            rslt += "\\\\ ";
-    }
-    rslt += "\\end{pmatrix}";
-
-    va_end(args);
-    return rslt;
-}
-*/
-
 }
 
 }
