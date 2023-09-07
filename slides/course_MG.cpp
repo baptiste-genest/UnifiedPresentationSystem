@@ -95,34 +95,28 @@ mapping offset(const vec& x){
 }
 
 #include "geometrycentral/numerical/linear_solvers.h"
-Vec illustratePoissonProblem(std::string filename) {
+Mat illustratePoissonProblem(std::string filename) {
     using namespace geometrycentral::surface;
     std::unique_ptr<ManifoldSurfaceMesh> mesh;
     std::unique_ptr<VertexPositionGeometry> position_geometry;
     std::tie(mesh, position_geometry) = readManifoldSurfaceMesh(UPS_prefix + "meshes/bunny_coarse.obj");
     ExtrinsicGeometryInterface& geometry = *position_geometry;
     geometry.requireCotanLaplacian();
-    geometry.requireVertexLumpedMassMatrix();
-    SMat L = geometry.cotanLaplacian;
-    Eigen::SimplicialLDLT<SMat> solver;
-    solver.compute(L);
-    std::cout << solver.info() << std::endl;
-    SMat M = geometry.vertexLumpedMassMatrix;
+    geometry.requireVertexGalerkinMassMatrix();
     auto N = mesh->nVertices();
-    Vec B = Vec::Ones(N);
-    for (int i = 0;i<10;i++)
-        //B.row(rand()%N) = ((vec::Random() + vec::Ones())*0.5).transpose();
-        B(rand()%N) = polyscope::randomUnit();
-    Vec rhs = M*B;
-    return geometrycentral::solvePositiveDefinite(L,rhs);
-    Mat X = Mat::Ones(N,3);
-    for (int i = 0;i<3;i++){
-        Vec rhs = M*B.col(i);
-        Vec rslt = solver.solve(rhs);
-        X.col(i) = rslt;
-        std::cout << solver.info() << std::endl;
-    }
-    return X;
+    SMat I(N,N);
+    I.setIdentity();
+    SMat L = geometry.cotanLaplacian + 1e-5*I;
+    Eigen::SimplicialLDLT<SMat> solver(L);
+    std::cout << solver.info() << std::endl;
+    SMat M = geometry.vertexGalerkinMassMatrix;
+    Mat B = Mat::Zero(N,2);
+    B(114) = 1;
+    Vec rhs = M*B.col(0);
+    B.col(1) = solver.solve(rhs);
+    if (solver.info() != Eigen::Success)
+        std::cout << "error eigen solve" << solver.info() << std::endl;
+    return B;
 }
 
 void init () {
@@ -405,11 +399,9 @@ void init () {
                     show << inNextFrame << PlaceRight(Image::Add(UPS_prefix + "images/cot_plot.png"));
             }
             show << newFrame << Title("Problème de Poisson")->at(TOP);
-            //                    UPS::Vec C = illustratePoissonProblem("");
-            //std::cout << C << std::endl;
-            //                    auto PP = PolyscopeQuantity<polyscope::SurfaceColorQuantity>::Add(bunny_coarse->pc->addVertexColorQuantity("V0000",C));
-            //auto PP = PolyscopeQuantity<polyscope::SurfaceScalarQuantity>::Add(disk->pc->addVertexScalarQuantity("V0000",C));
-            //show << disk << PP;
+            UPS::Mat C = illustratePoissonProblem("");
+            auto PP = PolyscopeQuantity<polyscope::SurfaceScalarQuantity>::Add(bunny_coarse->pc->addVertexScalarQuantity("V0000",C));
+            show << bunny_coarse << PP;
             auto title = Title("Applications du laplacien");
             show << newFrame << title->at(TOP);
             show << PlaceBelow(Latex::Add("Energie de Dirichlet",0.05));
