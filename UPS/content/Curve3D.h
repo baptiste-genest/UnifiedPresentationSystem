@@ -22,7 +22,7 @@ public:
 
     Curve3DPtr apply(const mapping& phi,bool loop = false) const;
 
-    scalar radius = 1;
+    scalar radius = 0.01;
 private:
     bool loop;
     vecs nodes;
@@ -32,6 +32,11 @@ public:
     Curve3D(const vecs &nodes,bool loop);
     Curve3D(const param& param,int N = 100,bool loop = false);
     virtual void initPolyscope() override;
+};
+
+struct Plot {
+    using Curve3DPtr = std::shared_ptr<Curve3D>;
+    static Curve3DPtr Add(const scalar_function& f,scalar x0,scalar x1,const Vec2& size,const vec& anchor,int N = 100);
 };
 
 }

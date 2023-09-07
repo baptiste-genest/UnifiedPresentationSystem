@@ -54,6 +54,7 @@ using Animation = std::function<void(TimeTypeSec,const StateInSlide&)>;
 using index = size_t;
 
 using scalar = double;
+using scalars = std::vector<scalar>;
 constexpr scalar TAU = 2*M_PI;
 using vec = Eigen::Vector<scalar,3>;
 using vec2 = Eigen::Vector<scalar,2>;
@@ -83,6 +84,7 @@ using Primitives = std::set<PrimitiveID>;
 
 using param = std::function<vec(scalar)>;
 using mapping = std::function<vec(const vec&)>;
+using scalar_function = std::function<scalar(scalar)>;
 using time_mapping = std::function<vec(const vec&,TimeTypeSec)>;
 
 }

@@ -43,6 +43,11 @@ inline TexObject transpose(const TexObject& A) {
     return A + "^t";
 }
 
+inline TexObject text(const TexObject& A) {
+    return "\\text{" + A + "}";
+}
+
+
 inline TexObject center(const TexObject& A) {
     return "\\begin{center} \n" + A + "\n\\end{center}";
 }
@@ -98,6 +103,23 @@ TexObject Vec(ARGS... arguments) {
     (data.emplace_back(arguments), ...);
     return Vec(data);
 }
+
+inline TexObject cases(const std::vector<TexObject>& texs) {
+    TexObject rslt = "\\begin{cases}\n";
+    for (int i= 0;i<texs.size();i+=2)
+        rslt += texs[i] + " ,&\\quad " + texs[i+1] + " \\\\";
+    rslt += "\\end{cases}";
+    return rslt;
+}
+
+template <typename... ARGS>
+TexObject cases(ARGS... arguments) {
+    std::vector<TexObject> data;
+    data.reserve(sizeof...(arguments));
+    (data.emplace_back(arguments), ...);
+    return cases(data);
+}
+
 
 template <int col,int row>
 inline TexObject Mat(const std::vector<TexObject>& texs) {

@@ -16,6 +16,9 @@ public:
     Mesh(const vecs &vertices,const vecs& original_vertices, const Faces &faces);
 
     static MeshPtr Add(const std::string& objfile,const vec& scale = vec(1.,1.,1.));
+    static MeshPtr Add(const std::string& objfile,scalar scale){
+        return Add(objfile,vec::Ones()*scale);
+    }
 
     MeshPtr apply(const mapping& phi) const;
     MeshPtr applyDynamic(const time_mapping& phi) const;

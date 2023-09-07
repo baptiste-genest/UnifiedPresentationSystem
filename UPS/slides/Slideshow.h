@@ -53,7 +53,9 @@ public:
     }
 
     struct in_next_frame{};
-    struct new_frame{};
+    struct new_frame{
+        bool same_title = false;
+    };
 
     inline Slideshow& operator<<(const Slide& S) {
         addSlide(S);
@@ -66,8 +68,14 @@ public:
         return *this;
     }
 
-    inline Slideshow& operator<<(new_frame) {
+    inline Slideshow& operator<<(new_frame nf) {
         slides.push_back(Slide());
+        if (nf.same_title){
+            int i = slides.size()-2;
+            auto ex = slides[i].exclusive_prim;
+            if (ex != -1)
+                addToLastSlide(Primitive::get(ex),slides[i-1][ex]);
+        }
         return *this;
     }
     
@@ -207,6 +215,7 @@ private:
 
 constexpr Slideshow::in_next_frame inNextFrame;
 constexpr Slideshow::new_frame newFrame;
+constexpr Slideshow::new_frame newFrameSameTitle{true};
 
 }
 
