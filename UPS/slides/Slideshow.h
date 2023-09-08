@@ -52,6 +52,10 @@ public:
         slides.back().add(ptr,sis);
     }
 
+    PrimitiveInSlide& lastPrimitiveInserted() {
+        return last_primitive_inserted;
+    }
+
     struct in_next_frame{};
     struct new_frame{
         bool same_title = false;

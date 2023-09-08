@@ -1,6 +1,11 @@
 #ifndef IO_H
 #define IO_H
 #include "../UPS.h"
+#include "geometrycentral/surface/vertex_position_geometry.h"
+#include "geometrycentral/surface/meshio.h"
+#include <iostream>
+#include<Eigen/Dense>
+#include<fstream>
 
 #include <fstream>
 
@@ -12,9 +17,6 @@ inline bool file_exists(std::string filename) {
     return std::ifstream(filename).good();
 }
 
-#include <iostream>
-#include<Eigen/Dense>
-#include<fstream>
 
 using namespace std;
 using namespace Eigen;
@@ -31,6 +33,22 @@ inline bool MatrixCache(std::string file,Mat& M){
     }
     return false;
 }
+
+
+struct GeometryCentralMesh {
+    std::unique_ptr<geometrycentral::surface::ManifoldSurfaceMesh> mesh;
+    std::unique_ptr<geometrycentral::surface::VertexPositionGeometry> position_geometry;
+    GeometryCentralMesh() {
+    }
+
+    void init(std::string filename) {
+        std::tie(mesh, position_geometry) = geometrycentral::surface::readManifoldSurfaceMesh(filename);
+    }
+    GeometryCentralMesh(std::string filename) {
+        init(filename);
+    }
+
+};
 
 }
 

@@ -16,7 +16,7 @@ UPS::Slideshow show(true);
 PrimitiveID explorer_id;
 
 vec point_explore(scalar t) {
-    return vec(cos(t),sin(t),0)*0.1;
+    return vec(cos(t),sin(t),0)*0.2;
 }
 
 vec phi(vec x) {
@@ -150,6 +150,34 @@ Mat EigenLaplace() {
     return Eig;
 }
 
+Vec LapHeight(){
+    Mat LH;
+    std::string cache = UPS_prefix + "cache/lap_height.csv";
+    if (io::MatrixCache(cache,LH))
+        return LH;
+
+
+    std::unique_ptr<geometrycentral::surface::ManifoldSurfaceMesh> mesh;
+    std::unique_ptr<geometrycentral::surface::VertexPositionGeometry> position_geometry;
+    std::tie(mesh, position_geometry) = geometrycentral::surface::readManifoldSurfaceMesh(UPS_prefix + "meshes/mountain.obj");
+    geometrycentral::surface::ExtrinsicGeometryInterface& geometry = *position_geometry;
+    geometry.requireCotanLaplacian();
+    geometry.requireVertexLumpedMassMatrix();
+
+    Vec H(mesh->nVertices());
+    for (const auto& v : mesh->vertices())
+        H(v.getIndex()) = position_geometry->inputVertexPositions[v][1];
+
+    auto N = mesh->nVertices();
+    //SMat I(N,N);
+    //I.setIdentity();
+    SMat L = geometry.cotanLaplacian;// + 1e-5*I;
+    LH = L*H;
+    //LH = geometrycentral::solveSquare(geometry.vertexLumpedMassMatrix,(Vec)LH.col(0));
+    io::SaveMatrix(cache,LH);
+    return LH;
+}
+
 void init () {
 
     const auto& SHOW = show;
@@ -161,6 +189,7 @@ void init () {
     auto bunny = Mesh::Add(UPS_prefix + "meshes/bunny.obj");
     auto bunny_coarse = Mesh::Add(UPS_prefix + "meshes/bunny_coarse.obj");
     auto human = Mesh::Add(UPS_prefix + "meshes/human.obj",0.2);
+    auto mountain = Mesh::Add(UPS_prefix + "meshes/mountain.obj",0.1);
     polyscope::view::resetCameraToHomeView();
 
     auto arrow = Formula::Add("\\longrightarrow");
@@ -177,11 +206,12 @@ void init () {
         show << "Taylor";
         show << PlaceBelow(Formula::Add("f(x+h) = f(x) + f'(x) h + f''(x) \\frac{h^2}{2}  + o(h^2)"),0.05);
         show << inNextFrame << PlaceBelow(Formula::Add("f(x+h) = f(x) + h^t \\nabla f(x) + \\frac{1}{2} h^t H_f(x)h + o(||h||^2)"),0.01);
-        auto plot = grid->apply(phi);
+        auto plot = grid->apply(phi,false);
         show << inNextFrame << plot;//->at(0.5);
         auto explorer = Point::Add(point_explore,0.1)->apply(phi);
         show << explorer;
         explorer_id = explorer->pid;
+        show << CameraView::Add(vec(0,-3,3.5),vec(0,0,1),vec::UnitZ());
 
         auto S1 = show.getCurrentSlide();
         show << S1 << disk->applyDynamic(taylor1);
@@ -226,19 +256,14 @@ void init () {
             << point_param->apply(offset)
             << point_param->apply(sphere_offset);
 
-        auto paramdef = Latex::Add(tex::center(
-                    "Une \\textit{paramétrisation} est une fonction $\\varphi$\n" +
-                    tex::equation("\\varphi : \\mathbb{R}^2 \\longrightarrow \\mathcal{M}")
-                    ));
-        show << inNextFrame << paramdef->at(0.5,0.8);
+        show << PlaceRight(Formula::Add("\\varphi(x,y) = " + tex::Vec("sin(x)cos(y)","sin(x)sin(y)","cos(x)")),0.3,0.1);
 
         {
             StateInSlide t = arrowp.second;
             t.angle = M_PI;
 
             show << inNextFrame >> title << Title("Paramétrisation inverse ?")->at(TOP) << arrow->at(t);
-            show << newFrame <<
-                Title("Vecteurs tangents")->at(TOP) << manifold << mani->at(0.7);
+            show << newFrame << Title("Vecteurs tangents")->at(TOP) << manifold << mani->at(0.7);
             auto P = Point::Add(vec(0,0,0));
             auto step = [] (scalar t) {
                 return periodic01(0.3*t)*0.3+0.01;
@@ -315,6 +340,7 @@ void init () {
         {
             std::string J = "J_{\\varphi}(p)";
             show << newFrame;// << Title("Tenseur métrique");
+            show << "metric";
             auto dot = Formula::Add("u \\cdot v = u^t v")->at(0.5,0.4);
             show << dot;
             auto Jdot = Formula::Add(J + "u \\cdot " + J + " v = ("+ J + "u)^t" + J + "v");
@@ -335,8 +361,8 @@ void init () {
             show << PolyscopeQuantity<polyscope::SurfaceVertexScalarQuantity>::Add(gplot);
             show << inNextFrame;
             for (int i = 0;i<6;i++){
-                vec p = point_explore(polyscope::randomUnit()*M_PI*2)*5;
-                vec q = point_explore(polyscope::randomUnit()*M_PI*2)*5;
+                vec p = point_explore(polyscope::randomUnit()*M_PI*2)*2.5;
+                vec q = point_explore(polyscope::randomUnit()*M_PI*2)*2.5;
                 auto gamma = [q,p](scalar t){
                     t = periodic01(t*0.15)*15;
                     vec rslt = hyperbolic_geodesic(q,p,t-5.)*0.5;
@@ -360,6 +386,7 @@ void init () {
         auto bco =bunny_coarse;
         bco->pc->setEdgeWidth(1.);
         bco->pc->setSmoothShade(false);
+        show << "rpz";
         show << bco;
         auto bunny_pc = PointCloud::Add(bunny_coarse->getVertices());
         auto bunny_pco = bunny_pc->apply(offset(vec(-off,0,0)));
@@ -384,6 +411,13 @@ void init () {
         show << PlaceBelow(Formula::Add("\\partial (f + g) = \\partial f + \\partial g")) << inNextFrame << PlaceRelative(Formula::Add(tex::AaboveB("?","\\longrightarrow"),0.06),UPS::CENTER_X,SAME_Y);
         show << inNextFrame << PlaceRight(Latex::Add(tex::center("Opérateurs différentiels discrets")));
         show << PlaceBelow(Formula::Add("AX"));
+
+        show << newFrame << Title("Récap 2")->at(TOP);
+        show << inNextFrame << PlaceLeft(Latex::Add("Représentation par maillage : information géométrique et topologique (graphe)"),0.4);
+        show << inNextFrame << PlaceRelative(Latex::Add("Adapté à la mesure de données réelles"),ABS_LEFT,REL_BOTTOM,0.1);
+        show << inNextFrame << PlaceRelative(Latex::Add("Fonction sur graphe $\\iff$ Vecteur"),ABS_LEFT,REL_BOTTOM,0.1);
+        show << inNextFrame << PlaceRelative(Latex::Add("Opérateurs différentiels $\\iff$ Matrice"),ABS_LEFT,REL_BOTTOM,0.1);
+        //show << inNextFrame << PlaceRelative(Latex::Add("Tenseur métrique : changement dans le calul des angles et longueur sur la surface"),ABS_LEFT,REL_BOTTOM,0.1);
     }
 
     {
@@ -435,9 +469,21 @@ void init () {
 
 
         {
-            show << newFrame << Title("Applications du laplacien");
+            auto titlelap = Title("Applications du laplacien");
+            show << newFrame << titlelap;
+            mountain->setSmooth(true);
+            show << inNextFrame << TOP << PlaceBelow(Latex::Add("Analyse de hauteur",0.05));
+            auto fh = Formula::Add("f(x,y,z) = z",0.06);
+            show << PlaceBelow(fh) <<mountain << top_cam;//CameraView::Add(vec(0,-3,3.5),vec(0,0,1),vec::UnitZ());
+            auto H = mountain->eval([](const vec& x) {return x(1);});
+            auto Q = PolyscopeQuantity<polyscope::SurfaceVertexScalarQuantity>::Add(mountain->pc->addVertexScalarQuantity("H",H));
+            auto LH = LapHeight();
+            auto QL = PolyscopeQuantity<polyscope::SurfaceVertexScalarQuantity>::Add(mountain->pc->addVertexScalarQuantity("LH",LH));
+            QL->q->setColorMap("jet");
+            show << Q << inNextFrame >> Q << QL << Formula::Add("\\Delta f",0.06)->at(0.8,0.4);
+
             auto cam = CameraView::Add(vec(-0.5,2,9),vec(-0.5,2,0),vec::UnitY());
-            show << newFrameSameTitle << TOP << PlaceBelow(Latex::Add("Problème de Poisson",0.05));
+            show << newFrameSameTitle << PlaceBelow(Latex::Add("Problème de Poisson",0.05));
             show << PlaceBelow(Formula::Add("\\Delta u = y",0.06),0.1);
             show << PlaceLeft(Formula::Add("y",0.05),0.35,0.3);
             UPS::Mat C = illustratePoissonProblem();
@@ -454,27 +500,12 @@ void init () {
             show << inNextFrame << Formula::Add(tex::AaboveB("\\Delta^{-1}","\\longrightarrow"),0.06);
             show << bunnyX << QX;
             show << PlaceRight(Formula::Add("u",0.05),0.35,0.3);
-            show << newFrameSameTitle << PlaceBelow(Latex::Add("Energie de Dirichlet",0.05));
+
+            {
+
+            show << newFrameSameTitle  << PlaceBelow(Latex::Add("Energie de Dirichlet",0.05));
             show << inNextFrame << PlaceBelow(Formula::Add("E(f) = \\int_\\Omega ||\\nabla f||^2 dx",0.07),0.1);
-
-            show << newFrameSameTitle << PlaceBelow(Latex::Add("Décomposition spectrale",0.05));
-            show << PlaceBelow(Formula::Add("\\Delta u = \\lambda u",0.07),0.1);
-            auto cam2 = CameraView::Add(vec(-0.5,4,12),vec(-0.5,4,0),vec::UnitY());
-            show << inNextFrame << cam2;
-            auto eig = EigenLaplace();
-            for (int i = 0;i<eig.cols();i++){
-                auto human_eig = human->apply(offset(vec(-6 + 3*i,0,0)));
-                human_eig->setSmooth(true);
-                auto E = PolyscopeQuantity<polyscope::SurfaceVertexScalarQuantity>::Add(human_eig->pc->addVertexScalarQuantity("eig",eig.col(i)));
-                show << human_eig << E;
-            }
-
-
-        }
-    }
-
-    if (false)
-    {
+{
         show << "gradient";
         auto f = [](const vec& X) {
             auto x = X(0);auto y = X(1);
@@ -490,7 +521,7 @@ void init () {
         auto GF = grid->eval(gradf);
 
         using namespace tex;
-        auto title = Title("Retour sur le gradient : $\\nabla$");
+        auto title = Title("Rappel(?) sur le gradient : $\\nabla$");
         show << newFrame << title->at(CENTER);
         show << inNextFrame << title->at(TOP);
         auto grad = Formula::Add("\\nabla f(x,y) = " + tex::Vec(frac("\\partial f","\\partial x")+"(x,y)",frac("\\partial f","\\partial y")+"(x,y)"));
@@ -514,17 +545,56 @@ void init () {
         show << inNextFrame << PlaceRight(Formula::Add("\\nabla f(x,y) = "+ tex::Vec("x","y")),0.5);
         show << PolyscopeQuantity<polyscope::SurfaceVertexVectorQuantity>::Add(gfval);
 
+        auto N = 100;
+        vecs GD(N);GD[0] = vec(1,1,0);
+        for (int i = 1;i<N;i++)
+            GD[i] = GD[i-1] - 0.1*gradf(GD[i-1]);
+        show << inNextFrame << PointCloud::Add(GD);
+        Primitive::get<PointCloud>(show.lastPrimitiveInserted().first->pid)->pc->setPointRadius(0.02,false);
+        show >> grad << Title("Descente de gradient")->at(TOP) << PlaceBelow(Formula::Add("x_{n+1} = x_{n} - \\tau \\nabla f(x_n)"));
 
     }
+
+{
+            show << newFrame  << Title("Minimiser l'énergie de Dirichlet")->at(TOP);
+            show << PlaceLeft(Formula::Add("E(f) = \\int_\\Omega ||\\nabla f||^2 dx",0.05),0.2,0.1);
+            show << inNextFrame << PlaceRight(Latex::Add("On peut montrer que $\\nabla E(f) = \\Delta f$",0.05),0.2,0.1);
+            show << inNextFrame << PlaceBelow(Formula::Add("f_{n+1} = f_n - \\tau \\Delta f_n",0.05));
+            auto mask_gc = io::GeometryCentralMesh(UPS_prefix + "meshes/nefertiti.obj");
+            auto mask = Mesh::Add(UPS_prefix + "meshes/nefertiti.obj");
+            mask->setSmooth(false);
+}
+            }
+
+
+
+            {
+            show << newFrame << titlelap->at(TOP) << PlaceBelow(Latex::Add("Décomposition spectrale",0.05));
+            show << PlaceBelow(Formula::Add("\\Delta u = \\lambda u",0.07),0.05);
+            show << inNextFrame <<PlaceBelow(Formula::Add("\\Delta (e^{ix}) = -e^{ix}",0.05));
+            auto cam2 = CameraView::Add(vec(-0.5,4,12),vec(-0.5,4,0),vec::UnitY());
+            show << inNextFrame << cam2;
+            auto eig = EigenLaplace();
+            for (int i = 0;i<eig.cols();i++){
+                auto human_eig = human->apply(offset(vec(-6 + 3*i,0,0)));
+                human_eig->setSmooth(true);
+                auto E = PolyscopeQuantity<polyscope::SurfaceVertexScalarQuantity>::Add(human_eig->pc->addVertexScalarQuantity("eig",eig.col(i)));
+                show << human_eig << E;
+            }
+            }
+
+        }
+    }
+
 
 }
 
 
 
 int main(int argc,char** argv) {
-    //show.init(UPS_prefix + "../scripts/course_MG.txt");
+    show.init(UPS_prefix + "../scripts/course_MG.txt");
     std::tie(mesh, position_geometry) = geometrycentral::surface::readManifoldSurfaceMesh(UPS_prefix + "meshes/bunny_coarse.obj");
-    show.init();
+    //show.init();
     init();
 
     polyscope::state::userCallback = [](){

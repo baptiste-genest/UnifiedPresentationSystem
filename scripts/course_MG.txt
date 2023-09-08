@@ -1,13 +1,22 @@
-[intro]
+[Intro]
+
+pas un cours de maths
+interompez moi si questions
+
+
+opérateurs différentiels : outils pour rendre algorithmique une intuition
+géométrique.
+
 
 Traitement de la géométrie : analyse et synthèse.
 
-diagramme de Venn:
 maths pures : grandes notions, théorème, monde des idées, aucune limite
 maths appliquées : rendre ces notions calculables en pratique
 informatique : le faire de manière efficace et surtout réutilisable par d'autres -> génie logiciel
 
-[taylor]
+[Taylor]
+
+imaginez que vous êtes aveugle et que vous pouvez juste calculer le gradient de la surface
 
 approximation polynomiale d'une fonction/surface plus complexe
 
@@ -17,23 +26,27 @@ idée des approches différentielles : exploration des surfaces par approximatio
 
 [manifold]
 
-dérivée de la paramétrisation 
-par rapport à x : premier vecteur tangent
-par rapport à y : deuxieme "" "" 
-plan généré par les deux : plan tangent à la surface en x
-
 idée importante : l'espace tangent dépend de l'endroit à l'on se trouve, des vecteurs intrinseques dépendent du point de support, pas comparable comme tel.
 
 Pour aller plus loin : connexion, dépend du chemin, etc...
 
 De manière générale, si on a un vecteur dans l'espace des paramètres, il est transformé par la jacobienne de la param
 
-regardons évolution du produit scalaire, u^t v -> u^t J^tJ v -> J^tJ = g tenseur métrique
--> la manière dont on mesure les angles et les longueurs dépend du point où on se trouve
-
 [metric]
 
 exemple : disque de poincaré -> relativité générale
+
+NOTION INTRINSEQUE
+
+[rpz]
+
+nuage de points -> que géométrique
+paramétrisation ou implicite -> représentation trop rigide et pas adaptée au monde réelle (mesure discrète - surface continue implicite)
+maillage -> compromis, adapté au calcul
+
+fonction -> vecteur de valeurs, première coordonnées, premier sommet etc...
+
+fonction de position PLONGEMENT
 
 [curvature]
 
