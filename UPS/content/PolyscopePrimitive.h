@@ -7,6 +7,9 @@
 
 namespace UPS {
 
+
+
+
 template<class T>
 class PolyscopeQuantity : public Primitive
 {
@@ -27,6 +30,11 @@ public:
     void outro(const TimeObject& t, const StateInSlide &sis) override {q->setEnabled(false);}
     void forceDisable() override {q->setEnabled(false);}
 };
+
+template<class T>
+static PolyscopeQuantity<T>::PCQuantityPtr AddPolyscopeQuantity(T* ptr) {
+    return PolyscopeQuantity<T>::Add(ptr);
+}
 
 template<>
 class PolyscopeQuantity<polyscope::SurfaceVertexVectorQuantity> : public Primitive
@@ -62,6 +70,11 @@ public:
     }
     void forceDisable() override {q->setEnabled(false);}
 };
+
+template<>
+PolyscopeQuantity<polyscope::SurfaceVertexVectorQuantity>::PCQuantityPtr AddPolyscopeQuantity(polyscope::SurfaceVertexVectorQuantity* ptr) {
+    return PolyscopeQuantity<polyscope::SurfaceVertexVectorQuantity>::Add(ptr);
+}
 
 
 class PolyscopePrimitive : public Primitive

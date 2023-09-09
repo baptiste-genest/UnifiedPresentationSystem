@@ -484,7 +484,7 @@ void init () {
             auto gplot = disk->pc->addVertexScalarQuantity("norm",gval);
             gplot->setColorMap("coolwarm");
             show << inNextFrame << Formula::Add("g(z) = " + tex::frac("1",tex::pow("(1-||z||^2)","2")) + tex::Mat<2,2>("1","0","0","1"))->at(0.5,0.3);
-            show << PolyscopeQuantity<polyscope::SurfaceVertexScalarQuantity>::Add(gplot);
+            show << AddPolyscopeQuantity(gplot);
             show << inNextFrame;
             for (int i = 0;i<6;i++){
                 vec p = point_explore(polyscope::randomUnit()*M_PI*2)*2.5;
@@ -528,7 +528,7 @@ void init () {
         auto F = Vec::Random(bunny_pc->getPoints().size());
         auto bpc = DuplicatePrimitive(bunny_pc);
         bpc->pc->setPointRadius(0.03,false);
-        auto Fq = PolyscopeQuantity<polyscope::PointCloudScalarQuantity>::Add(bpc->pc->addScalarQuantity("V0000",F));
+        auto Fq = AddPolyscopeQuantity(bpc->pc->addScalarQuantity("V0000",F));
         show <<  bpc << Fq;
         show << inNextFrame << PlaceRight(Formula::Add(tex::Vec("1.21","0.32", "\\vdots", "5.2","3.24"),0.05),0.6,0.1);
     }
@@ -585,7 +585,8 @@ void init () {
             UPS::Vec fem_basis = UPS::Vec::Zero(diskverycoarse->getVertices().size());
             auto i = rand()%diskverycoarse->getVertices().size();
             fem_basis(i) = 1;
-            auto Q = PolyscopeQuantity<polyscope::SurfaceVertexScalarQuantity>::Add(diskverycoarse->pc->addVertexScalarQuantity("FEM",fem_basis));
+            //auto Q = PolyscopeQuantity<polyscope::SurfaceVertexScalarQuantity>::Add(diskverycoarse->pc->addVertexScalarQuantity("FEM",fem_basis));
+            auto Q = AddPolyscopeQuantity(diskverycoarse->pc->addVertexScalarQuantity("FEM",fem_basis));
             show << top_cam << diskverycoarse << Q;
             vecs V = diskverycoarse->getVertices();
             V[i] = vec(V[i](0),V[i](1),0.3);
@@ -607,9 +608,9 @@ void init () {
             auto fh = Formula::Add("f(x,y,z) = z",0.06);
             show << PlaceBelow(fh) <<mountain << top_cam;//CameraView::Add(vec(0,-3,3.5),vec(0,0,1),vec::UnitZ());
             auto H = mountain->eval([](const vec& x) {return x(1);});
-            auto Q = PolyscopeQuantity<polyscope::SurfaceVertexScalarQuantity>::Add(mountain->pc->addVertexScalarQuantity("H",H));
+            auto Q = AddPolyscopeQuantity(mountain->pc->addVertexScalarQuantity("H",H));
             auto LH = LapHeight();
-            auto QL = PolyscopeQuantity<polyscope::SurfaceVertexScalarQuantity>::Add(mountain->pc->addVertexScalarQuantity("LH",LH));
+            auto QL = AddPolyscopeQuantity(mountain->pc->addVertexScalarQuantity("LH",LH));
             QL->q->setColorMap("jet");
             show << Q << inNextFrame >> Q << QL << Formula::Add("\\Delta f",0.06)->at(0.8,0.4);
 
@@ -656,9 +657,9 @@ void init () {
                 auto gfval = grid_edge->pc->addVertexVectorQuantity("V000",GF);
                 gfval->setVectorRadius(0.01,false);
 
-                show << PolyscopeQuantity<polyscope::SurfaceVertexScalarQuantity>::Add(fval);
+                show << AddPolyscopeQuantity(fval);
                 show << inNextFrame << PlaceRight(Formula::Add("\\nabla f(x,y) = "+ tex::Vec("x","y")),0.5);
-                show << PolyscopeQuantity<polyscope::SurfaceVertexVectorQuantity>::Add(gfval);
+                show << AddPolyscopeQuantity(gfval);
 
                 auto N = 100;
                 vecs GD(N);GD[0] = vec(1,1,0);
@@ -709,8 +710,8 @@ void init () {
                 auto bunnyX = DuplicatePrimitive(bunny_coarse)->apply(offset(off));
                 bunnyX->pc->setSmoothShade(false);
                 bunnyX->pc->setEdgeWidth(1.);
-                auto QY = PolyscopeQuantity<polyscope::SurfaceVertexScalarQuantity>::Add(bunnyY->pc->addVertexScalarQuantity("Y",C.col(0)));
-                auto QX = PolyscopeQuantity<polyscope::SurfaceVertexScalarQuantity>::Add(bunnyX->pc->addVertexScalarQuantity("X",C.col(1)));
+                auto QY = AddPolyscopeQuantity(bunnyY->pc->addVertexScalarQuantity("Y",C.col(0)));
+                auto QX = AddPolyscopeQuantity(bunnyX->pc->addVertexScalarQuantity("X",C.col(1)));
                 show << cam << bunnyY << QY;
                 show << inNextFrame << Formula::Add(tex::AaboveB("\\Delta^{-1}","\\longrightarrow"),0.06);
                 show << bunnyX << QX;
@@ -737,7 +738,7 @@ void init () {
                 for (int i = 0;i<eig.cols();i++){
                     auto human_eig = human->apply(offset(vec(-6 + 3*i,0,0)));
                     human_eig->setSmooth(true);
-                    auto E = PolyscopeQuantity<polyscope::SurfaceVertexScalarQuantity>::Add(human_eig->pc->addVertexScalarQuantity("eig",eig.col(i)));
+                    auto E = AddPolyscopeQuantity(human_eig->pc->addVertexScalarQuantity("eig",eig.col(i)));
                     show << human_eig << E;
                 }
             }
@@ -781,7 +782,7 @@ void init () {
         for (int i = 0;i<K.cols();i++){
             auto macaca_K = macaca->apply(offset(vec(-3 + 2*i,0,0)),true);
             auto q = macaca_K->pc->addVertexScalarQuantity("curvature",K.col(i));//.unaryExpr(LM));
-            auto E = PolyscopeQuantity<polyscope::SurfaceVertexScalarQuantity>::Add(q);
+            auto E = AddPolyscopeQuantity(q);
             q->setColorMap("jet");
             show << macaca_K << E;
         }
