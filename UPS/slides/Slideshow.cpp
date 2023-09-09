@@ -22,7 +22,7 @@ void UPS::Slideshow::previousFrame()
     current_slide--;
     for (auto& s : slides[current_slide]){
         auto p = Primitive::get(s.first);
-        p->intro(1.,s.second);
+        p->intro(TimeObject(p->getInnerTime(),1),s.second);
     }
     from_action = Time::now();
     backward = true;
@@ -40,7 +40,7 @@ void UPS::Slideshow::forceNextFrame()
     current_slide++;
     for (auto& s : slides[current_slide]){
         auto p = Primitive::get(s.first);
-        p->intro(1.,s.second);
+        p->intro(TimeObject(p->getInnerTime(),1),s.second);
     }
     from_action = Time::now();
     backward = false;
@@ -58,16 +58,16 @@ void UPS::Slideshow::play() {
 
     auto& CS = slides[current_slide];
 
-    TimeObject tobj = getTimeObject();
-
     setInnerTime();
 
     bool triggerIT = false;
 
+    TimeObject T = getTimeObject();
+
     if (backward || !locked) {
         locked = false;
         for (auto s : CS)
-            Primitive::get(s.first)->play(tobj,CS[s.first]);
+            Primitive::get(s.first)->play(T,CS[s.first]);
     }
     else {
         if (current_slide > 0){
@@ -78,33 +78,37 @@ void UPS::Slideshow::play() {
                     auto st = transition(0.5*t/transitionTime,
                                          PS[c],
                                          CS[c]);
-                    Primitive::get(c)->play(tobj,st);
+                    Primitive::get(c)->play(T,st);
                 }
-                if (t < transitionTime)
-                    for (auto ua : UA)
-                        Primitive::get(ua)->outro(t/transitionTime,PS[ua]);
+                if (t < transitionTime){
+                    T.transitionParameter = t/transitionTime;
+                    for (auto ua : UA){
+                        auto p = Primitive::get(ua);
+                        p->outro(T(t/transitionTime),PS[ua]);
+                    }
+                }
                 else {
                     handleTransition();
                     for (auto ub : UB){
-                        Primitive::get(ub)->intro(t/transitionTime-1.,CS[ub]);
+                        Primitive::get(ub)->intro(T(t/transitionTime-1.),CS[ub]);
                     }
                 }
             }
             else {
                 for (auto& s : CS)
-                    Primitive::get(s.first)->play(tobj,CS[s.first]);
+                    Primitive::get(s.first)->play(T,CS[s.first]);
                 locked = false;
             }
         }
         else {
             if (t < transitionTime){
                 for (auto s : CS){
-                    Primitive::get(s.first)->intro(t/transitionTime,CS[s.first]);
+                    Primitive::get(s.first)->intro(T(t/transitionTime),CS[s.first]);
                 }
             }
             else {
                 for (auto s : CS)
-                    Primitive::get(s.first)->play(tobj,CS[s.first]);
+                    Primitive::get(s.first)->play(T,CS[s.first]);
                 locked = false;
             }
         }
@@ -183,9 +187,10 @@ void UPS::Slideshow::precomputeTransitions()
     if (debug){
         current_slide = slides.size()-1;
         for (auto& s : slides.back()){
-            Primitive::get(s.first)->forceEnable();
-            Primitive::get(s.first)->handleInnerTime();
-            Primitive::get(s.first)->intro(1.,s.second);
+            auto p = Primitive::get(s.first);
+            p->forceEnable();
+            p->handleInnerTime();
+            p->intro(TimeObject(p->getInnerTime(),1),s.second);
         }
     }
 }
@@ -227,7 +232,7 @@ void UPS::Slideshow::init(std::string script_file)
     if (!script_file.empty())
         setScriptFile(script_file);
     polyscope::init();
-    polyscope::options::buildGui = false;
+    //polyscope::options::buildGui = false;
     polyscope::options::autocenterStructures = false;
     polyscope::options::autoscaleStructures = false;
     polyscope::options::groundPlaneEnabled = false;

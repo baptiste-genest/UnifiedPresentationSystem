@@ -85,7 +85,8 @@ using Primitives = std::set<PrimitiveID>;
 using param = std::function<vec(scalar)>;
 using mapping = std::function<vec(const vec&)>;
 using scalar_function = std::function<scalar(scalar)>;
-using time_mapping = std::function<vec(const vec&,TimeTypeSec)>;
+struct TimeObject;
+using time_mapping = std::function<vec(const vec&,const TimeObject&)>;
 
 }
 

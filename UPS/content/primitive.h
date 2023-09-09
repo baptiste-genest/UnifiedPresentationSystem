@@ -25,9 +25,9 @@ using PrimitiveInSlide = std::pair<PrimitivePtr,StateInSlide>;
 struct Primitive {
 
     using Size = ImVec2;
-    using Updater = std::function<void(TimeTypeSec,PrimitiveID)>;
+    using Updater = std::function<void(TimeObject,Primitive*)>;
 
-    Updater updater = [] (TimeTypeSec,PrimitiveID) {};
+    Updater updater = [] (TimeObject,Primitive*) {};
 
     PrimitiveID pid;
     static std::vector<PrimitivePtr> primitives;
@@ -49,7 +49,7 @@ struct Primitive {
         return {get(pid),sis};
     }
     inline std::pair<PrimitivePtr,StateInSlide> at(scalar x,scalar y) {
-        return {get(pid),ImVec2{x,y}};
+        return {get(pid),ImVec2(x,y)};
     }
     inline std::pair<PrimitivePtr,StateInSlide> at(scalar alpha) {
         StateInSlide sis;
@@ -68,13 +68,14 @@ struct Primitive {
     }
 
     void play(const TimeObject& t,const StateInSlide& sis) {
-        draw(t,sis);
-        updater(getInnerTime(),pid);
+        auto it = t(this);
+        draw(it,sis);
+        updater(it,this);
     }
 
     virtual void draw(const TimeObject& time,const StateInSlide& sis) = 0;
-    virtual void intro(parameter t,const StateInSlide& sis) = 0;
-    virtual void outro(parameter t,const StateInSlide& sis) = 0;
+    virtual void intro(const TimeObject& t,const StateInSlide& sis) = 0;
+    virtual void outro(const TimeObject& t,const StateInSlide& sis) = 0;
     virtual void forceDisable() {};
     virtual void forceEnable() {};
     virtual Size getSize() const {return Size();}

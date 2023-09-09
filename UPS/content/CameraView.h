@@ -21,8 +21,8 @@ public:
     // Primitive interface
 public:
     void draw(const TimeObject &time, const StateInSlide &sis) override {}
-    void intro(parameter, const StateInSlide &) override {    }
-    void outro(parameter t, const StateInSlide &sis) override {    }
+    void intro(const TimeObject&, const StateInSlide &) override {    }
+    void outro(const TimeObject&, const StateInSlide &sis) override {    }
     virtual void forceEnable() override {
         polyscope::view::lookAt(from,to,up,flyTo);
     }

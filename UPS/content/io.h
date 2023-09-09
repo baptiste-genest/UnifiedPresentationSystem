@@ -40,14 +40,16 @@ struct GeometryCentralMesh {
     std::unique_ptr<geometrycentral::surface::VertexPositionGeometry> position_geometry;
     GeometryCentralMesh() {
     }
-
     void init(std::string filename) {
         std::tie(mesh, position_geometry) = geometrycentral::surface::readManifoldSurfaceMesh(filename);
     }
     GeometryCentralMesh(std::string filename) {
         init(filename);
     }
-
+    vec getPos(geometrycentral::surface::Vertex v) const {
+        const auto& x = position_geometry->vertexPositions[v];
+        return vec(x[0],x[1],x[2]);
+    }
 };
 
 }

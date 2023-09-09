@@ -16,23 +16,23 @@ UPS::Mesh::MeshPtr UPS::Mesh::Add(const std::string &objfile,const vec& scale,bo
     return rslt;
 }
 
-UPS::Mesh::MeshPtr UPS::Mesh::apply(const mapping &phi,bool smooth) const
+UPS::Mesh::MeshPtr UPS::Mesh::apply(const VertexMap &phi,bool smooth) const
 {
     auto Vphi = vertices;
-    for (auto& x : Vphi)
-        x = phi(x);
+    for (int i = 0;i<Vphi.size();i++)
+        Vphi[i] = phi({Vphi[i],i});
     MeshPtr rslt = NewPrimitive<Mesh>(Vphi,original_vertices,faces,smooth);
     return rslt;
 }
 
-UPS::Mesh::MeshPtr UPS::Mesh::applyDynamic(const time_mapping &phi,bool smooth) const
+UPS::Mesh::MeshPtr UPS::Mesh::applyDynamic(const VertexTimeMap &phi,bool smooth) const
 {
     MeshPtr rslt = NewPrimitive<Mesh>(vertices,original_vertices,faces,smooth);
-    rslt->updater = [phi] (TimeTypeSec t,PrimitiveID id) {
-        auto M = Primitive::get<Mesh>(id);
+    rslt->updater = [phi] (const TimeObject& t,Primitive* ptr) {
+        auto M = Primitive::get<Mesh>(ptr->pid);
         auto V = M->original_vertices;
-        for (auto& x : V)
-            x = phi(x,t);
+        for (int i = 0;i<V.size();i++)
+            V[i] = phi({V[i],i},t);
         M->updateMesh(V);
     };
     return rslt;

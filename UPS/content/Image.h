@@ -35,8 +35,8 @@ static void ImageRotated(ImTextureID tex_id, ImVec2 center, ImVec2 size, float a
     // Primitive interface
 public:
     void draw(const TimeObject&, const StateInSlide &sis) override;
-    void intro(parameter t, const StateInSlide &sis) override;
-    void outro(parameter t, const StateInSlide &sis) override;
+    void intro(const TimeObject& t, const StateInSlide &sis) override;
+    void outro(const TimeObject& t, const StateInSlide &sis) override;
     Size getSize() const override {return Size(width,height);}
 };
 

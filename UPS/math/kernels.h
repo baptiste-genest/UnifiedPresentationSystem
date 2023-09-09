@@ -4,6 +4,9 @@
 #include "../UPS.h"
 
 namespace UPS {
+template <typename T> int sgn(T val) {
+    return (T(0) < val) - (val < T(0));
+}
 
 inline scalar periodic01(scalar t){
     return std::sin(t*TAU)*0.5 + 0.5;

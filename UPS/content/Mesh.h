@@ -11,6 +11,15 @@ namespace UPS {
 class Mesh : public PolyscopePrimitive
 {
 public:
+
+    struct Vertex {
+        vec pos;
+        int id;
+    };
+
+    using VertexTimeMap = std::function<vec(const Vertex&,const TimeObject&)>;
+    using VertexMap = std::function<vec(const Vertex&)>;
+
     using MeshPtr = std::shared_ptr<Mesh>;
     Mesh() {}
     Mesh(const vecs &vertices,const vecs& original_vertices, const Faces &faces,bool smooth = false);
@@ -20,8 +29,15 @@ public:
         return Add(objfile,vec::Ones()*scale,smooth);
     }
 
-    MeshPtr apply(const mapping& phi,bool smooth = true) const;
-    MeshPtr applyDynamic(const time_mapping& phi,bool smooth = true) const;
+    static MeshPtr Add(const vecs& V,const Faces& F,bool smooth = false){
+        return NewPrimitive<Mesh>(V,V,F,smooth);
+    }
+
+    MeshPtr apply(const VertexMap& phi,bool smooth = true) const;
+    MeshPtr apply(const mapping& phi,bool smooth = true) const {
+        return apply([phi](Vertex v){return phi(v.pos);},smooth);
+    }
+    MeshPtr applyDynamic(const VertexTimeMap& phi,bool smooth = true) const;
 
     void setSmooth(bool set);
 
@@ -34,8 +50,10 @@ public:
     polyscope::SurfaceMesh* pc;
 
     const vecs& getVertices() const {return vertices;}
+    const Faces& getFaces() const {return faces;}
 
     void updateMesh(const vecs& X);
+
 
 private:
     vecs vertices,original_vertices;

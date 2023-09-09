@@ -23,8 +23,8 @@ public :
 public:
     T* q;
     void draw(const TimeObject &time, const StateInSlide &sis) override {q->setEnabled(true);}
-    void intro(parameter t, const StateInSlide &sis) override {q->setEnabled(true);}
-    void outro(parameter t, const StateInSlide &sis) override {q->setEnabled(false);}
+    void intro(const TimeObject& t, const StateInSlide &sis) override {q->setEnabled(true);}
+    void outro(const TimeObject& t, const StateInSlide &sis) override {q->setEnabled(false);}
     void forceDisable() override {q->setEnabled(false);}
 };
 
@@ -51,13 +51,13 @@ public:
         q->setEnabled(true);
         q->setVectorLengthScale(l0,false);
     }
-    void intro(parameter t, const StateInSlide &sis) override {
-        q->setVectorLengthScale(l0*smoothstep(t),false);
+    void intro(const TimeObject& t, const StateInSlide &sis) override {
+        q->setVectorLengthScale(l0*smoothstep(t.transitionParameter),false);
         q->setEnabled(true);
     }
-    void outro(parameter t, const StateInSlide &sis) override {
-        q->setVectorLengthScale(l0*(1-smoothstep(t)),false);
-        if (t > 0.95)
+    void outro(const TimeObject& t, const StateInSlide &sis) override {
+        q->setVectorLengthScale(l0*(1-smoothstep(t.transitionParameter)),false);
+        if (t.transitionParameter > 0.95)
             q->setEnabled(false);
     }
     void forceDisable() override {q->setEnabled(false);}
@@ -84,13 +84,13 @@ public:
     void draw(const TimeObject&, const StateInSlide &sis) override {
         polyscope_ptr->setTransparency(sis.alpha);
     }
-    void intro(parameter t,const StateInSlide &sis) override {
-        polyscope_ptr->setTransparency(smoothstep(t)*sis.alpha);
-        updater(getInnerTime(),pid);
+    void intro(const TimeObject& t,const StateInSlide &sis) override {
+        polyscope_ptr->setTransparency(smoothstep(t.transitionParameter)*sis.alpha);
+        updater(t(this),this);
     }
-    void outro(parameter t,const StateInSlide &sis) override {
-        polyscope_ptr->setTransparency(smoothstep(1-t)*sis.alpha);
-        updater(getInnerTime(),pid);
+    void outro(const TimeObject& t,const StateInSlide &sis) override {
+        polyscope_ptr->setTransparency(smoothstep(1-t.transitionParameter)*sis.alpha);
+        updater(t(this),this);
     }
 
     void forceDisable() override {

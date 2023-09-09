@@ -56,9 +56,9 @@ UPS::Point::Point(const param &phi, scalar radius) : x(phi(0)),
     phi(phi),
     radius(radius)
 {
-    updater = [phi](TimeTypeSec t,PrimitiveID id){
-        auto p = Primitive::get<Point>(id);
-        p->x = phi(t);
+    updater = [phi](const TimeObject& t,Primitive* ptr){
+        auto p = Primitive::get<Point>(ptr->pid);
+        p->x = phi(t.inner_time);
         vecs X = {p->x};
         p->pc->updatePointPositions(X);
         p->updateVectors();

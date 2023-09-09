@@ -11,7 +11,7 @@
 #include "geometrycentral/numerical/linear_solvers.h"
 
 using namespace UPS;
-UPS::Slideshow show(true);
+UPS::Slideshow show(false);
 
 PrimitiveID explorer_id;
 
@@ -56,25 +56,18 @@ mat2 hessian(vec X) {
 }
 scalar zoffset = 0.02;
 
-vec taylor2(vec H,TimeTypeSec) {
+vec taylor(const Mesh::Vertex& v,TimeObject T) {
+    auto& H = v.pos;
     auto t = Primitive::get(explorer_id)->getInnerTime();
     auto x = point_explore(t);
+    vec2 h(H(0),H(1));
     auto g = gradient(x);
-    vec2 h = vec2(H(0),H(1));
+    auto p = phi(x);
+    if (T.relative_frame_number == 0)
+        return p + H + vec(0,0,g.dot(h) + zoffset);
     auto Hf = hessian(x);
-    auto p = phi(x);
-    return p + H + vec(0,0,g.dot(h) + 0.5 * h.dot(Hf*h)+zoffset);
+    return p + H + vec(0,0,g.dot(h) + zoffset + 0.5 * h.dot(Hf*h)*smoothstep(T.from_action*0.5));
 }
-
-vec taylor1(vec H,TimeTypeSec) {
-    auto t = Primitive::get(explorer_id)->getInnerTime();
-    auto x = point_explore(t);
-    auto g = gradient(x);
-    vec2 h = vec2(H(0),H(1));
-    auto p = phi(x);
-    return p + H + vec(0,0,g.dot(h) +zoffset);
-}
-
 
 using complex = std::complex<double>;
 complex toComp(const vec& x){
@@ -97,18 +90,22 @@ mapping offset(const vec& x){
     return [x] (const vec& X){return X+x;};
 }
 
+/*
 std::unique_ptr<geometrycentral::surface::ManifoldSurfaceMesh> mesh;
 std::unique_ptr<geometrycentral::surface::VertexPositionGeometry> position_geometry;
+*/
+io::GeometryCentralMesh bunnyGC;
 
 Mat illustratePoissonProblem() {
     Mat B;
     std::string cache = UPS_prefix + "cache/poisson.csv";
     if (io::MatrixCache(cache,B))
         return B;
-    geometrycentral::surface::ExtrinsicGeometryInterface& geometry = *position_geometry;
+    auto& mesh = bunnyGC;
+    geometrycentral::surface::ExtrinsicGeometryInterface& geometry = *mesh.position_geometry;
     geometry.requireCotanLaplacian();
     geometry.requireVertexGalerkinMassMatrix();
-    auto N = mesh->nVertices();
+    auto N = mesh.mesh->nVertices();
     SMat I(N,N);
     I.setIdentity();
     SMat L = geometry.cotanLaplacian + 1e-5*I;
@@ -131,13 +128,11 @@ Mat EigenLaplace() {
     if (io::MatrixCache(cache,Eig))
         return Eig;
 
-    std::unique_ptr<geometrycentral::surface::ManifoldSurfaceMesh> mesh;
-    std::unique_ptr<geometrycentral::surface::VertexPositionGeometry> position_geometry;
-    std::tie(mesh, position_geometry) = geometrycentral::surface::readManifoldSurfaceMesh(UPS_prefix + "meshes/human.obj");
-    geometrycentral::surface::ExtrinsicGeometryInterface& geometry = *position_geometry;
+    io::GeometryCentralMesh mesh(UPS_prefix + "meshes/human.obj");
+    geometrycentral::surface::ExtrinsicGeometryInterface& geometry = *mesh.position_geometry;
     geometry.requireCotanLaplacian();
     geometry.requireVertexGalerkinMassMatrix();
-    auto N = mesh->nVertices();
+    auto N = mesh.mesh->nVertices();
     SMat I(N,N);
     I.setIdentity();
     SMat L = geometry.cotanLaplacian + 1e-5*I;
@@ -157,26 +152,155 @@ Vec LapHeight(){
         return LH;
 
 
-    std::unique_ptr<geometrycentral::surface::ManifoldSurfaceMesh> mesh;
-    std::unique_ptr<geometrycentral::surface::VertexPositionGeometry> position_geometry;
-    std::tie(mesh, position_geometry) = geometrycentral::surface::readManifoldSurfaceMesh(UPS_prefix + "meshes/mountain.obj");
-    geometrycentral::surface::ExtrinsicGeometryInterface& geometry = *position_geometry;
+    io::GeometryCentralMesh mesh(UPS_prefix + "meshes/mountain.obj");
+    geometrycentral::surface::ExtrinsicGeometryInterface& geometry = *mesh.position_geometry;
     geometry.requireCotanLaplacian();
-    geometry.requireVertexLumpedMassMatrix();
-
-    Vec H(mesh->nVertices());
-    for (const auto& v : mesh->vertices())
-        H(v.getIndex()) = position_geometry->inputVertexPositions[v][1];
-
-    auto N = mesh->nVertices();
-    //SMat I(N,N);
-    //I.setIdentity();
+    geometry.requireVertexGalerkinMassMatrix();
+    auto N = mesh.mesh->nVertices();
+    Vec H(N);
+    for (const auto& v : mesh.mesh->vertices())
+        H(v.getIndex()) = mesh.position_geometry->inputVertexPositions[v][1];
     SMat L = geometry.cotanLaplacian;// + 1e-5*I;
     LH = L*H;
-    //LH = geometrycentral::solveSquare(geometry.vertexLumpedMassMatrix,(Vec)LH.col(0));
     io::SaveMatrix(cache,LH);
     return LH;
 }
+
+vecs tutte_init(const io::GeometryCentralMesh& mesh,const vec& offset) {
+    auto V = mesh.mesh->nVertices();
+    vecs X(V,offset);
+    for (const auto& v : mesh.mesh->vertices())
+        if (v.isBoundary()){
+            auto x =mesh.getPos(v);
+            x(2) = 0;
+            X[v.getIndex()] = x.normalized() + offset;
+        }
+    return X;
+}
+
+vecs tutte_embedding(const io::GeometryCentralMesh& mesh,vecs X) {
+    auto V = mesh.mesh->nVertices();
+    auto oldX = X;
+    for (const auto& v : mesh.mesh->vertices()){
+        if (!v.isBoundary()){
+            vec x = vec::Zero();
+            for (const auto& h : v.adjacentVertices())
+                x += oldX[h.getIndex()];
+            x /= v.degree();
+            X[v.getIndex()] = x;
+        }
+    }
+    return X;
+}
+
+Eigen::SimplicialLDLT<SMat> MCF;
+
+void init_MCF(const io::GeometryCentralMesh& mesh,scalar dt = 1e-4){
+    geometrycentral::surface::ExtrinsicGeometryInterface& geometry = *mesh.position_geometry;
+    geometry.requireCotanLaplacian();
+    geometry.requireVertexGalerkinMassMatrix();
+    auto N = mesh.mesh->nVertices();
+    SMat I(N,N);
+    I.setIdentity();
+    SMat L = geometry.vertexGalerkinMassMatrix - dt*(-geometry.cotanLaplacian + 1e-5*I);
+    MCF.compute(L);
+}
+
+Mat posToMat(const vecs& X) {
+    int N = X.size();
+    Mat P(N,3);
+    for (int i = 0;i<N;i++){
+        P.row(i) = X[i].transpose();
+    }
+    return P;
+}
+
+vecs matToPos(const Mat& M) {
+    int N = M.rows();
+    vecs P(N);
+    for (int i = 0;i<N;i++){
+        P[i] = M.row(i).transpose();
+    }
+    return P;
+}
+
+vecs mean_curvature_flow(const io::GeometryCentralMesh& mesh,const vecs& X) {
+    return matToPos(MCF.solve(mesh.position_geometry->vertexGalerkinMassMatrix*posToMat(X)));
+}
+
+Eigen::SimplicialLDLT<SMat> TP,TN;
+
+void init_taubin(const io::GeometryCentralMesh& mesh,scalar l = 1e-4,scalar mu = 2e-4){
+    geometrycentral::surface::ExtrinsicGeometryInterface& geometry = *mesh.position_geometry;
+    geometry.requireCotanLaplacian();
+    geometry.requireVertexGalerkinMassMatrix();
+    auto N = mesh.mesh->nVertices();
+    SMat I(N,N);
+    I.setIdentity();
+    SMat LP = geometry.vertexGalerkinMassMatrix - l*(-geometry.cotanLaplacian + 1e-5*I);
+    TP.compute(LP);
+    SMat LN = geometry.vertexGalerkinMassMatrix + mu*(-geometry.cotanLaplacian + 1e-5*I);
+    TN.compute(LN);
+}
+
+vecs taubin_step(const io::GeometryCentralMesh& mesh,const vecs& X,scalar l = 1e-1) {
+    scalar mu = -0.9*l;
+    auto P = posToMat(X);
+    const auto& L = mesh.position_geometry->cotanLaplacian;
+    P += l*L*P;
+    P += mu*L*P;
+    return matToPos(P);
+}
+
+
+
+Vec vertexDataToVec(const io::GeometryCentralMesh& M,const geometrycentral::surface::VertexData<double>& D){
+    Vec X(M.mesh->nVertices());
+    for (const auto& v : M.mesh->vertices())
+        X(v.getIndex()) = D[v];
+    return X;
+}
+
+Vec clampExtrems(const Vec& X) {
+    int N = X.rows();
+    scalars v(N);
+    for (int i = 0;i<N;i++)
+        v[i] = X(i);
+    auto t = 0.01;
+    int r = N*t;
+    std::nth_element(v.begin(),v.begin() + r,v.end());
+    auto m = *(v.begin() + r);
+    int R = N*(1-t);
+    std::nth_element(v.begin(),v.begin() + R,v.end());
+    auto M = *(v.begin() + R);
+    Vec Y = X;
+    return Y.unaryExpr([m,M](scalar x) {return std::clamp<scalar>(x,m,M);});
+}
+
+
+Mat Curvatures(const io::GeometryCentralMesh& mesh) {
+    Mat curvature;
+    std::string cache = UPS_prefix + "cache/curvature.csv";
+    if (io::MatrixCache(cache,curvature))
+        return curvature;
+    geometrycentral::surface::ExtrinsicGeometryInterface& geometry = *mesh.position_geometry;
+    geometry.requireVertexMinPrincipalCurvatures();
+    geometry.requireVertexMaxPrincipalCurvatures();
+    geometry.requireVertexGaussianCurvatures();
+    geometry.requireVertexMeanCurvatures();
+    auto N = mesh.mesh->nVertices();
+    mesh.mesh->vertices();
+    int k = 4;
+    curvature = Mat(N,k);
+    curvature.col(0) = clampExtrems(vertexDataToVec(mesh,geometry.vertexMinPrincipalCurvatures));
+    curvature.col(1) = clampExtrems(vertexDataToVec(mesh,geometry.vertexMaxPrincipalCurvatures));
+    curvature.col(2) = clampExtrems(vertexDataToVec(mesh,geometry.vertexMeanCurvatures));
+    curvature.col(3) = clampExtrems(vertexDataToVec(mesh,geometry.vertexGaussianCurvatures));
+    io::SaveMatrix(cache,curvature);
+    return curvature;
+}
+
+io::GeometryCentralMesh maskGC;
 
 void init () {
 
@@ -190,6 +314,8 @@ void init () {
     auto bunny_coarse = Mesh::Add(UPS_prefix + "meshes/bunny_coarse.obj");
     auto human = Mesh::Add(UPS_prefix + "meshes/human.obj",0.2);
     auto mountain = Mesh::Add(UPS_prefix + "meshes/mountain.obj",0.1);
+    maskGC.init(UPS_prefix + "meshes/nefertiti.obj");
+    bunnyGC.init(UPS_prefix + "meshes/bunny.obj");
     polyscope::view::resetCameraToHomeView();
 
     auto arrow = Formula::Add("\\longrightarrow");
@@ -199,7 +325,7 @@ void init () {
     show << Latex::Add("Les opérateurs différentiels sont vos amis.",TITLE)->at(CENTER);
     show << "Intro";
 
-    if (true)
+    if (false)
     {
         auto title = Title("Calcul différentiel et approximation de Taylor")->at(TOP);
         show << newFrame << title;
@@ -213,13 +339,12 @@ void init () {
         explorer_id = explorer->pid;
         show << CameraView::Add(vec(0,-3,3.5),vec(0,0,1),vec::UnitZ());
 
-        auto S1 = show.getCurrentSlide();
-        show << S1 << disk->applyDynamic(taylor1);
-        show << S1 << disk->applyDynamic(taylor2);
+        show << inNextFrame << disk->applyDynamic(taylor);
+        show << inNextFrame;
         show << newFrame << title << Latex::Add("Idée générale des approches différentielles :\\\\ Approcher localement un objet complexe par un objet simple (polynomial)")->at(CENTER);
     }
 
-    if (true)
+    if (false)
     {
         show << "manifold";
         auto title = Title(tex::center("Variétés différentielles et paramétrisation"));
@@ -233,12 +358,12 @@ void init () {
         auto grid_param = grid->apply(offset);
         grid_param->pc->setEdgeWidth(1);
         show << top_cam;
-        show << grid_param;
         auto varphi = Formula::Add("\\varphi");
         auto mani = grid->apply(sphere_offset);
         mani->pc->setEdgeWidth(1);
         auto arrowp = arrow->at(0.5,0.65);
-        show << inNextFrame << mani << arrowp << PlaceBelow(varphi);
+        show << mani;
+        show << inNextFrame << grid_param << arrowp << PlaceBelow(varphi);
 
         PrimitiveGroup manifold;
         manifold << grid_param << mani << arrowp << top_cam;
@@ -266,7 +391,7 @@ void init () {
             show << newFrame << Title("Vecteurs tangents")->at(TOP) << manifold << mani->at(0.7);
             auto P = Point::Add(vec(0,0,0));
             auto step = [] (scalar t) {
-                return periodic01(0.3*t)*0.3+0.01;
+                return (1-smoothstep(0.3*t))*0.3+0.01;
             };
             auto dx = [step](scalar t){
                 return vec(step(t),0,0);
@@ -311,7 +436,8 @@ void init () {
                 auto po = point_param->apply(offset);
                 auto ps = point_param->apply(sphere_offset);
                 show << PlaceLeft(plane,0.3) << po << ps;
-                auto TM =  grid->applyDynamic([po](vec x,TimeTypeSec){
+                auto TM =  grid->applyDynamic([po](const Mesh::Vertex& v,TimeObject){
+                    auto x = v.pos;
                         vec p = po->getCurrentPos() + vec(1.5,0,0);
                         auto h = 1e-3;
                         vec dx = (sphere(p+vec(h,0,0))-sphere(p)).normalized()*0.4;
@@ -370,7 +496,7 @@ void init () {
                 };
                 show << Point::Add(gamma,0.02);
             }
-            show << newFrame << Title("Récap 1")->at(TOP);
+            show << newFrame << Title("Récap Géométrie différentielle 1")->at(TOP);
             show << inNextFrame << PlaceLeft(Latex::Add("Approche différentielle : approximation locale par des polynômes"),0.4);
             show << inNextFrame << PlaceRelative(Latex::Add("Paramétrisation : fonction d'exploration de la variété"),ABS_LEFT,REL_BOTTOM,0.1);
             show << inNextFrame << PlaceRelative(Latex::Add("Espace tangent : plan tangent à un point de la variété"),ABS_LEFT,REL_BOTTOM,0.1);
@@ -378,6 +504,8 @@ void init () {
         }
     }
 
+
+    if (false)
     {
         show << newFrame << Title("Représentation discrète des formes et fonctions")->at(CENTER) << inNextFrame << TOP;
         scalar off = 3;
@@ -401,10 +529,11 @@ void init () {
         auto bpc = DuplicatePrimitive(bunny_pc);
         bpc->pc->setPointRadius(0.03,false);
         auto Fq = PolyscopeQuantity<polyscope::PointCloudScalarQuantity>::Add(bpc->pc->addScalarQuantity("V0000",F));
-        show << inNextFrame << bpc << Fq;
+        show <<  bpc << Fq;
         show << inNextFrame << PlaceRight(Formula::Add(tex::Vec("1.21","0.32", "\\vdots", "5.2","3.24"),0.05),0.6,0.1);
     }
 
+    if (false)
     {
         show << newFrame << Title("Discrétisation des opérateurs différentiels")->at(TOP);
         show << inNextFrame << PlaceLeft(Latex::Add(tex::center("Opérateurs différentiels classiques")));
@@ -412,7 +541,7 @@ void init () {
         show << inNextFrame << PlaceRight(Latex::Add(tex::center("Opérateurs différentiels discrets")));
         show << PlaceBelow(Formula::Add("AX"));
 
-        show << newFrame << Title("Récap 2")->at(TOP);
+        show << newFrame << Title("Récap Discrétisation")->at(TOP);
         show << inNextFrame << PlaceLeft(Latex::Add("Représentation par maillage : information géométrique et topologique (graphe)"),0.4);
         show << inNextFrame << PlaceRelative(Latex::Add("Adapté à la mesure de données réelles"),ABS_LEFT,REL_BOTTOM,0.1);
         show << inNextFrame << PlaceRelative(Latex::Add("Fonction sur graphe $\\iff$ Vecteur"),ABS_LEFT,REL_BOTTOM,0.1);
@@ -420,17 +549,19 @@ void init () {
         //show << inNextFrame << PlaceRelative(Latex::Add("Tenseur métrique : changement dans le calul des angles et longueur sur la surface"),ABS_LEFT,REL_BOTTOM,0.1);
     }
 
+    if (true)
     {
         using namespace tex;
         show << newFrame << Title("Exemple : Le laplacien $\\Delta$")->at(TOP);
         auto df = "\\partial^2 f";
         auto lapdef = Formula::Add("\\Delta f = " + frac(df,del<2>(0)) + "+" + frac(df,del<2>(1)),0.06);
         show << inNextFrame << lapdef->at(CENTER);
-        auto topolap = Latex::Add(equation("(Lf)_i = \\sum_{n \\in N_i}" + frac("f_n","|N_i|") + " - f_i"),0.06);
+        auto topolap = Latex::Add(equation("(Lf)_i = \\sum_{n \\in N_i} (f_i - f_n)"),0.06);
         show << inNextFrame >> lapdef << topolap->at(CENTER);
         show << inNextFrame << Vec2(0.5,0.3);
         show << PlaceLeft(Image::Add(UPS_prefix + "images/simple_graph.png"),0.6,0.2);
         show << PlaceRelative(Image::Add(UPS_prefix + "images/simple_lap_mat.png"),UPS::REL_RIGHT,SAME_Y);
+
         {
             show << newFrame << Title("Une discrétisation imparfaite ?")->at(TOP);
             show << CameraView::Add(vec(2,0.5,4),vec(2,0.5,0),vec(0,1,0));
@@ -482,108 +613,255 @@ void init () {
             QL->q->setColorMap("jet");
             show << Q << inNextFrame >> Q << QL << Formula::Add("\\Delta f",0.06)->at(0.8,0.4);
 
-            auto cam = CameraView::Add(vec(-0.5,2,9),vec(-0.5,2,0),vec::UnitY());
-            show << newFrameSameTitle << PlaceBelow(Latex::Add("Problème de Poisson",0.05));
-            show << PlaceBelow(Formula::Add("\\Delta u = y",0.06),0.1);
-            show << PlaceLeft(Formula::Add("y",0.05),0.35,0.3);
-            UPS::Mat C = illustratePoissonProblem();
-            auto off = vec(2.5,0,0);
-            auto bunnyY = DuplicatePrimitive(bunny_coarse)->apply(offset(-off));
-            bunnyY->pc->setSmoothShade(false);
-            bunnyY->pc->setEdgeWidth(1.);
-            auto bunnyX = DuplicatePrimitive(bunny_coarse)->apply(offset(off));
-            bunnyX->pc->setSmoothShade(false);
-            bunnyX->pc->setEdgeWidth(1.);
-            auto QY = PolyscopeQuantity<polyscope::SurfaceVertexScalarQuantity>::Add(bunnyY->pc->addVertexScalarQuantity("Y",C.col(0)));
-            auto QX = PolyscopeQuantity<polyscope::SurfaceVertexScalarQuantity>::Add(bunnyX->pc->addVertexScalarQuantity("X",C.col(1)));
-            show << cam << bunnyY << QY;
-            show << inNextFrame << Formula::Add(tex::AaboveB("\\Delta^{-1}","\\longrightarrow"),0.06);
-            show << bunnyX << QX;
-            show << PlaceRight(Formula::Add("u",0.05),0.35,0.3);
-
             {
 
-            show << newFrameSameTitle  << PlaceBelow(Latex::Add("Energie de Dirichlet",0.05));
-            show << inNextFrame << PlaceBelow(Formula::Add("E(f) = \\int_\\Omega ||\\nabla f||^2 dx",0.07),0.1);
-{
-        show << "gradient";
-        auto f = [](const vec& X) {
-            auto x = X(0);auto y = X(1);
-            return x*x+y*y;
-        };
-        auto gradf = [](const vec& X) {
-            return 2*X;
-        };
-        auto lift = [f](const vec& X) {
-            return vec(X(0),X(1),f(X));
-        };
-        auto F = grid->eval(f);
-        auto GF = grid->eval(gradf);
+                show << newFrameSameTitle  << PlaceBelow(Latex::Add("Energie de Dirichlet",0.05));
+                show << inNextFrame << PlaceBelow(Formula::Add("E(f) = \\int_\\Omega ||\\nabla f||^2 dx",0.07),0.1);
+            }
 
-        using namespace tex;
-        auto title = Title("Rappel(?) sur le gradient : $\\nabla$");
-        show << newFrame << title->at(CENTER);
-        show << inNextFrame << title->at(TOP);
-        auto grad = Formula::Add("\\nabla f(x,y) = " + tex::Vec(frac("\\partial f","\\partial x")+"(x,y)",frac("\\partial f","\\partial y")+"(x,y)"));
-        show << PlaceBelow(grad);
-        auto grid_edge = DuplicatePrimitive(grid);
-        grid_edge->pc->setEdgeWidth(1);
-        show << inNextFrame << PlaceBelow(Latex::Add("Par exemple")) << grid_edge;
-        auto S = show.getCurrentSlide();
-        auto gl = grid_edge->apply(lift);
-        show << S << gl;
 
-        show << PlaceLeft(Formula::Add("f(x,y) = "+ frac("x^2+y^2","2")),0.5);
-        show << inNextFrame  << CameraView::Add(vec(0,0.5,4),vec(0,0.5,0),vec(0,1,0),true) >> gl;
+            {
+                show << "gradient";
+                auto f = [](const vec& X) {
+                    auto x = X(0);auto y = X(1);
+                    return x*x+y*y;
+                };
+                auto gradf = [](const vec& X) {
+                    return 2*X;
+                };
+                auto lift = [f](const vec& X) {
+                    return vec(X(0),X(1),f(X));
+                };
+                auto F = grid->eval(f);
+                auto GF = grid->eval(gradf);
 
-        auto fval = grid_edge->pc->addVertexScalarQuantity("f000",F);
-        fval->setColorMap("jet");
-        auto gfval = grid_edge->pc->addVertexVectorQuantity("V000",GF);
-        gfval->setVectorRadius(0.01,false);
+                using namespace tex;
+                auto title = Title("Focus sur le gradient : $\\nabla$");
+                show << newFrame << title->at(CENTER);
+                show << inNextFrame << title->at(TOP);
+                auto grad = Formula::Add("\\nabla f(x,y) = " + tex::Vec(frac("\\partial f","\\partial x")+"(x,y)",frac("\\partial f","\\partial y")+"(x,y)"));
+                show << PlaceBelow(grad);
+                auto grid_edge = DuplicatePrimitive(grid);
+                grid_edge->pc->setEdgeWidth(1);
+                show << inNextFrame << PlaceBelow(Latex::Add("Par exemple")) << grid_edge;
+                auto S = show.getCurrentSlide();
+                auto gl = grid_edge->apply(lift);
+                show << S << gl;
 
-        show << PolyscopeQuantity<polyscope::SurfaceVertexScalarQuantity>::Add(fval);
-        show << inNextFrame << PlaceRight(Formula::Add("\\nabla f(x,y) = "+ tex::Vec("x","y")),0.5);
-        show << PolyscopeQuantity<polyscope::SurfaceVertexVectorQuantity>::Add(gfval);
+                show << PlaceLeft(Formula::Add("f(x,y) = "+ frac("x^2+y^2","2")),0.5);
+                show << inNextFrame  << CameraView::Add(vec(0,0.5,4),vec(0,0.5,0),vec(0,1,0),true) >> gl;
 
-        auto N = 100;
-        vecs GD(N);GD[0] = vec(1,1,0);
-        for (int i = 1;i<N;i++)
-            GD[i] = GD[i-1] - 0.1*gradf(GD[i-1]);
-        show << inNextFrame << PointCloud::Add(GD);
-        Primitive::get<PointCloud>(show.lastPrimitiveInserted().first->pid)->pc->setPointRadius(0.02,false);
-        show >> grad << Title("Descente de gradient")->at(TOP) << PlaceBelow(Formula::Add("x_{n+1} = x_{n} - \\tau \\nabla f(x_n)"));
+                auto fval = grid_edge->pc->addVertexScalarQuantity("f000",F);
+                fval->setColorMap("jet");
+                auto gfval = grid_edge->pc->addVertexVectorQuantity("V000",GF);
+                gfval->setVectorRadius(0.01,false);
+
+                show << PolyscopeQuantity<polyscope::SurfaceVertexScalarQuantity>::Add(fval);
+                show << inNextFrame << PlaceRight(Formula::Add("\\nabla f(x,y) = "+ tex::Vec("x","y")),0.5);
+                show << PolyscopeQuantity<polyscope::SurfaceVertexVectorQuantity>::Add(gfval);
+
+                auto N = 100;
+                vecs GD(N);GD[0] = vec(1,1,0);
+                for (int i = 1;i<N;i++)
+                    GD[i] = GD[i-1] - 0.1*gradf(GD[i-1]);
+                show << inNextFrame << PointCloud::Add(GD);
+                Primitive::get<PointCloud>(show.lastPrimitiveInserted().first->pid)->pc->setPointRadius(0.02,false);
+                show >> grad << Title("Descente de gradient")->at(TOP) << PlaceBelow(Formula::Add("x_{n+1} = x_{n} - \\tau \\nabla f(x_n)"));
+
+            }
+
+            {
+                show << newFrame  << Title("Minimiser l'énergie de Dirichlet")->at(TOP);
+                show << PlaceLeft(Formula::Add("E(f) = \\int_\\Omega ||\\nabla f||^2 dx",0.05),0.2,0.1);
+                show << inNextFrame << PlaceRight(Latex::Add("On peut montrer que $\\nabla E(f) = \\Delta f$",0.05),0.2,0.1);
+                show << inNextFrame << PlaceBelow(Formula::Add("f_{n+1} = f_n - \\tau \\Delta f_n",0.05));
+                auto off = vec(1.5,0,0);
+                auto mask = Mesh::Add(UPS_prefix + "meshes/nefertiti.obj",0.5)->apply(offset(off),false);
+                show << mask << top_cam;
+                auto TI = tutte_init(maskGC,-off);
+                Mesh::MeshPtr te_mesh = Mesh::Add(TI,mask->getFaces(),false);
+                te_mesh->updater = [TI] (const TimeObject& t,Primitive* ptr){
+                    static int cid = -1;
+                    Mesh* p = static_cast<Mesh*>(ptr);
+                    if (t.relative_frame_number == 0){
+                        if (cid != 0)
+                            p->updateMesh(TI);
+                        cid = 0;
+                    }
+                    else {
+                        cid = 1;
+                        p->updateMesh(tutte_embedding(maskGC,p->getVertices()));
+                    }
+                };
+                show << te_mesh << inNextFrame;
+            }
+
+            {
+                auto cam = CameraView::Add(vec(-0.5,2,9),vec(-0.5,2,0),vec::UnitY());
+                show << newFrameSameTitle << PlaceBelow(Latex::Add("Problème de Poisson",0.05));
+                show << PlaceBelow(Formula::Add("\\Delta u = y",0.06),0.1);
+                show << PlaceLeft(Formula::Add("y",0.05),0.35,0.3);
+                UPS::Mat C = illustratePoissonProblem();
+                auto off = vec(2.5,0,0);
+                auto bunnyY = DuplicatePrimitive(bunny_coarse)->apply(offset(-off));
+                bunnyY->pc->setSmoothShade(false);
+                bunnyY->pc->setEdgeWidth(1.);
+                auto bunnyX = DuplicatePrimitive(bunny_coarse)->apply(offset(off));
+                bunnyX->pc->setSmoothShade(false);
+                bunnyX->pc->setEdgeWidth(1.);
+                auto QY = PolyscopeQuantity<polyscope::SurfaceVertexScalarQuantity>::Add(bunnyY->pc->addVertexScalarQuantity("Y",C.col(0)));
+                auto QX = PolyscopeQuantity<polyscope::SurfaceVertexScalarQuantity>::Add(bunnyX->pc->addVertexScalarQuantity("X",C.col(1)));
+                show << cam << bunnyY << QY;
+                show << inNextFrame << Formula::Add(tex::AaboveB("\\Delta^{-1}","\\longrightarrow"),0.06);
+                show << bunnyX << QX;
+                show << PlaceRight(Formula::Add("u",0.05),0.35,0.3);
+            }
+
+
+            {
+                show << newFrame << titlelap->at(TOP);
+                show << PlaceBelow(Latex::Add("Fonctions harmoniques",0.05));
+                show << inNextFrame << PlaceBelow(Formula::Add("\\Delta f = 0",0.05),0.05);
+                show << PlaceBottom(Image::Add(UPS_prefix + "images/harmonic.png"));
+
+            }
+
+
+            {
+                show << newFrame << titlelap->at(TOP) << PlaceBelow(Latex::Add("Décomposition spectrale",0.05));
+                show << PlaceBelow(Formula::Add("\\Delta u = \\lambda u",0.07),0.05);
+                show << inNextFrame <<PlaceBelow(Formula::Add("\\Delta (e^{ix}) = -e^{ix}",0.05));
+                auto cam2 = CameraView::Add(vec(-0.5,4,12),vec(-0.5,4,0),vec::UnitY());
+                show << inNextFrame << cam2;
+                auto eig = EigenLaplace();
+                for (int i = 0;i<eig.cols();i++){
+                    auto human_eig = human->apply(offset(vec(-6 + 3*i,0,0)));
+                    human_eig->setSmooth(true);
+                    auto E = PolyscopeQuantity<polyscope::SurfaceVertexScalarQuantity>::Add(human_eig->pc->addVertexScalarQuantity("eig",eig.col(i)));
+                    show << human_eig << E;
+                }
+            }
+
+            show << newFrame << Title("Récap Laplacien")->at(TOP);
+            show << inNextFrame << PlaceLeft(Latex::Add("Compare la valeur d'une fonction en un point par rapport au voisinage"),0.4);
+            show << inNextFrame << PlaceRelative(Latex::Add("Interpolation"),ABS_LEFT,REL_BOTTOM,0.1);
+            show << inNextFrame << PlaceRelative(Latex::Add("Diffusion de quantité"),ABS_LEFT,REL_BOTTOM,0.1);
+            show << inNextFrame << PlaceRelative(Latex::Add("Analyse spectrale"),ABS_LEFT,REL_BOTTOM,0.1);
+
+        }
 
     }
 
-{
-            show << newFrame  << Title("Minimiser l'énergie de Dirichlet")->at(TOP);
-            show << PlaceLeft(Formula::Add("E(f) = \\int_\\Omega ||\\nabla f||^2 dx",0.05),0.2,0.1);
-            show << inNextFrame << PlaceRight(Latex::Add("On peut montrer que $\\nabla E(f) = \\Delta f$",0.05),0.2,0.1);
-            show << inNextFrame << PlaceBelow(Formula::Add("f_{n+1} = f_n - \\tau \\Delta f_n",0.05));
-            auto mask_gc = io::GeometryCentralMesh(UPS_prefix + "meshes/nefertiti.obj");
-            auto mask = Mesh::Add(UPS_prefix + "meshes/nefertiti.obj");
-            mask->setSmooth(false);
-}
+    {
+        auto parabola = [] (const Mesh::Vertex& v,const TimeObject& t) {
+            const auto& h = v.pos;
+            if (t.relative_frame_number == 0)
+                return h;
+            scalar a = -0.3,b = 0.4;
+            if (t.relative_frame_number == 1){
+                a *= smoothstep(t.from_action*0.3);
+                b *= smoothstep(t.from_action*0.3);
             }
+            return vec(h(0),h(1),a*h(0)*h(0) + b*h(1)*h(1));
+        };
+        show << newFrame << Title("Courbures");
+        show << "curvature";
+        auto plot = grid->applyDynamic(parabola,false);
+        show << inNextFrame << TOP << plot << inNextFrame;
+        show << inNextFrame << Formula::Add("k_1,k_2",0.06)->at(0.5,0.3);
+        show << newFrameSameTitle;
+        auto macaca = Mesh::Add(UPS_prefix + "meshes/david.obj",0.01);
+        io::GeometryCentralMesh mesh(UPS_prefix + "meshes/david.obj");
+        Mat K = Curvatures(mesh);
 
+        auto LM = [] (scalar x) {
+            return std::log(1+std::abs(x))*sgn(x);
+        };
 
-
-            {
-            show << newFrame << titlelap->at(TOP) << PlaceBelow(Latex::Add("Décomposition spectrale",0.05));
-            show << PlaceBelow(Formula::Add("\\Delta u = \\lambda u",0.07),0.05);
-            show << inNextFrame <<PlaceBelow(Formula::Add("\\Delta (e^{ix}) = -e^{ix}",0.05));
-            auto cam2 = CameraView::Add(vec(-0.5,4,12),vec(-0.5,4,0),vec::UnitY());
-            show << inNextFrame << cam2;
-            auto eig = EigenLaplace();
-            for (int i = 0;i<eig.cols();i++){
-                auto human_eig = human->apply(offset(vec(-6 + 3*i,0,0)));
-                human_eig->setSmooth(true);
-                auto E = PolyscopeQuantity<polyscope::SurfaceVertexScalarQuantity>::Add(human_eig->pc->addVertexScalarQuantity("eig",eig.col(i)));
-                show << human_eig << E;
-            }
-            }
-
+        for (int i = 0;i<K.cols();i++){
+            auto macaca_K = macaca->apply(offset(vec(-3 + 2*i,0,0)),true);
+            auto q = macaca_K->pc->addVertexScalarQuantity("curvature",K.col(i));//.unaryExpr(LM));
+            auto E = PolyscopeQuantity<polyscope::SurfaceVertexScalarQuantity>::Add(q);
+            q->setColorMap("jet");
+            show << macaca_K << E;
         }
+        show << CameraView::Add(vec(0.5,-6,1.5),vec(0.5,0,1.5),vec::UnitZ());
+        show << Formula::Add("k_1",0.05)->at(0.2,0.3);
+        show << Formula::Add("k_2",0.05)->at(0.4,0.3);
+        show << Formula::Add("H = " + tex::frac("k_1 + k_2","2"),0.05)->at(0.6,0.3);
+        show << Formula::Add("K = k_1k_2",0.05)->at(0.8,0.3);
+
+        show << newFrame << Title("Discrétisation courbure de Gauss")->at(TOP);
+        auto deflect = PlaceRight(Formula::Add("K = 2\\pi - \\sum_{n \\in N_i} \\theta_n",0.06),0.4,0.1);
+        auto fan = Mesh::Add(UPS_prefix + "meshes/fan.obj");
+        auto curvature = [] (const Mesh::Vertex& v,const TimeObject& t) {
+            const auto& h = v.pos;
+            if (t.relative_frame_number == 0)
+                return h;
+            scalar a = 0.4,b = 0.4;
+            if (t.relative_frame_number == 1){
+                a *= smoothstep(t.from_action*0.5);
+                b *= smoothstep(t.from_action*0.5);
+            }
+            else {
+                a *= 1-2*smoothstep(t.from_action*0.5);
+            }
+            return vec(h(0),h(1),a*h(0)*h(0) + b*h(1)*h(1));
+        };
+        show << fan->applyDynamic(curvature,false);
+        show << deflect;
+        auto S = show.getCurrentSlide();
+        show << PlaceRight(Formula::Add("K = 0",0.05),0.6);
+        show << S << PlaceRight(Formula::Add("K = 1",0.05),0.6);
+        show << S << PlaceRight(Formula::Add("K = -1",0.05),0.6);
+
+        show << newFrame;
+        show << Title("Théorème de Gauss-Bonet")->at(TOP);
+        show << inNextFrame << Formula::Add("\\int_{\\mathcal{M}} K dA = 4(1-g)",0.08);
+
+        show << newFrame << Title("Discrétisation courbure moyenne")->at(TOP);
+        show << PlaceBelow(Formula::Add("\\Delta P = -2Hn",0.06));
+
+        init_MCF(bunnyGC,1e-3);
+        init_taubin(bunnyGC,1e-3,2e-3);
+
+        auto X0 = bunny->getVertices();
+        auto bunnymcf = DuplicatePrimitive(bunny);
+        bunnymcf->setSmooth(true);
+
+        vecs noise(bunnyGC.mesh->nVertices());
+        for (auto& x : noise)
+            x = vec::Random()*0.01;
+
+        bunnymcf->updater = [X0,noise] (const TimeObject& t,Primitive* ptr){
+            static int cid = -1;
+            Mesh* p = static_cast<Mesh*>(ptr);
+            if (t.relative_frame_number == 0){
+                if (cid != 0)
+                    p->updateMesh(X0);
+                cid = 0;
+            }
+            else if (t.relative_frame_number == 1){
+                p->updateMesh(mean_curvature_flow(bunnyGC,p->getVertices()));
+                cid = 1;
+            }
+            else if (t.relative_frame_number == 2){
+                auto Xt = X0;
+                for (int i = 0;i<Xt.size();i++)
+                    Xt[i] += noise[i]*smoothstep(t.from_action);
+                p->updateMesh(Xt);
+                cid = 1;
+            }
+            else {
+                cid = 1;
+                //p->updateMesh(mean_curvature_flow(bunnyGC,p->getVertices()));
+                p->updateMesh(taubin_step(bunnyGC,p->getVertices()));
+            }
+        };
+        show << CameraView::Add(vec(-0.5,2,9),vec(-0.5,2,0),vec::UnitY());
+        show << bunnymcf << inNextFrame << inNextFrame << inNextFrame;
+
+        //show
     }
 
 
@@ -592,9 +870,8 @@ void init () {
 
 
 int main(int argc,char** argv) {
-    show.init(UPS_prefix + "../scripts/course_MG.txt");
-    std::tie(mesh, position_geometry) = geometrycentral::surface::readManifoldSurfaceMesh(UPS_prefix + "meshes/bunny_coarse.obj");
-    //show.init();
+    //show.init(UPS_prefix + "../scripts/course_MG.txt");
+    show.init();
     init();
 
     polyscope::state::userCallback = [](){

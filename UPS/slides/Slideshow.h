@@ -38,7 +38,6 @@ public:
 
     void setInnerTime();
 
-
     inline Slide& getCurrentSlide(){return slides.back();}
     inline Slide& getSlide(index i){return slides[i];}
 
@@ -142,7 +141,11 @@ public:
 
 
     inline TimeObject getTimeObject() const {
-        return TimeObject{TimeFrom(from_begin),TimeFrom(from_action),(int)current_slide};
+        TimeObject T;
+        T.from_begin = TimeFrom(from_begin);
+        T.from_action = TimeFrom(from_action);
+        T.absolute_frame_number = current_slide;
+        return T;
     }
 
     void removeFromCurrentSlide(PrimitivePtr ptr) {

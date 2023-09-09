@@ -54,17 +54,17 @@ void UPS::Image::draw(const TimeObject &, const StateInSlide &sis)
     display(sis);
 }
 
-void UPS::Image::intro(parameter t, const StateInSlide &sis)
+void UPS::Image::intro(const TimeObject& t, const StateInSlide &sis)
 {
     auto sist = sis;
-    sist.alpha = smoothstep(t)*sis.alpha;
+    sist.alpha = smoothstep(t.transitionParameter)*sis.alpha;
     display(sist);
 }
 
-void UPS::Image::outro(parameter t, const StateInSlide &sis)
+void UPS::Image::outro(const TimeObject& t, const StateInSlide &sis)
 {
     auto sist = sis;
-    sist.alpha = smoothstep(1-t)*sis.alpha;
+    sist.alpha = smoothstep(1-t.transitionParameter)*sis.alpha;
     display(sist);
 }
 

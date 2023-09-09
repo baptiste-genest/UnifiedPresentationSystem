@@ -41,15 +41,15 @@ void Text::pushFont() const
     }
 }
 
-void Text::intro(parameter t, const StateInSlide &sis)
+void Text::intro(const TimeObject& t, const StateInSlide &sis)
 {
-    alpha = smoothstep(t);
+    alpha = smoothstep(t.transitionParameter);
     display(sis);
 }
 
-void Text::outro(parameter t, const StateInSlide &sis)
+void Text::outro(const TimeObject& t, const StateInSlide &sis)
 {
-    alpha = 1-smoothstep(t);
+    alpha = 1-smoothstep(t.transitionParameter);
     display(sis);
 
 }

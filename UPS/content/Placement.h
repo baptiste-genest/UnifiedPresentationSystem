@@ -159,6 +159,22 @@ inline PrimitiveInSlide PlaceRight(PrimitivePtr ptr,scalar y = 0.5,scalar paddin
     return {ptr,StateInSlide(P)};
 }
 
+inline PrimitiveInSlide PlaceBottom(PrimitivePtr ptr,scalar x = 0.5,scalar padding = 0.1) {
+    Vec2 P;
+    P.x = x;
+    P.y = 1. - ptr->getRelativeSize().y*0.5+padding;
+    return {ptr,StateInSlide(P)};
+}
+
+inline PrimitiveInSlide PlaceTop(PrimitivePtr ptr,scalar x = 0.5,scalar padding = 0.1) {
+    Vec2 P;
+    P.x = x;
+    P.y = ptr->getRelativeSize().y*0.5+padding;
+    return {ptr,StateInSlide(P)};
+}
+
+
+
 
 }
 

@@ -29,8 +29,8 @@ public:
     void draw(const TimeObject& t, const StateInSlide &sis) override {
         display(sis);
     }
-    void intro(parameter t, const StateInSlide &sis) override;
-    void outro(parameter t, const StateInSlide &sis) override;
+    void intro(const TimeObject& t, const StateInSlide &sis) override;
+    void outro(const TimeObject& t, const StateInSlide &sis) override;
     Size getSize() const override;
 };
 
