@@ -10,6 +10,8 @@
 #include "content/Mesh.h"
 #include "content/Curve3D.h"
 #include "content/Point.h"
+#include "content/io.h"
 #include "content/CameraView.h"
+#include "content/Sliders.h"
 
 #endif // UNIFIEDPRESENTATIONSYSTEM_H

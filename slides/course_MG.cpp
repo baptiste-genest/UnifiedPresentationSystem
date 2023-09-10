@@ -3,7 +3,6 @@
 #include "../UPS/UnifiedPresentationSystem.h"
 #include "geometrycentral/surface/vertex_position_geometry.h"
 #include "geometrycentral/surface/meshio.h"
-#include "../UPS/content/io.h"
 #include "imgui.h"
 #include <Eigen/SparseCholesky>
 #include <Eigen/IterativeLinearSolvers>
@@ -11,7 +10,7 @@
 #include "geometrycentral/numerical/linear_solvers.h"
 
 using namespace UPS;
-UPS::Slideshow show(false);
+UPS::Slideshow show(true);
 
 PrimitiveID explorer_id;
 
@@ -122,28 +121,67 @@ Mat illustratePoissonProblem() {
     return B;
 }
 
-Mat EigenLaplace() {
+Mat posToMat(const vecs& X) {
+    int N = X.size();
+    Mat P(N,3);
+    for (int i = 0;i<N;i++){
+        P.row(i) = X[i].transpose();
+    }
+    return P;
+}
+
+vecs matToPos(const Mat& M) {
+    int N = M.rows();
+    vecs P(N);
+    for (int i = 0;i<N;i++){
+        P[i] = M.row(i).transpose();
+    }
+    return P;
+}
+
+
+Mat EigenLaplace(const io::GeometryCentralMesh& mesh,std::string label,int k) {
     Mat Eig;
-    std::string cache = UPS_prefix + "cache/eig.csv";
+    std::string cache = UPS_prefix + "cache/eig_"+label+ std::to_string(k) + ".csv";
     if (io::MatrixCache(cache,Eig))
         return Eig;
 
-    io::GeometryCentralMesh mesh(UPS_prefix + "meshes/human.obj");
     geometrycentral::surface::ExtrinsicGeometryInterface& geometry = *mesh.position_geometry;
     geometry.requireCotanLaplacian();
     geometry.requireVertexGalerkinMassMatrix();
+    geometry.requireVertexLumpedMassMatrix();
     auto N = mesh.mesh->nVertices();
     SMat I(N,N);
     I.setIdentity();
     SMat L = geometry.cotanLaplacian + 1e-5*I;
-    int k = 5;
-    auto E = geometrycentral::smallestKEigenvectorsPositiveDefinite(L,geometry.vertexGalerkinMassMatrix,k,50);
+    auto E = geometrycentral::smallestKEigenvectorsPositiveDefinite(L,I,k,100);
     Eig = Mat(N,k);
     for (int i = 0;i<k;i++)
-        Eig.col(i) = E[i];
+        Eig.col(i) = E[i].normalized();
     io::SaveMatrix(cache,Eig);
     return Eig;
 }
+
+vecs compute_eigen_coeffs(const Mat& eig,const vecs& pos) {
+    vecs L(eig.cols());
+    Mat P = posToMat(pos);
+    for (int i = 0;i<eig.cols();i++){
+        for (int j = 0;j<3;j++)
+            L[i](j) = eig.col(i).dot(P.col(j));
+    }
+    return L;
+}
+
+vecs spectral_compression(const Mat& eig,const vecs& coefs,int nb) {
+    Mat P = Mat::Zero(eig.rows(),3);
+    for (int i = 0;i<nb;i++){
+        for (int j = 0;j<3;j++){
+            P.col(j) += coefs[i](j)*eig.col(i);
+        }
+    }
+    return matToPos(P);
+}
+
 
 Vec LapHeight(){
     Mat LH;
@@ -204,24 +242,6 @@ void init_MCF(const io::GeometryCentralMesh& mesh,scalar dt = 1e-4){
     I.setIdentity();
     SMat L = geometry.vertexGalerkinMassMatrix - dt*(-geometry.cotanLaplacian + 1e-5*I);
     MCF.compute(L);
-}
-
-Mat posToMat(const vecs& X) {
-    int N = X.size();
-    Mat P(N,3);
-    for (int i = 0;i<N;i++){
-        P.row(i) = X[i].transpose();
-    }
-    return P;
-}
-
-vecs matToPos(const Mat& M) {
-    int N = M.rows();
-    vecs P(N);
-    for (int i = 0;i<N;i++){
-        P[i] = M.row(i).transpose();
-    }
-    return P;
 }
 
 vecs mean_curvature_flow(const io::GeometryCentralMesh& mesh,const vecs& X) {
@@ -668,7 +688,6 @@ void init () {
                 show << inNextFrame << PointCloud::Add(GD);
                 Primitive::get<PointCloud>(show.lastPrimitiveInserted().first->pid)->pc->setPointRadius(0.02,false);
                 show >> grad << Title("Descente de gradient")->at(TOP) << PlaceBelow(Formula::Add("x_{n+1} = x_{n} - \\tau \\nabla f(x_n)"));
-
             }
 
             {
@@ -697,6 +716,21 @@ void init () {
                 show << te_mesh << inNextFrame;
             }
 
+
+
+            {
+                show << newFrame << titlelap->at(TOP);
+                show << PlaceBelow(Latex::Add("Fonctions harmoniques",0.05));
+                show << inNextFrame << PlaceBelow(Formula::Add("\\Delta f = 0",0.05),0.05);
+                show << PlaceLeft(Image::Add(UPS_prefix + "images/poisson-g.png"),0.5,0.1);
+                show << inNextFrame << PlaceRelative(Image::Add(UPS_prefix + "images/poisson-u.png"),REL_RIGHT,SAME_Y,0.1);
+                show << newFrameSameTitle << PlaceBelow(Latex::Add("Problème de Plateau (ou du film de savon)",0.04));
+                show << PlaceBelow(Image::Add(UPS_prefix + "images/plateau.png"));
+                show << newFrameSameTitle << PlaceBelow(Latex::Add("Poisson Surface Reconstruction",0.04));
+                show << PlaceBelow(Image::Add(UPS_prefix + "images/PSR.jpg"));
+                show << inNextFrame << PlaceBelow(Image::Add(UPS_prefix + "images/PSR_algo.png"));
+            }
+
             {
                 auto cam = CameraView::Add(vec(-0.5,2,9),vec(-0.5,2,0),vec::UnitY());
                 show << newFrameSameTitle << PlaceBelow(Latex::Add("Problème de Poisson",0.05));
@@ -720,39 +754,56 @@ void init () {
 
 
             {
-                show << newFrame << titlelap->at(TOP);
-                show << PlaceBelow(Latex::Add("Fonctions harmoniques",0.05));
-                show << inNextFrame << PlaceBelow(Formula::Add("\\Delta f = 0",0.05),0.05);
-                show << PlaceBottom(Image::Add(UPS_prefix + "images/harmonic.png"));
-
-            }
-
-
-            {
                 show << newFrame << titlelap->at(TOP) << PlaceBelow(Latex::Add("Décomposition spectrale",0.05));
                 show << PlaceBelow(Formula::Add("\\Delta u = \\lambda u",0.07),0.05);
                 show << inNextFrame <<PlaceBelow(Formula::Add("\\Delta (e^{ix}) = -e^{ix}",0.05));
-                auto cam2 = CameraView::Add(vec(-0.5,4,12),vec(-0.5,4,0),vec::UnitY());
+                auto cam2 = CameraView::Add(vec(-0.5,6,15),vec(-0.5,6,0),vec::UnitY());
                 show << inNextFrame << cam2;
-                auto eig = EigenLaplace();
-                for (int i = 0;i<eig.cols();i++){
-                    auto human_eig = human->apply(offset(vec(-6 + 3*i,0,0)));
+                auto humanGC = io::GeometryCentralMesh(UPS_prefix + "meshes/human.obj");
+                auto BCGC = io::GeometryCentralMesh(UPS_prefix + "meshes/bunny_coarse.obj");
+                auto eig_h = EigenLaplace(humanGC,"human",10);
+                auto eig_b = EigenLaplace(BCGC,"bunny",300);
+                auto NB_slider = AddIntSliders(1,"NB of coeffs",eig_b.cols(),{1,eig_b.cols()});
+
+
+                for (int i = 0;i<10;i++){
+                    Mesh::MeshPtr human_eig;
+                    if (i < 5)
+                        human_eig = human->apply(offset(vec(-6 + 3*i,3,0)));
+                    else
+                        human_eig = human->apply(offset(vec(-6 + 3*(i-5) + 1.5,0,0)));
                     human_eig->setSmooth(true);
-                    auto E = AddPolyscopeQuantity(human_eig->pc->addVertexScalarQuantity("eig",eig.col(i)));
+                    auto E = AddPolyscopeQuantity(human_eig->pc->addVertexScalarQuantity("eig",eig_h.col(i)));
                     show << human_eig << E;
                 }
+
+                show << newFrameSameTitle;
+                show << NB_slider;
+                auto bunnySC = DuplicatePrimitive(bunny_coarse);
+                show << bunnySC << CameraView::Add(vec(-0.5,2,8),vec(-0.5,2,0),vec::UnitY());
+                vecs L = compute_eigen_coeffs(eig_b,bunnySC->getVertices());
+                bunnySC->updater = [eig_b,L,NB_slider] (const TimeObject& t,Primitive* ptr){
+                    Mesh* p = static_cast<Mesh*>(ptr);
+                    static int cid = -1;
+                    int N = NB_slider->getVal(0);
+                    if (cid != N){
+                        p->updateMesh(spectral_compression(eig_b,L,NB_slider->getVal(0)));
+                        cid = N;
+                    }
+                };
             }
 
             show << newFrame << Title("Récap Laplacien")->at(TOP);
             show << inNextFrame << PlaceLeft(Latex::Add("Compare la valeur d'une fonction en un point par rapport au voisinage"),0.4);
             show << inNextFrame << PlaceRelative(Latex::Add("Interpolation"),ABS_LEFT,REL_BOTTOM,0.1);
-            show << inNextFrame << PlaceRelative(Latex::Add("Diffusion de quantité"),ABS_LEFT,REL_BOTTOM,0.1);
+            show << inNextFrame << PlaceRelative(Latex::Add("Diffusion de quantités"),ABS_LEFT,REL_BOTTOM,0.1);
             show << inNextFrame << PlaceRelative(Latex::Add("Analyse spectrale"),ABS_LEFT,REL_BOTTOM,0.1);
 
         }
 
     }
 
+    if (false)
     {
         auto parabola = [] (const Mesh::Vertex& v,const TimeObject& t) {
             const auto& h = v.pos;
@@ -871,9 +922,17 @@ void init () {
         show << inNextFrame << PlaceRelative(Latex::Add("Anaylse de surface et débruitage"),ABS_LEFT,REL_BOTTOM,0.1);
     }
 
+    if (false)
     {
         show << newFrame << Title("Opérateurs vectoriels");
         show << inNextFrame << TOP;
+    }
+
+    if (true) {
+        show << newFrame << Title("Références") << TOP;
+        show << inNextFrame << PlaceLeft(Latex::Add("\"Introduction to discrete differential geometry\", Keenan Crane (Cours filmé)"),0.4);
+        show << inNextFrame << PlaceRelative(Latex::Add("\"Polygon Mesh Processing\", Bruno Lévy et at."),ABS_LEFT,REL_BOTTOM,0.1);
+        show << inNextFrame << PlaceRelative(Latex::Add("\"Analyse Numérique et optimisation\", Grégoire Allaire"),ABS_LEFT,REL_BOTTOM,0.1);
     }
 
 
