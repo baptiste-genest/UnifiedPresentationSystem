@@ -860,9 +860,20 @@ void init () {
             }
         };
         show << CameraView::Add(vec(-0.5,2,9),vec(-0.5,2,0),vec::UnitY());
-        show << bunnymcf << inNextFrame << inNextFrame << inNextFrame;
+        show << bunnymcf;
+        show << inNextFrame <<PlaceRight(Latex::Add("Lissage : Mean Curvature Flow"),0.3);
+        show << inNextFrame <<PlaceBelow(Latex::Add("Débruitage : Taubin flow"));
+        show << inNextFrame;
 
-        //show
+        show << newFrame << Title("Récap courbures")->at(TOP);
+        show << inNextFrame << PlaceLeft(Latex::Add("Mesure l'échec d'une surface à ressembler à un plan"),0.4);
+        show << inNextFrame << PlaceRelative(Latex::Add("Différents types de courbures : Min/Max, Moyenne, Gauss"),ABS_LEFT,REL_BOTTOM,0.1);
+        show << inNextFrame << PlaceRelative(Latex::Add("Anaylse de surface et débruitage"),ABS_LEFT,REL_BOTTOM,0.1);
+    }
+
+    {
+        show << newFrame << Title("Opérateurs vectoriels");
+        show << inNextFrame << TOP;
     }
 
 

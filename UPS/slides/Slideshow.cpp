@@ -232,7 +232,7 @@ void UPS::Slideshow::init(std::string script_file)
     if (!script_file.empty())
         setScriptFile(script_file);
     polyscope::init();
-    //polyscope::options::buildGui = false;
+    polyscope::options::buildGui = false;
     polyscope::options::autocenterStructures = false;
     polyscope::options::autoscaleStructures = false;
     polyscope::options::groundPlaneEnabled = false;
