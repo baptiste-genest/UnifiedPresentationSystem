@@ -39,6 +39,10 @@ inline TexObject frac(const TexObject& A,const TexObject& B) {
     return "\\frac{" + A +"}{" + B + "}";
 }
 
+inline TexObject dot(const TexObject& A,const TexObject& B) {
+    return "\\langle{" + A +"," + B + "\\rangle}";
+}
+
 inline TexObject transpose(const TexObject& A) {
     return A + "^t";
 }

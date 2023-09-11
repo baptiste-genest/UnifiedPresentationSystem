@@ -320,6 +320,86 @@ Mat Curvatures(const io::GeometryCentralMesh& mesh) {
     return curvature;
 }
 
+inline vec Vector3Tovec(const geometrycentral::Vector3& x) {
+    return vec(x.x,x.y,x.z);
+}
+
+std::pair<scalars,scalars> computeDivAndCurl(const io::GeometryCentralMesh& mesh,const vecs& XF) {
+    scalars div(mesh.mesh->nVertices(),0);
+    scalars curl(mesh.mesh->nVertices(),0);
+    mesh.position_geometry->requireVertexPositions();
+    mesh.position_geometry->requireFaceNormals();
+    for (const auto& v : mesh.mesh->vertices()){
+        scalar d = 0;
+        scalar c = 0;
+        for (const auto& h : v.outgoingHalfedges()){
+            auto u = XF[h.face().getIndex()];
+            auto e = (mesh.position_geometry->vertexPositions[h.tipVertex()] - mesh.position_geometry->vertexPositions[h.next().tipVertex()]);
+            d += u.dot(Vector3Tovec(geometrycentral::cross(mesh.position_geometry->faceNormal(h.face()),e)));
+            c += u.dot(Vector3Tovec(e));
+        }
+        div[v.getIndex()] = d;
+        curl[v.getIndex()] = c;
+    }
+    return {div,curl};
+}
+
+vecs generateFaceBasedRandomVectorField(const io::GeometryCentralMesh& mesh) {
+    vecs XF(mesh.mesh->nFaces());
+    for (const auto& f : mesh.mesh->faces()){
+        XF[f.getIndex()] = vec::Random();
+        XF[f.getIndex()](2) = 0;
+    }
+    //smooth vector field by iteratively avering with neighbors faces
+    for (int i = 0;i<100;i++){
+        vecs XF2(mesh.mesh->nFaces());
+        for (const auto& f : mesh.mesh->faces()){
+            vec x = vec::Zero();
+            for (const auto& fn : f.adjacentFaces())
+                x += XF[fn.getIndex()];
+            XF2[f.getIndex()] = x/3.;
+        }
+        for (const auto& f : mesh.mesh->faces())
+            XF[f.getIndex()] += 1e-1*XF2[f.getIndex()];
+    }
+    return XF;
+}
+
+Vec scalarsToVec(const scalars& S) {
+    Vec X(S.size());
+    for (int i =0;i<S.size();i++)
+        X(i) = S[i];
+    return X;
+}
+
+std::pair<vecs,vecs> computeHelmholtzHodge(const io::GeometryCentralMesh& mesh,const vecs& XF,const scalars& div) {
+    mesh.position_geometry->requireCotanLaplacian();
+    mesh.position_geometry->requireVertexGalerkinMassMatrix();
+    mesh.position_geometry->requireFaceAreas();
+    Vec D = scalarsToVec(div);
+    SMat I(div.size(),div.size());
+    I.setIdentity();
+    SMat L = mesh.position_geometry->cotanLaplacian + 1e-5*I;
+    auto P = geometrycentral::solvePositiveDefinite(L,(Vec)(mesh.position_geometry->vertexGalerkinMassMatrix*D));
+    vecs DF(mesh.mesh->nFaces(),vec::Zero());
+    vecs CF = DF;
+    scalar S = 0;
+    for (const auto& f : mesh.mesh->faces()){
+        vec g = vec::Zero();
+        auto N = mesh.position_geometry->faceNormal(f);
+        for (const auto& h : f.adjacentHalfedges()){
+            auto v = h.tailVertex();
+            auto e = (mesh.position_geometry->vertexPositions[h.next().tipVertex()] - mesh.position_geometry->vertexPositions[h.tipVertex()]);
+            g += P(v.getIndex())*Vector3Tovec(geometrycentral::cross(N,e));
+        }
+        g /= mesh.position_geometry->faceArea(f)*2;
+        CF[f.getIndex()] = g;
+        DF[f.getIndex()] = XF[f.getIndex()] - g;
+        S += g.norm();
+    }
+    return {CF,DF};
+}
+
 io::GeometryCentralMesh maskGC;
 
 void init () {
@@ -569,7 +649,7 @@ void init () {
         //show << inNextFrame << PlaceRelative(Latex::Add("Tenseur métrique : changement dans le calul des angles et longueur sur la surface"),ABS_LEFT,REL_BOTTOM,0.1);
     }
 
-    if (true)
+    if (false)
     {
         using namespace tex;
         show << newFrame << Title("Exemple : Le laplacien $\\Delta$")->at(TOP);
@@ -922,13 +1002,44 @@ void init () {
         show << inNextFrame << PlaceRelative(Latex::Add("Anaylse de surface et débruitage"),ABS_LEFT,REL_BOTTOM,0.1);
     }
 
-    if (false)
+    if (true)
     {
-        show << newFrame << Title("Opérateurs vectoriels");
+        auto t = Title("Opérateurs vectoriels");
+        show << newFrame << t;
         show << inNextFrame << TOP;
+        auto diskGC = io::GeometryCentralMesh(UPS_prefix + "meshes/disk_coarse.obj");
+        auto disk = Mesh::Add(UPS_prefix + "meshes/disk_coarse.obj",1.,true);
+        auto XF = generateFaceBasedRandomVectorField(diskGC);
+        auto Q = disk->pc->addFaceVectorQuantity("X",XF);
+        auto top_cam2 = CameraView::Add(vec(0,0.6,2.5),vec(0,0.6,0),vec(0,1,0));
+        show << disk << top_cam2 << AddPolyscopeQuantity(Q);
+        auto&& [div,curl] = computeDivAndCurl(diskGC,XF);
+        auto Qdiv = disk->pc->addVertexScalarQuantity("div",div);
+        auto div_t = Formula::Add("\\text{div}(V)_i = \\sum_{ijk\\sim i}" + tex::dot("u_{ijk}","n_{ijk}\\times e_{jk}"),0.04);
+        Qdiv->setColorMap("jet");
+        auto S = show.getCurrentSlide();
+
+        auto cam2 = CameraView::Add(vec(1,0.5,2),vec(1,0.5,0),vec(0,1,0),true);
+        show << S << cam2 << Latex::Add("Divergence",0.05)->at(0.5,0.2) << AddPolyscopeQuantity(Qdiv) << PlaceRight(div_t,0.4,0.05) << PlaceBelow(Image::Add(UPS_prefix + "images/fan_div.png"));
+        auto Qcurl = disk->pc->addVertexScalarQuantity("curl",curl);
+        auto curl_t = Formula::Add("\\text{curl}(V)_i = \\sum_{ijk\\sim i}" + tex::dot("u_{ijk}","e_{jk}"),0.04);
+        Qcurl->setColorMap("jet");
+        show << S << cam2 << Latex::Add("Rotationnel",0.05)->at(0.5,0.2) << AddPolyscopeQuantity(Qcurl) << PlaceRight(curl_t,0.4,0.05) << PlaceBelow(Image::Add(UPS_prefix + "images/fan_curl.png"));
+        show << newFrameSameTitle << PlaceBelow(Latex::Add("Théorème de Helmotz-Hodge",0.05));
+        auto HH = computeHelmholtzHodge(diskGC,XF,div);
+        auto disk_orig = disk->apply(offset(vec(-2.1,0,0)));
+        auto disk_CF = disk->apply(offset(vec(0,0,0)));
+        auto disk_DF = disk->apply(offset(vec(2.1,0,0)));
+        auto orig = disk_orig->pc->addFaceVectorQuantity("X",XF);
+        auto QCF = disk_CF->pc->addFaceVectorQuantity("CF",HH.first);
+        auto QDF = disk_DF->pc->addFaceVectorQuantity("DF",HH.second);
+        show << top_cam << disk_orig << disk_CF << disk_DF << AddPolyscopeQuantity(orig) <<  AddPolyscopeQuantity(QCF) << AddPolyscopeQuantity(QDF);
+        show << Formula::Add("=",0.06)->at(1./3.,0.5) << Formula::Add("+",0.06)->at(2./3.,0.5);
+        show << Formula::Add("X",0.06)->at(1./6.,0.9) << Formula::Add("\\text{curl}(X) = 0",0.06)->at(1./2.,0.9) << Formula::Add("\\text{div}(X) = 0",0.06)->at(5./6.,0.9);
+        show << newFrame << Title("Laplacien vectoriel et diffusion");
     }
 
-    if (true) {
+    if (false) {
         show << newFrame << Title("Références") << TOP;
         show << inNextFrame << PlaceLeft(Latex::Add("\"Introduction to discrete differential geometry\", Keenan Crane (Cours filmé)"),0.4);
         show << inNextFrame << PlaceRelative(Latex::Add("\"Polygon Mesh Processing\", Bruno Lévy et at."),ABS_LEFT,REL_BOTTOM,0.1);
