@@ -10,7 +10,7 @@
 #include "geometrycentral/numerical/linear_solvers.h"
 
 using namespace UPS;
-UPS::Slideshow show(true);
+UPS::Slideshow show(false);
 
 PrimitiveID explorer_id;
 
@@ -425,7 +425,7 @@ void init () {
     show << Latex::Add("Les opérateurs différentiels sont vos amis.",TITLE)->at(CENTER);
     show << "Intro";
 
-    if (false)
+    if (true)
     {
         auto title = Title("Calcul différentiel et approximation de Taylor")->at(TOP);
         show << newFrame << title;
@@ -444,7 +444,7 @@ void init () {
         show << newFrame << title << Latex::Add("Idée générale des approches différentielles :\\\\ Approcher localement un objet complexe par un objet simple (polynomial)")->at(CENTER);
     }
 
-    if (false)
+    if (true)
     {
         show << "manifold";
         auto title = Title(tex::center("Variétés différentielles et paramétrisation"));
@@ -605,7 +605,7 @@ void init () {
     }
 
 
-    if (false)
+    if (true)
     {
         show << newFrame << Title("Représentation discrète des formes et fonctions")->at(CENTER) << inNextFrame << TOP;
         scalar off = 3;
@@ -633,7 +633,7 @@ void init () {
         show << inNextFrame << PlaceRight(Formula::Add(tex::Vec("1.21","0.32", "\\vdots", "5.2","3.24"),0.05),0.6,0.1);
     }
 
-    if (false)
+    if (true)
     {
         show << newFrame << Title("Discrétisation des opérateurs différentiels")->at(TOP);
         show << inNextFrame << PlaceLeft(Latex::Add(tex::center("Opérateurs différentiels classiques")));
@@ -649,7 +649,7 @@ void init () {
         //show << inNextFrame << PlaceRelative(Latex::Add("Tenseur métrique : changement dans le calul des angles et longueur sur la surface"),ABS_LEFT,REL_BOTTOM,0.1);
     }
 
-    if (false)
+    if (true)
     {
         using namespace tex;
         show << newFrame << Title("Exemple : Le laplacien $\\Delta$")->at(TOP);
@@ -883,7 +883,7 @@ void init () {
 
     }
 
-    if (false)
+    if (true)
     {
         auto parabola = [] (const Mesh::Vertex& v,const TimeObject& t) {
             const auto& h = v.pos;
@@ -1039,7 +1039,7 @@ void init () {
         show << newFrame << Title("Laplacien vectoriel et diffusion");
     }
 
-    if (false) {
+    if (true) {
         show << newFrame << Title("Références") << TOP;
         show << inNextFrame << PlaceLeft(Latex::Add("\"Introduction to discrete differential geometry\", Keenan Crane (Cours filmé)"),0.4);
         show << inNextFrame << PlaceRelative(Latex::Add("\"Polygon Mesh Processing\", Bruno Lévy et at."),ABS_LEFT,REL_BOTTOM,0.1);
@@ -1052,8 +1052,8 @@ void init () {
 
 
 int main(int argc,char** argv) {
-    //show.init(UPS_prefix + "../scripts/course_MG.txt");
-    show.init();
+    show.init(UPS_prefix + "../scripts/course_MG.txt");
+    //show.init();
     init();
 
     polyscope::state::userCallback = [](){
