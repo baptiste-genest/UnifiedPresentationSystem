@@ -11,7 +11,9 @@
 #include "content/Curve3D.h"
 #include "content/Point.h"
 #include "content/io.h"
+#include "content/Graphics2D/Curve2D.h"
 #include "content/CameraView.h"
 #include "content/Sliders.h"
+#include "../extern/svg.hpp"
 
 #endif // UNIFIEDPRESENTATIONSYSTEM_H

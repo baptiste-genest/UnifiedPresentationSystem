@@ -13,11 +13,13 @@ find_package (Eigen3 3.3 REQUIRED NO_MODULE)
 
 file(GLOB SRC
      "content/*"
+     "content/Graphics2D/*"
      "math/*"
      "slides/*"
      "style/*"
      "UnifiedPresentationSystem.h"
      "UPS.h"
+     "../extern/svg.hpp"
 )
 
 add_subdirectory("../../libs/geometry-central" geometry-central)

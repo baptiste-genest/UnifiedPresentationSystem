@@ -596,6 +596,7 @@ void init () {
                 };
                 show << Point::Add(gamma,0.02);
             }
+            show << inNextFrame << PlaceRight(Image::Add(UPS_prefix + "images/pavage_penta.png"),0.6,0.01);
             show << newFrame << Title("Récap Géométrie différentielle 1")->at(TOP);
             show << inNextFrame << PlaceLeft(Latex::Add("Approche différentielle : approximation locale par des polynômes"),0.4);
             show << inNextFrame << PlaceRelative(Latex::Add("Paramétrisation : fonction d'exploration de la variété"),ABS_LEFT,REL_BOTTOM,0.1);

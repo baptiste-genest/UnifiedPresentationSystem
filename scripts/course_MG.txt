@@ -32,11 +32,17 @@ Pour aller plus loin : connexion, dépend du chemin, etc...
 
 De manière générale, si on a un vecteur dans l'espace des paramètres, il est transformé par la jacobienne de la param
 
+IMAGE AVEC LE SOLDAT QUI TIENT SA LANCE
+
 [metric]
 
-exemple : disque de poincaré -> relativité générale
+exemple : disque de poincaré 
 
 NOTION INTRINSEQUE
+
+BLAGUE CANAPE
+
+relativité générale
 
 [rpz]
 

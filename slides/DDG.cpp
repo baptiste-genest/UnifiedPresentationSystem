@@ -18,9 +18,13 @@ void init () {
 
     auto txt = Text::Add("Introduction à la Géométrie Différentielle Classique et Discrète ");
 
-    show << txt->at(CENTER);
+    //show << txt->at(CENTER);
 
-    auto M = Mesh::Add(UPS_prefix + "meshes/quad_grid_50.obj");
+    Figure F1;
+    F1.PlotFunction(0,2*M_PI,[](scalar x) {return std::sin(x*5);});
+    show << Figure::Add(F1)->at(CENTER);
+
+    auto M = Mesh::Add(UPS_prefix + "meshes/grid_quad_50.obj");
 
     show << inNextFrame << txt->at(TOP) << M;
     auto arrow = Latex::Add(tex::equation("\\longrightarrow"));
@@ -53,10 +57,13 @@ void init () {
 
 
 int main(int argc,char** argv) {
+
     show.init();
     init();
 
-    polyscope::state::userCallback = [](){show.play();};
+    polyscope::state::userCallback = [](){
+        show.play();
+    };
     polyscope::show();
     return 0;
 }
