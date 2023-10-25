@@ -885,7 +885,7 @@ void init () {
 
     }
 
-    if (false)
+    if (true)
     {
         auto parabola = [] (const Mesh::Vertex& v,const TimeObject& t) {
             const auto& h = v.pos;
@@ -1004,7 +1004,7 @@ void init () {
         show << inNextFrame << PlaceRelative(Latex::Add("Anaylse de surface et débruitage"),ABS_LEFT,REL_BOTTOM,0.1);
     }
 
-    if (false)
+    if (true)
     {
         auto t = Title("Opérateurs vectoriels");
         show << newFrame << t;
