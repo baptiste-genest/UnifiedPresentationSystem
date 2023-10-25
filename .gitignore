@@ -1,6 +1,6 @@
 build/**
 data/formulas/*
-data/cache/*
+data/cache/*.csv
 
 .cache/**
 .compile_commands.json
