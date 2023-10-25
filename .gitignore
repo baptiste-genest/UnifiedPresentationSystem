@@ -1,5 +1,5 @@
 build/**
-data/formulas/*
+data/formulas/*.png
 data/cache/*.csv
 
 .cache/**
