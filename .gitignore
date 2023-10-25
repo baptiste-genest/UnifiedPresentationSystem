@@ -2,6 +2,9 @@ build/**
 data/formulas/*
 data/cache/*
 
+.cache/**
+.compile_commands.json
+
 
 # Prerequisites
 *.d
