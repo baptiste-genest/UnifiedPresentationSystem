@@ -15,8 +15,13 @@
 #include <ratio>
 #include <functional>
 
+#ifdef __APPLE__
+#include "Eigen/Dense"
+#include "Eigen/Sparse"
+#else
 #include "eigen3/Eigen/Dense"
 #include "eigen3/Eigen/Sparse"
+#endif
 
 #include "polyscope/polyscope.h"
 
