@@ -28,7 +28,7 @@ jobs:
        if: matrix.os == 'ubuntu-latest'
        run: |
            sudo apt-get update
-           sudo apt-get install xorg-dev libglu1-mesa-dev libeigen-dev
+           sudo apt-get install xorg-dev libglu1-mesa-dev libeigen3-dev
 
      - name: Install macOS deps
        if: matrix.os == 'macOS-latest'
