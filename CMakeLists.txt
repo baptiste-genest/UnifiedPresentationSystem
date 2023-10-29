@@ -10,7 +10,7 @@ include(polyscope)
 include(geometry-central)
 
 find_package(OpenGL REQUIRED)
-find_package (Eigen3 3.3 REQUIRED NO_MODULE)
+find_package(Eigen3 3.3 REQUIRED NO_MODULE)
 
 file(GLOB SRC
      "src/content/*"
