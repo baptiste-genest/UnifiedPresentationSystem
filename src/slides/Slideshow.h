@@ -181,6 +181,7 @@ private:
     struct prompt_range {
         int begin,end;
         promptTag tag;
+        prompt_range(int b, int e,promptTag t) : begin(b),end(e),tag(t) {}
         bool inRange(int c) const {
             if (end == -1)
                 return begin <= c;

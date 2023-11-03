@@ -24,7 +24,7 @@ file(GLOB SRC
 )
 
 add_executable(dev projects/dev/main.cpp ${SRC})
-target_link_libraries(dev polyscope OpenGL geometry-central)
+target_link_libraries(dev polyscope OpenGL::GL geometry-central)
 
 add_executable(course_MG projects/course_MG/main.cpp ${SRC})
-target_link_libraries(course_MG polyscope OpenGL geometry-central)
+target_link_libraries(course_MG polyscope OpenGL::GL geometry-central)
