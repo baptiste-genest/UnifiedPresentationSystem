@@ -6,6 +6,8 @@ list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/src/cmake)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+include(CPM)
 include(polyscope)
 include(geometry-central)
 
@@ -28,3 +30,6 @@ target_link_libraries(dev polyscope OpenGL::GL geometry-central)
 
 add_executable(course_MG projects/course_MG/main.cpp ${SRC})
 target_link_libraries(course_MG polyscope OpenGL::GL geometry-central)
+
+add_executable(tuto1 projects/tutorials/tuto1.cpp ${SRC})
+target_link_libraries(tuto1 polyscope OpenGL::GL geometry-central)

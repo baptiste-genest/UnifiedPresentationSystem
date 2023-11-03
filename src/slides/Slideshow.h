@@ -10,7 +10,9 @@ namespace UPS {
 class Slideshow
 {
 public:
-
+    
+    /// Main constructor.
+    /// @param debug to enable debug mode (default: false)
     Slideshow(bool debug = false) : debug(debug) {
         from_action = Time::now();
         from_begin = Time::now();

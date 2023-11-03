@@ -5,6 +5,7 @@
 #include "Image.h"
 #include "io.h"
 #include <stdarg.h>
+#include <string>
 
 namespace UPS {
 
