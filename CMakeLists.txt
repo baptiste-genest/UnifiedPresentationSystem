@@ -8,8 +8,10 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 include(CPM)
+include(eigen)
 include(polyscope)
 include(geometry-central)
+include(spdlog)
 
 find_package(OpenGL REQUIRED)
 find_package(Eigen3 3.3 REQUIRED NO_MODULE)
@@ -26,10 +28,14 @@ file(GLOB SRC
 )
 
 add_executable(dev projects/dev/main.cpp ${SRC})
-target_link_libraries(dev polyscope OpenGL::GL geometry-central)
+target_link_libraries(dev polyscope spdlog Eigen3::Eigen OpenGL::GL geometry-central)
 
 add_executable(course_MG projects/course_MG/main.cpp ${SRC})
-target_link_libraries(course_MG polyscope OpenGL::GL geometry-central)
+target_link_libraries(course_MG polyscope spdlog Eigen3::Eigen OpenGL::GL geometry-central)
 
+## Tutorials
 add_executable(tuto1 projects/tutorials/tuto1.cpp ${SRC})
-target_link_libraries(tuto1 polyscope OpenGL::GL geometry-central)
+target_link_libraries(tuto1 polyscope spdlog Eigen3::Eigen geometry-central)
+
+add_executable(tuto2 projects/tutorials/tuto1.cpp ${SRC})
+target_link_libraries(tuto2 polyscope spdlog Eigen3::Eigen geometry-central)
