@@ -31,21 +31,21 @@ void UPS::generate_latex(const std::string &filename,
         formula_file << "\\end{align*}"<< std::endl;
     formula_file << "\\end{document}"<< std::endl;
 
-    std::string latex_cmd = "source ~/.zshrc ;pdflatex -output-directory=/tmp /tmp/formula.tex  >>/tmp/UPS.log";
+    std::string latex_cmd = "source ~/.bashrc ;source ~/.zshrc ;pdflatex -output-directory=/tmp /tmp/formula.tex  >>/tmp/UPS.log";
     if (std::system(latex_cmd.c_str())) {
         std::cerr << "[error while generating latex] " <<  std::endl;
         assert(false);
     }
-    if (std::system("source ~/.zshrc ; pdfcrop /tmp/formula.pdf  >>/tmp/UPS.log")){
+    if (std::system("source ~/.bashrc ;source ~/.zshrc ;pdfcrop /tmp/formula.pdf  >>/tmp/UPS.log")){
         std::cerr << "[error while croping pdf] " << std::endl;
         assert(false);
     }
-    if (std::system(("source ~/.zshrc ; convert -density 800 -quality 100 /tmp/formula-crop.pdf -colorspace RGB " + filename + " >>/tmp/UPS.log").c_str())) {
+    if (std::system(("source ~/.bashrc ;source ~/.zshrc ; convert -density 800 -quality 100 /tmp/formula-crop.pdf -colorspace RGB " + filename + " >>/tmp/UPS.log").c_str())) {
         std::cerr << "[error while converting to png]" << std::endl;
         assert(false);
     }
     int h = 1080*height_ratio*Image::getSize(filename).y/99.;
-    if (std::system(("source ~/.zshrc ; convert " + filename + " -resize x" + std::to_string(h) + " " + filename + " >>/tmp/UPS.log").c_str())){
+    if (std::system(("source ~/.bashrc ;source ~/.zshrc ; convert " + filename + " -resize x" + std::to_string(h) + " " + filename + " >>/tmp/UPS.log").c_str())){
         std::cerr << "[error while resizing]" << std::endl;
         assert(false);
     }
