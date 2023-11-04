@@ -38,8 +38,8 @@ add_executable(course_MG projects/course_MG/main.cpp)
 target_link_libraries(course_MG UPS)
 
 ## Tutorials
-add_executable(tuto1 projects/tutorials/tuto1.cpp)
-target_link_libraries(tuto1 UPS)
+add_executable(tuto_helloworld projects/tutorials/tuto_helloworld.cpp)
+target_link_libraries(tuto_helloworld UPS)
 
-add_executable(tuto2 projects/tutorials/tuto2.cpp)
-target_link_libraries(tuto2 UPS)
+add_executable(tuto_mesh projects/tutorials/tuto_mesh.cpp)
+target_link_libraries(tuto_mesh UPS)
