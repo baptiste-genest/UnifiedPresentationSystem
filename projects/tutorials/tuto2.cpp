@@ -4,6 +4,11 @@
 
 UPS::Slideshow show(false);
 
+
+UPS::vec f_scale(UPS::vec x) {
+  return x*0.5;
+}
+
 int main(int argc,char** argv)
 {
   
@@ -24,9 +29,30 @@ int main(int argc,char** argv)
   auto title = UPS::Title("The Bunny")->at(UPS::TOP);
   show << UPS::newFrame << title;
   
+  //Loading a 3d object
   auto bunny = UPS::Mesh::Add(UPS::Options::UPS_prefix + "meshes/bunny.obj");
   show << bunny;
+  // Adding the bunny again but scaled down
   
+  show <<UPS::newFrame << UPS::Title("The Bunny (scaled down when loaded")->at(UPS::TOP) 
+       << UPS::Mesh::Add(UPS::Options::UPS_prefix + "meshes/bunny.obj", 0.5);
+  
+  show <<UPS::newFrame << UPS::Title("The Bunny (apply from function)")->at(UPS::TOP) ;
+  show << bunny->apply(f_scale,false);
+  
+  show <<UPS::newFrame << UPS::Title("The Bunny (apply from lambda)")->at(UPS::TOP) ;
+  auto lambda_scale = [](const UPS::vec &v) { return v*0.5;};
+  show << bunny->apply(lambda_scale,false);
+  
+  show <<UPS::newFrame << UPS::Title("The Bunny with quantities")->at(UPS::TOP) ;
+
+  show << bunny->apply(lambda_scale,false);
+  auto lambda_x = [](const UPS::vec &v) { return sin(v(0));};
+  auto vals = bunny->eval(lambda_x);
+  show << UPS::AddPolyscopeQuantity( bunny->pc->addVertexScalarQuantity("posX", vals)->setColorMap("jet") ) ;
+  show << UPS::Latex::Add("$\\sqrt{2}$");
+  show << UPS::PlaceBelow(UPS::Latex::Add("$\\sqrt{3}$"));
+
   polyscope::state::userCallback = [](){
     show.play();
   };

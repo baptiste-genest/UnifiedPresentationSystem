@@ -1054,7 +1054,7 @@ void init () {
 
 
 int main(int argc,char** argv) {
-    show.init(Options::UPS_prefix + "../../projects/course_MG/script.txt");
+    show.init(Options::UPS_prefix  + "../../projects/course_MG/script.txt");
     //show.init();
     init();
 
