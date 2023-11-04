@@ -1,6 +1,7 @@
 #ifndef UNIFIEDPRESENTATIONSYSTEM_H
 #define UNIFIEDPRESENTATIONSYSTEM_H
 
+#include "content/Options.h"
 #include "content/Image.h"
 #include "content/Text.h"
 #include "math/kernels.h"

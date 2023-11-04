@@ -4,6 +4,7 @@
 #include "../UPS.h"
 #include "../math/kernels.h"
 #include "TimeObject.h"
+#include "Options.h"
 
 namespace UPS {
 
@@ -82,7 +83,7 @@ struct Primitive {
     virtual void initPolyscope() {}
 
     Size getRelativeSize() const {
-        auto S = UPS_screen_resolution;
+        auto S = Vec2(Options::UPS_screen_resolution_x, UPS::Options::UPS_screen_resolution_y);
         auto s = getSize();
         return Vec2(s.x/S.x,s.y/S.y);
     }

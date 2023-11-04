@@ -13,7 +13,7 @@ UPS::vec phi(const UPS::vec& x){
 void init () {
     using namespace UPS;
 
-    auto CMFONTID = UPS::FontManager::addFont(UPS_prefix + "fonts/ComputerModernSR.ttf",80);
+    auto CMFONTID = UPS::FontManager::addFont(Options::UPS_prefix + "fonts/ComputerModernSR.ttf",80);
     UPS::Style::default_font = CMFONTID;
 
     auto txt = Text::Add("Introduction à la Géométrie Différentielle Classique et Discrète ");
@@ -24,7 +24,7 @@ void init () {
     F1.PlotFunction(0,2*M_PI,[](scalar x) {return std::sin(x*5);});
     show << Figure::Add(F1)->at(CENTER);
 
-    auto M = Mesh::Add(UPS_prefix + "meshes/grid_quad_50.obj");
+    auto M = Mesh::Add(Options::UPS_prefix + "meshes/grid_quad_50.obj");
 
     show << inNextFrame << txt->at(TOP) << M;
     auto arrow = Latex::Add(tex::equation("\\longrightarrow"));

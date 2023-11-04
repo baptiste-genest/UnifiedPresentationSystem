@@ -25,7 +25,6 @@
 
 #include "polyscope/polyscope.h"
 
-
 namespace UPS {
 
 class Widget;
@@ -84,10 +83,7 @@ using PrimitivePtr = std::shared_ptr<Primitive>;
 using PrimitiveID = long;
 using Primitives = std::set<PrimitiveID>;
 
-// #define UPS_prefix std::string("/home/eulerson314/dev/UnifiedPresentationSystem/data/")
-#define UPS_prefix std::string("../../data/")
-#define UPS_screen_resolution Vec2(1920,1080);
-
+  
 using param = std::function<vec(scalar)>;
 using mapping = std::function<vec(const vec&)>;
 using scalar_function = std::function<scalar(scalar)>;

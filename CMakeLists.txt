@@ -14,9 +14,8 @@ include(geometry-central)
 include(spdlog)
 
 find_package(OpenGL REQUIRED)
-find_package(Eigen3 3.3 REQUIRED NO_MODULE)
 
-file(GLOB SRC
+file(GLOB SRC_lib
      "src/content/*"
      "src/content/Graphics2D/*"
      "src/math/*"
@@ -27,15 +26,20 @@ file(GLOB SRC
      "src/extern/svg.hpp"
 )
 
-add_executable(dev projects/dev/main.cpp ${SRC})
-target_link_libraries(dev polyscope spdlog Eigen3::Eigen OpenGL::GL geometry-central)
+## The library
+add_library(UPS ${SRC_lib})
+target_link_libraries(UPS PUBLIC polyscope Eigen3::Eigen spdlog  OpenGL::GL geometry-central)
 
-add_executable(course_MG projects/course_MG/main.cpp ${SRC})
-target_link_libraries(course_MG polyscope spdlog Eigen3::Eigen OpenGL::GL geometry-central)
+## Slideshows
+add_executable(dev projects/dev/main.cpp)
+target_link_libraries(dev UPS)
+
+add_executable(course_MG projects/course_MG/main.cpp)
+target_link_libraries(course_MG UPS)
 
 ## Tutorials
-add_executable(tuto1 projects/tutorials/tuto1.cpp ${SRC})
-target_link_libraries(tuto1 polyscope spdlog Eigen3::Eigen geometry-central)
+add_executable(tuto1 projects/tutorials/tuto1.cpp)
+target_link_libraries(tuto1 UPS)
 
-add_executable(tuto2 projects/tutorials/tuto1.cpp ${SRC})
-target_link_libraries(tuto2 polyscope spdlog Eigen3::Eigen geometry-central)
+add_executable(tuto2 projects/tutorials/tuto2.cpp)
+target_link_libraries(tuto2 UPS)
