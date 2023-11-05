@@ -32,26 +32,30 @@ int main(int argc,char** argv)
   //Loading a 3d object
   auto bunny = UPS::Mesh::Add(UPS::Options::UPS_prefix + "meshes/bunny.obj");
   show << bunny;
-  // Adding the bunny again but scaled down
   
-  show <<UPS::newFrame << UPS::Title("The Bunny (scaled down when loaded")->at(UPS::TOP) 
+  // Adding the bunny again but scaled down
+  show <<UPS::newFrame 
+       << UPS::Title("The Bunny (scaled down when loaded")->at(UPS::TOP)
        << UPS::Mesh::Add(UPS::Options::UPS_prefix + "meshes/bunny.obj", 0.5);
   
-  show <<UPS::newFrame << UPS::Title("The Bunny (apply from function)")->at(UPS::TOP) ;
-  show << bunny->apply(f_scale,false);
+  //Using apply()
+  //Note that a new instance of the object is created
+  show <<UPS::newFrame << UPS::Title("The Bunny (apply)")->at(UPS::TOP)
+       << bunny->apply(f_scale,false);
   
-  show <<UPS::newFrame << UPS::Title("The Bunny (apply from lambda)")->at(UPS::TOP) ;
-  auto lambda_scale = [](const UPS::vec &v) { return v*0.5;};
+  auto lambda_scale = [](const UPS::vec &v) { return v*0.5 + UPS::vec(1.,1.,1.);};
   show << bunny->apply(lambda_scale,false);
+  
   
   show <<UPS::newFrame << UPS::Title("The Bunny with quantities")->at(UPS::TOP) ;
-
-  show << bunny->apply(lambda_scale,false);
+  auto bunnyred =  bunny->apply(lambda_scale,false);
   auto lambda_x = [](const UPS::vec &v) { return sin(v(0));};
-  auto vals = bunny->eval(lambda_x);
-  show << UPS::AddPolyscopeQuantity( bunny->pc->addVertexScalarQuantity("posX", vals)->setColorMap("jet") ) ;
+  auto vals = bunnyred->eval(lambda_x);
+  show << bunnyred;
+  show << UPS::AddPolyscopeQuantity( bunnyred->pc->addVertexScalarQuantity("posX", vals)->setColorMap("jet") ) ;
   show << UPS::Latex::Add("$\\sqrt{2}$");
   show << UPS::PlaceBelow(UPS::Latex::Add("$\\sqrt{3}$"));
+  show << UPS::PlaceBelow(UPS::Latex::Add("$\\sqrt{5}$"));
 
   polyscope::state::userCallback = [](){
     show.play();
