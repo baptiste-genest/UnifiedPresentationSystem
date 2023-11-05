@@ -23,7 +23,7 @@ int main(int argc,char** argv)
   show.init();
   
   //Slideshow title
-  show << UPS::Latex::Add("Hello 3D World!",UPS::TITLE)->at(UPS::CENTER);
+  show << UPS::Latex::Add("Hello 3D World!",UPS::Options::UPS_TITLE)->at(UPS::CENTER);
   
   //New slide
   auto title = UPS::Title("The Bunny")->at(UPS::TOP);
@@ -35,7 +35,7 @@ int main(int argc,char** argv)
   
   // Adding the bunny again but scaled down
   show <<UPS::newFrame 
-       << UPS::Title("The Bunny (scaled down when loaded")->at(UPS::TOP)
+       << UPS::Title("The Bunny (scaled down when loaded)")->at(UPS::TOP)
        << UPS::Mesh::Add(UPS::Options::UPS_prefix + "meshes/bunny.obj", 0.5);
   
   //Using apply()
@@ -51,6 +51,7 @@ int main(int argc,char** argv)
   auto bunnyred =  bunny->apply(lambda_scale,false);
   auto lambda_x = [](const UPS::vec &v) { return sin(v(0));};
   auto vals = bunnyred->eval(lambda_x);
+  bunnyred->setSmooth(true);
   show << bunnyred;
   show << UPS::AddPolyscopeQuantity( bunnyred->pc->addVertexScalarQuantity("posX", vals)->setColorMap("jet") ) ;
   show << UPS::Latex::Add("$\\sqrt{2}$");

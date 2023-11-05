@@ -17,7 +17,7 @@ int main(int argc,char** argv)
   show.init();
   
   //Slideshow title
-  show << UPS::Latex::Add("Hello World!",UPS::TITLE)->at(UPS::CENTER);
+  show << UPS::Latex::Add("Hello World!",UPS::Options::UPS_TITLE)->at(UPS::CENTER);
   
   //New slide
   auto title = UPS::Title("The beauty of $\\pi$ ")->at(UPS::TOP);

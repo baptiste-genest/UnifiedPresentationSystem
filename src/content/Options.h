@@ -24,6 +24,12 @@ namespace UPS {
     ///Density for the PDF -> PNG export
     extern size_t UPS_density;
 
+    ///Various sizes
+    ///
+  
+    /// Height ratio for title
+    extern double UPS_TITLE;
+    extern double UPS_default_height_ratio;
     
   }
 }

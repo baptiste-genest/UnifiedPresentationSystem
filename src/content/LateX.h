@@ -6,29 +6,28 @@
 #include "io.h"
 #include <stdarg.h>
 #include <string>
+#include "Options.h"
 
 namespace UPS {
 
 using TexObject = std::string;
 
-constexpr scalar TITLE = 0.07;
-
 void generate_latex(const std::string& filename,const TexObject& tex,bool formula,scalar height_ratio);
 
 struct Latex {
     using LatexPtr = std::shared_ptr<Image>;
-    static LatexPtr Add(const TexObject& tex,scalar height_ratio=0.04);
+    static LatexPtr Add(const TexObject& tex,scalar height_ratio = Options::UPS_default_height_ratio);
 };
 
 struct Formula {
     using LatexPtr = std::shared_ptr<Image>;
-    static LatexPtr Add(const TexObject& tex,scalar height_ratio=0.04);
+    static LatexPtr Add(const TexObject& tex,scalar height_ratio = Options::UPS_default_height_ratio);
 };
 
 
 
 inline Latex::LatexPtr Title(TexObject s) {
-    auto rslt = Latex::Add(s,TITLE);
+    auto rslt = Latex::Add(s,Options::UPS_TITLE);
     rslt->exclusive = true;
     return rslt;
 }

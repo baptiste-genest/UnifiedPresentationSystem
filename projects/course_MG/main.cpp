@@ -422,7 +422,7 @@ void init () {
 
     auto top_cam = CameraView::Add(vec(0,0.6,5),vec(0,0.6,0),vec(0,1,0));
 
-    show << Latex::Add("Les opérateurs différentiels sont vos amis.",TITLE)->at(CENTER);
+    show << Latex::Add("Les opérateurs différentiels sont vos amis.",Options::UPS_TITLE)->at(CENTER);
     show << "Intro";
 
     if (true)
