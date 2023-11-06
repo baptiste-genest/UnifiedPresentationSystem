@@ -31,7 +31,7 @@ public:
     void forceDisable() override {q->setEnabled(false);}
 };
 
-template<class T>
+template<typename T>
 static PolyscopeQuantity<T>::PCQuantityPtr AddPolyscopeQuantity(T* ptr) {
     return PolyscopeQuantity<T>::Add(ptr);
 }
