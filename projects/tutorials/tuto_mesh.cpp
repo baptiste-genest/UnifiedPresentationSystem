@@ -43,7 +43,7 @@ int main(int argc,char** argv)
   show <<UPS::newFrame << UPS::Title("The Bunny (apply)")->at(UPS::TOP)
        << bunny->apply(f_scale,false);
   
-  auto lambda_scale = [](const UPS::vec &v) { return v*0.5 + UPS::vec(1.,1.,1.);};
+  auto lambda_scale = [](const UPS::vec &v) { return UPS::vec(v*0.5 + UPS::vec(1.,0.,0.));};
   show << bunny->apply(lambda_scale,false);
   
   
