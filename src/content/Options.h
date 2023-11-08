@@ -11,11 +11,7 @@ namespace UPS {
 
     /// Latex paths
     extern std::string UPS_pathPDFLATEX;
-    extern std::string UPS_pathPDFTEX;
-    extern std::string UPS_pathGS;
-    extern std::string UPS_pathPDFCROP;
     extern std::string UPS_pathCONVERT;
-    extern std::string UPS_pathPDFLATEX;
     
     ///Window size
     extern size_t UPS_screen_resolution_x;

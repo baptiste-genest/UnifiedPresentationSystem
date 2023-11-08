@@ -15,9 +15,6 @@ int main(int argc,char** argv)
   //Setting the paths
   UPS::Options::UPS_pathCONVERT="/opt/homebrew/bin/";
   UPS::Options::UPS_pathPDFLATEX="/Library/TeX/texbin/";
-  UPS::Options::UPS_pathPDFTEX="/Library/TeX/texbin/";
-  UPS::Options::UPS_pathGS="/opt/homebrew/bin/";
-  UPS::Options::UPS_pathPDFCROP="/Library/TeX/texbin/";
   
   //Init
   show.init();

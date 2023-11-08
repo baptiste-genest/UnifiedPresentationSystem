@@ -39,15 +39,12 @@ void UPS::generate_latex(const std::string &filename,
         std::cerr << "[error while generating latex] " <<  std::endl;
         assert(false);
     }
-    if (std::system((Options::UPS_pathPDFCROP+"pdfcrop --gscmd "+ Options::UPS_pathGS+"gs --pdftexcmd "+ Options::UPS_pathPDFTEX+ "pdftex /tmp/formula.pdf  >>/tmp/UPS.log").c_str())) {
-        std::cerr << "[error while croping pdf] " << std::endl;
-        assert(false);
-    }
-    if (std::system((Options::UPS_pathCONVERT+"convert -density "+std::to_string(Options::UPS_density)+" -quality 100 /tmp/formula-crop.pdf -colorspace RGB " + filename + " >>/tmp/UPS.log").c_str())) {
+    if (std::system((Options::UPS_pathCONVERT+"convert -trim -density "+std::to_string(Options::UPS_density)+" -quality 100 /tmp/formula.pdf -colorspace RGB " + filename + " >>/tmp/UPS.log").c_str())) {
         std::cerr << "[error while converting to png]" << std::endl;
         assert(false);
     }
     int h = 1080*height_ratio*Image::getSize(filename).y/99.;
+  spdlog::info((Options::UPS_pathCONVERT+"convert " + filename + " -resize x" + std::to_string(h) + " " + filename + " >>/tmp/UPS.log"));
     if (std::system((Options::UPS_pathCONVERT+"convert " + filename + " -resize x" + std::to_string(h) + " " + filename + " >>/tmp/UPS.log").c_str())){
         std::cerr << "[error while resizing]" << std::endl;
         assert(false);
