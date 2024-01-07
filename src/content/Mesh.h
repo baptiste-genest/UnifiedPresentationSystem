@@ -64,18 +64,26 @@ namespace UPS {
     const Faces& getFaces() const {return faces;}
     
     void updateMesh(const vecs& X);
-    
-    
-  private:
+
+    MeshPtr translate(const vec& x) const {
+      return apply([x](const vec& v) {return vec(x+v);});
+    }
+
+    MeshPtr scale(scalar x) const {
+      return apply([x](const vec& v) {return vec(x*v);});
+    }
+
+
+private:
     vecs vertices,original_vertices;
     bool smooth = false;
     Faces faces;
-    
+
     // PolyscopePrimitive interface
-  public:
+public:
     virtual void initPolyscope() override;
   };
-  
-}
+
+  }
 
 #endif // MESH_H

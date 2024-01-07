@@ -17,6 +17,11 @@ void generate_latex(const std::string& filename,const TexObject& tex,bool formul
 struct Latex {
     using LatexPtr = std::shared_ptr<Image>;
     static LatexPtr Add(const TexObject& tex,scalar height_ratio = Options::UPS_default_height_ratio);
+
+    static TexObject context;
+    static void Define(const TexObject& tex) {context += tex;}
+    static void DeclareMathOperator(const TexObject& name,const TexObject& content);
+    static void NewCommand(const TexObject& name,const TexObject& content) {context += "\\newcommand{\\"+name+"}{"+content+"}";}
 };
 
 struct Formula {
@@ -90,6 +95,24 @@ inline TexObject del(int i,bool xyz = true) {
     }
     return D + "x_{"+std::to_string(i)+"}";
 }
+
+inline TexObject align(const std::vector<TexObject>& texs) {
+    TexObject rslt = "\\begin{align*}\n";
+    for (int i= 0;i<texs.size()-1;i++)
+        rslt += texs[i] + "\\\\";
+    rslt += texs.back();
+    rslt += "\\end{align*}";
+    return rslt;
+}
+
+template <typename... ARGS>
+TexObject align(ARGS... arguments) {
+    std::vector<TexObject> data;
+    data.reserve(sizeof...(arguments));
+    (data.emplace_back(arguments), ...);
+    return align(data);
+}
+
 
 inline TexObject Vec(const std::vector<TexObject>& texs) {
     TexObject rslt = "\\begin{pmatrix}\n";

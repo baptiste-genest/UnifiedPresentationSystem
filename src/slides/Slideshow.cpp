@@ -1,4 +1,5 @@
 #include "Slideshow.h"
+#include <GL/gl.h>
 
 void UPS::Slideshow::nextFrame()
 {
@@ -64,6 +65,10 @@ void UPS::Slideshow::play() {
 
     TimeObject T = getTimeObject();
 
+
+    for (auto& s : CS)
+        CS[s.first].readFromLabel();
+
     if (backward || !locked) {
         locked = false;
         for (auto s : CS)
@@ -95,8 +100,9 @@ void UPS::Slideshow::play() {
                 }
             }
             else {
-                for (auto& s : CS)
+                for (auto& s : CS){
                     Primitive::get(s.first)->play(T,CS[s.first]);
+                }
                 locked = false;
             }
         }
@@ -116,6 +122,8 @@ void UPS::Slideshow::play() {
 
     prompt();
 
+    handleDragAndDrop();
+
     if (ImGui::IsKeyPressed(262) && !locked){
         nextFrame();
     }
@@ -123,6 +131,16 @@ void UPS::Slideshow::play() {
         previousFrame();
     }else if (ImGui::IsKeyPressed(264)){
         forceNextFrame();
+    }
+
+    if (ImGui::IsKeyPressed(67)){
+        std::string file("/tmp/cam.json");
+        std::ofstream camfile(file);
+        camfile << polyscope::view::getCameraJson();
+        std::cout << "current camera view exported at " << file << std::endl;
+    }
+    if (ImGui::IsKeyPressed(80)){
+        polyscope::screenshot(false);
     }
     ImGui::End();
 }
@@ -134,6 +152,24 @@ void UPS::Slideshow::setInnerTime()
     for (auto& p : appearing_primitives[current_slide])
         Primitive::get(p)->handleInnerTime();
     visited_slide = current_slide;
+}
+
+void UPS::Slideshow::handleDragAndDrop()
+{
+    auto io = ImGui::GetIO();
+    auto S = ImGui::GetWindowSize();
+    auto x = double(io.MousePos.x)/S.x;
+    auto y = double(io.MousePos.y)/S.y;
+    if (selected_primitive == -1 && io.MouseDown[0] > 0){
+        selected_primitive = getPrimitiveUnderMouse(x,y);
+    }
+    else if (io.MouseDown[0] == 0. && selected_primitive != -1) {
+        selected_primitive = -1;
+    }
+    if (io.MouseDown[0] > 0 && selected_primitive != -1) {
+        auto& pis = slides[current_slide][selected_primitive];
+        pis.writeAtLabel(x,y,true);
+    }
 }
 
 void UPS::Slideshow::prompt()
@@ -256,4 +292,19 @@ void UPS::Slideshow::setScriptFile(std::string file)
 {
     prompter_ptr = std::make_unique<Prompter>(file);
 
+}
+
+UPS::PrimitiveID UPS::Slideshow::getPrimitiveUnderMouse(scalar x,scalar y) const
+{
+    for (auto& pis : slides[current_slide]){
+        auto p = pis.second.relative_anchor_pos;
+        auto sp = Primitive::get(pis.first);
+        if (!sp->isScreenSpace())
+            continue;
+        auto rs = sp->getRelativeSize();
+        if (std::abs(p.x - x) < rs.x && std::abs(p.y - y) < rs.y){
+            return pis.first;
+        }
+    }
+    return -1;
 }

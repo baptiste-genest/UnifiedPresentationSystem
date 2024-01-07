@@ -12,19 +12,18 @@ UPS::vec phi(const UPS::vec& x){
 
 void init () {
     using namespace UPS;
-
-    auto CMFONTID = UPS::FontManager::addFont(Options::UPS_prefix + "fonts/ComputerModernSR.ttf",80);
+    auto CMFONTID = UPS::FontManager::addFont(Options::UPS_data_prefix + "fonts/ComputerModernSR.ttf",80);
     UPS::Style::default_font = CMFONTID;
 
     auto txt = Text::Add("Introduction à la Géométrie Différentielle Classique et Discrète ");
 
-    //show << txt->at(CENTER);
+    show << txt->at(CENTER);
 
     Figure F1;
     F1.PlotFunction(0,2*M_PI,[](scalar x) {return std::sin(x*5);});
     show << Figure::Add(F1)->at(CENTER);
-
-    auto M = Mesh::Add(Options::UPS_prefix + "meshes/grid_quad_50.obj");
+    
+    auto M = Mesh::Add(Options::UPS_data_prefix + "meshes/grid_quad_50.obj");
 
     show << inNextFrame << txt->at(TOP) << M;
     auto arrow = Latex::Add(tex::equation("\\longrightarrow"));
@@ -32,10 +31,10 @@ void init () {
     show << inNextFrame << M->apply(phi) << arrow->at(CENTER) << PlaceBelow(varphi);
 
 
-    auto circle = [](scalar t){return vec(0.5*cos(TAU*t) + 0.2,0,0.5*sin(TAU*t));};
+    Parametrization::curve_param circle = [](scalar t){return vec(0.5*cos(TAU*t) + 0.2,0,0.5*sin(TAU*t));};
 
     auto curveParam = Curve3D::Add(circle,100,true);
-    auto circle_slow = [](scalar t){return vec(0.5*cos(t) + 0.2,0,0.5*sin(t));};
+    Parametrization circle_slow([](scalar t){return vec(0.5*cos(t) + 0.2,0,0.5*sin(t));});
     auto point_param = UPS::Point::Add(circle_slow);
 
 

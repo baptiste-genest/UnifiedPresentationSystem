@@ -37,6 +37,9 @@ target_link_libraries(dev UPS)
 add_executable(course_MG projects/course_MG/main.cpp)
 target_link_libraries(course_MG UPS)
 
+add_executable(minimal_surf projects/minimal_surf/main.cpp)
+target_link_libraries(minimal_surf UPS)
+
 ## Tutorials
 add_executable(tuto_helloworld projects/tutorials/tuto_helloworld.cpp)
 target_link_libraries(tuto_helloworld UPS)

@@ -5,7 +5,7 @@ UPS::Curve3D::Curve3DPtr UPS::Curve3D::Add(const vecs &nodes, bool loop)
     return NewPrimitive<Curve3D>(nodes,loop);
 }
 
-UPS::Curve3D::Curve3DPtr UPS::Curve3D::Add(const param &param,int N, bool loop)
+UPS::Curve3D::Curve3DPtr UPS::Curve3D::Add(const curve_param &param,int N, bool loop)
 {
     return NewPrimitive<Curve3D>(param,N,loop);
 }
@@ -43,7 +43,7 @@ Curve3D::Curve3D(const vecs &nodes,bool loop) : loop(loop),
 {
 }
 
-Curve3D::Curve3D(const param &param, int N, bool loop) : loop(loop)
+Curve3D::Curve3D(const curve_param &param, int N, bool loop) : loop(loop)
 {
     nodes.resize(N);
     scalar dt = loop ? 1./N : 1./(N-1);

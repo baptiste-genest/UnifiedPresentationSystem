@@ -50,6 +50,8 @@ public:
         if (slides.empty())
             slides.push_back(Slide());
         last_primitive_inserted = {ptr,sis};
+        if (ptr->isScreenSpace())
+            last_screen_primitive_inserted = {ptr,sis};
         slides.back().add(ptr,sis);
     }
 
@@ -84,10 +86,28 @@ public:
         }
         return *this;
     }
-    
+
+    inline Slideshow& operator<<(const Replace& R) {
+        PrimitiveInSlide old;
+        if (!R.ptr_other)
+            old = last_screen_primitive_inserted;
+        else
+            old = {R.ptr_other,slides.back()[R.ptr_other->pid]};
+        auto pos = old.second;
+        removeFromCurrentSlide(old.first);
+        addToLastSlide(R.ptr,StateInSlide(pos));
+        return *this;
+    }
+
     inline Slideshow& operator<<(const RelativePlacement& P) {
-        auto pos = P.computePlacement(last_primitive_inserted);
-        addToLastSlide(P.ptr,StateInSlide(pos));
+        if (!P.ptr_other){
+            auto pos = P.computePlacement(last_screen_primitive_inserted);
+            addToLastSlide(P.ptr,StateInSlide(pos));
+        }
+        else {
+            auto pos = P.computePlacement({P.ptr_other,slides.back()[P.ptr_other->pid]});
+            addToLastSlide(P.ptr,StateInSlide(pos));
+        }
         return *this;
     }
 
@@ -103,8 +123,8 @@ public:
     }
 
     inline Slideshow& operator<<(const StateInSlide& sis) {
-        slides.back()[last_primitive_inserted.first->pid] = sis;
-        last_primitive_inserted.second = sis;
+        slides.back()[last_screen_primitive_inserted.first->pid] = sis;
+        last_screen_primitive_inserted.second = sis;
         return *this;
     }
 
@@ -169,6 +189,8 @@ public:
         return *this;
     }
 
+    void handleDragAndDrop();
+
 
     void prompt();
 
@@ -179,6 +201,9 @@ public:
     void setScriptFile(std::string file);
 
 private:
+
+    PrimitiveID selected_primitive =-1;
+    PrimitiveID getPrimitiveUnderMouse(scalar x,scalar y) const;
 
     struct prompt_range {
         int begin,end;
@@ -193,7 +218,7 @@ private:
     std::vector<prompt_range> scripts_ranges;
     std::unique_ptr<Prompter> prompter_ptr;
 
-    PrimitiveInSlide last_primitive_inserted;
+    PrimitiveInSlide last_primitive_inserted,last_screen_primitive_inserted;
 
     bool transition_done = false;
     bool backward = false;

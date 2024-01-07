@@ -27,7 +27,7 @@ UPS::Figure::FigurePtr UPS::Figure::Add(Figure& F,vec2 rel_size)
 {
     std::string content = std::string(F.root);
     auto H = std::hash<std::string>{}(content);
-    std::string filename = Options::UPS_prefix + "figures/" + std::to_string(H) + ".png";
+    std::string filename = Options::UPS_data_prefix + "figures/" + std::to_string(H) + ".png";
 
 
     if (!io::file_exists(filename)){

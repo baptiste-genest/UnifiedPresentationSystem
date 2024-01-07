@@ -38,6 +38,7 @@ public:
     void intro(const TimeObject& t, const StateInSlide &sis) override;
     void outro(const TimeObject& t, const StateInSlide &sis) override;
     Size getSize() const override {return Size(width,height);}
+    bool isScreenSpace() override {return true;}
 };
 
 }

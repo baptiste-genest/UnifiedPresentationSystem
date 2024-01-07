@@ -50,6 +50,10 @@ struct GeometryCentralMesh {
         const auto& x = position_geometry->vertexPositions[v];
         return vec(x[0],x[1],x[2]);
     }
+    vec getPos(int v) const {
+        const auto& x = position_geometry->vertexPositions[mesh->vertex(v)];
+        return vec(x[0],x[1],x[2]);
+    }
 };
 
 }

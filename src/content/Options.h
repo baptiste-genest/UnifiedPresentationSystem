@@ -7,7 +7,9 @@ namespace UPS {
   namespace Options{
 
     /// Global UPS build prefix
-    extern std::string UPS_prefix;
+    extern std::string UPS_data_prefix;
+    extern std::string UPS_projects_prefix;
+    extern std::string PROJECT_ROOT;
 
     /// Latex paths
     extern std::string UPS_pathPDFLATEX;

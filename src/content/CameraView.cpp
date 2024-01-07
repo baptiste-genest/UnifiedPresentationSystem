@@ -5,13 +5,14 @@ UPS::CameraView::CameraViewPtr UPS::CameraView::Add(const vec& f,const vec& t, c
     return NewPrimitive<CameraView>(toVec3(f),toVec3(t),toVec3(up),flyTo);
 }
 
-
-
-namespace UPS {
-CameraView::CameraView(const glm::vec3 &from, const glm::vec3 &to, const glm::vec3 &up, bool flyTo) : from(from),
-    to(to),
-    up(up),
-    flyTo(flyTo)
-{}
-
+UPS::CameraView::CameraViewPtr UPS::CameraView::Add(std::string file, bool flyTo)
+{
+    std::ifstream camfile(file);
+    if (!camfile.is_open()){
+        std::cerr << "invalid path " << file << std::endl;
+        throw ;
+    }
+    std::string str((std::istreambuf_iterator<char>(camfile)),
+                    std::istreambuf_iterator<char>());
+    return NewPrimitive<CameraView>(str,flyTo);
 }

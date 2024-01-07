@@ -5,13 +5,19 @@
 UPS::Latex::LatexPtr UPS::Latex::Add(const TexObject &tex,scalar height_ratio)
 {
     auto H = std::hash<std::string>{}(tex+"0"+std::to_string(height_ratio));
-    std::string filename = Options::UPS_prefix + "formulas/" + std::to_string(H) + ".png";
+    std::string filename = Options::UPS_data_prefix + "formulas/" + std::to_string(H) + ".png";
 
     if (!io::file_exists(filename)){
         generate_latex(filename,tex,false,height_ratio);
     }
     return Image::Add(filename.c_str());
 }
+
+void UPS::Latex::DeclareMathOperator(const TexObject &name, const TexObject &content) {
+    context += "\\DeclareMathOperator*{\\" + name + "}{" + content + "}";
+}
+
+UPS::TexObject UPS::Latex::context = "";
 
 void UPS::generate_latex(const std::string &filename,
                          const TexObject &tex,
@@ -26,6 +32,8 @@ void UPS::generate_latex(const std::string &filename,
     formula_file << "\\usepackage{amsfonts}"<< std::endl;
     formula_file << "\\usepackage{aligned-overset}"<< std::endl;
     formula_file << "\\usepackage{ragged2e}"<< std::endl;
+
+    formula_file << Latex::context << std::endl;
     formula_file << "\\begin{document}"<< std::endl;
     if (formula)
         formula_file << "\\begin{align*}"<< std::endl;
@@ -56,7 +64,7 @@ void UPS::generate_latex(const std::string &filename,
 UPS::Formula::LatexPtr UPS::Formula::Add(const TexObject &tex, scalar height_ratio)
 {
     auto H = std::hash<std::string>{}(tex+"1"+std::to_string(height_ratio));
-    std::string filename = Options::UPS_prefix + "formulas/" + std::to_string(H) + ".png";
+    std::string filename = Options::UPS_data_prefix + "formulas/" + std::to_string(H) + ".png";
 
     if (!io::file_exists(filename)){
         generate_latex(filename,tex,true,height_ratio);

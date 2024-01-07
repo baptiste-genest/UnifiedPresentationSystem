@@ -9,14 +9,21 @@ const Vec2 CENTER(0.5,0.5);
 const Vec2 TOP(0.5,0.1);
 const Vec2 BOTTOM(0.5,0.9);
 
+struct Replace {
+    Replace(PrimitivePtr ptr,PrimitivePtr ptr_other = nullptr) : ptr(ptr),ptr_other(ptr_other) {}
+    PrimitivePtr ptr;
+    PrimitivePtr ptr_other = nullptr;
+};
+
 
 struct RelativePlacement {
 
-    RelativePlacement(PrimitivePtr ptr) : ptr(ptr) {}
+    RelativePlacement(PrimitivePtr ptr,PrimitivePtr ptr_other = nullptr) : ptr(ptr),ptr_other(ptr_other) {}
 
     virtual Vec2 computePlacement(const PrimitiveInSlide& other) const = 0;
 
     PrimitivePtr ptr;
+    PrimitivePtr ptr_other = nullptr;
 };
 
 inline PrimitiveInSlide PlaceABelowB(PrimitivePtr ptr,const PrimitiveInSlide& other,scalar padding = 0.01) {
@@ -30,34 +37,18 @@ inline PrimitiveInSlide PlaceABelowB(PrimitivePtr ptr,const PrimitiveInSlide& ot
     return {ptr,P};
 }
 
-struct PlaceBelow : public RelativePlacement {
-    PlaceBelow(PrimitivePtr ptr,scalar padding = 0.01) : RelativePlacement(ptr),padding(padding) {}
+inline PrimitiveInSlide PlaceANextToB(PrimitivePtr ptr,const PrimitiveInSlide& other,int side = 1,scalar padding = 0.01) {
+    Vec2 P;
+    P.y = other.second.relative_anchor_pos.y;
+    P.x = other.second.relative_anchor_pos.x
+          + side*(other.first->getRelativeSize().x*0.5
+                    + padding
+                    + ptr->getRelativeSize().x*0.5)
+        ;
+    return {ptr,P};
+}
 
-    Vec2 computePlacement(const PrimitiveInSlide& other) const override {
-        return PlaceABelowB(ptr,other,padding).second.relative_anchor_pos;
-    }
 
-    scalar padding;
-};
-
-
-
-struct PlaceAbove : public RelativePlacement {
-    PlaceAbove(PrimitivePtr ptr,scalar padding = 0.01) : RelativePlacement(ptr),padding(padding) {}
-
-    Vec2 computePlacement(const PrimitiveInSlide& other) const override {
-        Vec2 P;
-        P.x = other.second.relative_anchor_pos.x;
-        P.y = other.second.relative_anchor_pos.y
-              - other.first->getRelativeSize().y*0.5
-              - padding
-              - ptr->getRelativeSize().y*0.5
-            ;
-        return P;
-    }
-
-    scalar padding;
-};
     enum placeX {
         REL_LEFT,
         ABS_LEFT,
@@ -77,72 +68,34 @@ struct PlaceAbove : public RelativePlacement {
 
 struct PlaceRelative : public RelativePlacement {
     PlaceRelative(PrimitivePtr ptr,placeX X,placeY Y,scalar paddingx = 0.01,scalar paddingy = 0.01) : RelativePlacement(ptr),X(X),Y(Y),paddingx(paddingx),paddingy(paddingy) {}
+    PlaceRelative(PrimitivePtr ptr,PrimitivePtr ptr_other,placeX X,placeY Y,scalar paddingx = 0.01,scalar paddingy = 0.01) : RelativePlacement(ptr,ptr_other),X(X),Y(Y),paddingx(paddingx),paddingy(paddingy) {}
 
-    Vec2 computePlacement(const PrimitiveInSlide& other) const override {
-        Vec2 P;
-        switch(X) {
-        case REL_LEFT:
-                P.x = other.second.relative_anchor_pos.x
-                        - other.first->getRelativeSize().x*0.5
-                        - paddingx
-                        - ptr->getRelativeSize().x*0.5
-                        ;
-                break;
-            case ABS_LEFT:
-                P.x = paddingx + ptr->getRelativeSize().x*0.5;
-                break;
-            case CENTER_X:
-                P.x = CENTER.x;
-                break;
-            case SAME_X:
-                P.x = other.second.relative_anchor_pos.x;
-                break;
-            case REL_RIGHT:
-                P.x = other.second.relative_anchor_pos.x
-                        + other.first->getRelativeSize().x*0.5
-                        + paddingx
-                        + ptr->getRelativeSize().x*0.5
-                        ;
-                break;
-            case ABS_RIGHT:
-                P.x = 1-paddingx-ptr->getRelativeSize().x*0.5;
-                break;
-        }
-        switch(Y) {
-            case REL_BOTTOM:
-                P.y = other.second.relative_anchor_pos.y
-                        + other.first->getRelativeSize().y*0.5
-                        + paddingy
-                        + ptr->getRelativeSize().y*0.5
-                        ;
-                break;
-            case ABS_TOP:
-                P.y = paddingy-ptr->getRelativeSize().y*0.5;
-                break;
-            case CENTER_Y:
-                P.y = CENTER.y;
-                break;
-            case SAME_Y:
-                P.y = other.second.relative_anchor_pos.y;
-                break;
-            case REL_TOP:
-                P.y = other.second.relative_anchor_pos.y
-                        - other.first->getRelativeSize().y*0.5
-                        - paddingy
-                        - ptr->getRelativeSize().y*0.5
-                        ;
-                break;
-            case ABS_BOTTOM:
-                P.y = 1-paddingy - ptr->getRelativeSize().y*0.5;
-                break;
-        }
-        return P;
-    }
+    Vec2 computePlacement(const PrimitiveInSlide& other) const override;
 
     scalar paddingx,paddingy;
     placeX X;
     placeY Y;
 };
+
+inline PlaceRelative PlaceNextTo(PrimitivePtr ptr,int side,scalar paddingx = 0.01,PrimitivePtr other = nullptr) {
+    if (side == 1)
+        return PlaceRelative(ptr,placeX::REL_RIGHT,SAME_Y,paddingx);
+    return PlaceRelative(ptr,placeX::REL_LEFT,SAME_Y,paddingx);
+}
+
+inline PlaceRelative PlaceBelow(PrimitivePtr ptr,scalar paddingy = 0.01) {
+    return PlaceRelative(ptr,placeX::SAME_X,placeY::REL_BOTTOM,0.01,paddingy);
+}
+inline PlaceRelative PlaceBelow(PrimitivePtr ptr,PrimitivePtr other,scalar paddingy = 0.01) {
+    return PlaceRelative(ptr,other,placeX::SAME_X,placeY::REL_BOTTOM,0.01,paddingy);
+}
+inline PlaceRelative PlaceAbove(PrimitivePtr ptr,scalar paddingy = 0.01) {
+    return PlaceRelative(ptr,placeX::SAME_X,placeY::REL_TOP,0.01,paddingy);
+}
+inline PlaceRelative PlaceAbove(PrimitivePtr ptr,PrimitivePtr other,scalar paddingy = 0.01) {
+    return PlaceRelative(ptr,other,placeX::SAME_X,placeY::REL_TOP,0.01,paddingy);
+}
+
 
 inline PrimitiveInSlide PlaceLeft(PrimitivePtr ptr,scalar y = 0.5,scalar padding = 0.1) {
     Vec2 P;
