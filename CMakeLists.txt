@@ -26,6 +26,8 @@ file(GLOB SRC_lib
      "src/extern/svg.hpp"
 )
 
+add_compile_definitions("UPS_SOURCE=${PROJECT_SOURCE_DIR}")
+
 ## The library
 add_library(UPS ${SRC_lib})
 target_link_libraries(UPS PUBLIC polyscope Eigen3::Eigen spdlog  OpenGL::GL geometry-central)

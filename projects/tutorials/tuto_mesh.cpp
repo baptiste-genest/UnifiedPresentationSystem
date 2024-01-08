@@ -2,7 +2,7 @@
 #include "../../src/UnifiedPresentationSystem.h"
 
 
-UPS::Slideshow show(false);
+UPS::Slideshow show;
 
 
 UPS::vec f_scale(UPS::vec x) {
@@ -17,7 +17,7 @@ int main(int argc,char** argv)
   UPS::Options::UPS_pathPDFLATEX="/Library/TeX/texbin/";
   
   //Init
-  show.init();
+  show.init("tutorials");
   
   //Slideshow title
   show << UPS::Latex::Add("Hello 3D World!",UPS::Options::UPS_TITLE)->at(UPS::CENTER);
@@ -27,13 +27,13 @@ int main(int argc,char** argv)
   show << UPS::newFrame << title;
   
   //Loading a 3d object
-  auto bunny = UPS::Mesh::Add(UPS::Options::UPS_data_prefix + "meshes/bunny.obj");
+  auto bunny = UPS::Mesh::Add(UPS::Options::DataPath + "meshes/bunny.obj");
   show << bunny;
   
   // Adding the bunny again but scaled down
   show <<UPS::newFrame 
        << UPS::Title("The Bunny (scaled down when loaded)")->at(UPS::TOP)
-       << UPS::Mesh::Add(UPS::Options::UPS_data_prefix + "meshes/bunny.obj", 0.5);
+       << UPS::Mesh::Add(UPS::Options::DataPath + "meshes/bunny.obj", 0.5);
   
   //Using apply()
   //Note that a new instance of the object is created

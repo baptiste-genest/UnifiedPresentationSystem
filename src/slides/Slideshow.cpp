@@ -1,6 +1,7 @@
 #include "Slideshow.h"
 #include <GL/gl.h>
 
+
 void UPS::Slideshow::nextFrame()
 {
     if (current_slide == slides.size()-1)
@@ -263,8 +264,20 @@ void UPS::Slideshow::ImGuiWindowConfig()
     ImGui::SetNextWindowSize(ImVec2(io.DisplaySize.x,io.DisplaySize.y));
 }
 
-void UPS::Slideshow::init(std::string script_file)
+void UPS::Slideshow::init(std::string project_name, std::string script_file, bool debug)
 {
+    from_action = Time::now();
+    from_begin = Time::now();
+
+    UPS::Options::UPSPath = TOSTRING(UPS_SOURCE);
+    UPS::Options::DataPath = Options::UPSPath + "/data/";
+    UPS::Options::ProjectName = project_name;
+    UPS::Options::ProjectPath = UPS::Options::UPSPath+std::string("/projects/")+UPS::Options::ProjectName+std::string("/");
+    UPS::Options::ProjectCachePath = UPS::Options::ProjectPath+std::string("cache/");
+    std::cout << "[ UPS PATH ] " << UPS::Options::UPSPath << std::endl;
+    std::cout << "[ PROJECT PATH ] " << UPS::Options::ProjectPath << std::endl;
+    std::cout << "[ PROJECT CACHE PATH ] " << UPS::Options::ProjectCachePath << std::endl;
+
     if (!script_file.empty())
         setScriptFile(script_file);
     polyscope::init();

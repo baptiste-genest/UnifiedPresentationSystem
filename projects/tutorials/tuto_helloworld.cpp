@@ -2,7 +2,7 @@
 #include "../../src/UnifiedPresentationSystem.h"
 
 
-UPS::Slideshow show(false);
+UPS::Slideshow show;
 
 int main(int argc,char** argv)
 {
@@ -11,7 +11,7 @@ int main(int argc,char** argv)
   UPS::Options::UPS_pathPDFLATEX="/Library/TeX/texbin/";
   
   
-  show.init();
+  show.init("tutorials");
   
   //Slideshow title
   show << UPS::Latex::Add("Hello World!",UPS::Options::UPS_TITLE)->at(UPS::CENTER);

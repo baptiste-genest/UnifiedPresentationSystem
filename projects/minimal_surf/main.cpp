@@ -4,7 +4,7 @@
 #include "imgui.h"
 using namespace UPS;
 
-Slideshow show(false);
+Slideshow show;
 
 
 vec phi(const vec& x){
@@ -41,27 +41,25 @@ mapping offset(const vec& x){
 }
 
 void init () {
+
     using namespace UPS;
-    auto CMFONTID = FontManager::addFont(Options::UPS_data_prefix + "fonts/ComputerModernSR.ttf",80);
-    auto grid = Mesh::Add(Options::UPS_data_prefix + "meshes/grid_quad_50.obj");
-    auto quad = Mesh::Add(Options::UPS_data_prefix + "meshes/quad.obj");
-    auto cube = Mesh::Add(Options::UPS_data_prefix + "meshes/cube.obj");
-    auto bunny = Mesh::Add(Options::UPS_data_prefix + "meshes/bunny.obj");
-    auto bunny_coarse = Mesh::Add(Options::UPS_data_prefix + "meshes/bunny_coarse.obj");
+    auto CMFONTID = FontManager::addFont(Options::DataPath + "fonts/ComputerModernSR.ttf",80);
+    auto grid = Mesh::Add(Options::DataPath + "meshes/grid_quad_50.obj");
+    auto quad = Mesh::Add(Options::DataPath + "meshes/quad.obj");
+    auto cube = Mesh::Add(Options::DataPath + "meshes/cube.obj");
+    auto bunny = Mesh::Add(Options::DataPath + "meshes/bunny.obj");
+    auto bunny_coarse = Mesh::Add(Options::DataPath + "meshes/bunny_coarse.obj");
 
 
     Latex::DeclareMathOperator("argmin","arg\\,min");
     Latex::DeclareMathOperator("area","Area");
     Latex::NewCommand("mass","\\text{mass}");
 
-
     Style::default_font = CMFONTID;
-
-    auto project_path = Options::UPS_projects_prefix + "minimal_surf/";
 
     Parametrization P(circle);
 
-    if (false)
+    if (true)
     {
         auto title = Title(tex::center("Computing Minimal Surfaces\\\\ using Differential forms"));
         show << title->at(CENTER);
@@ -75,7 +73,8 @@ void init () {
 
         show << newFrame << Title("Minimal surface")->at(TOP);
         show << PlaceBelow(Latex::Add("Plateau's problem"));
-        show << CameraView::Add(project_path + "catenoid.json");
+
+        show << CameraView::Add(UPS::Options::ProjectCachePath + "catenoid.json");
         show << inNextFrame;
         auto border = Formula::Add("\\Gamma",0.08);
         show << border->at("border");
@@ -92,7 +91,7 @@ void init () {
         show << newFrame << Title("k-vectors")->at(TOP);
         auto algebra = Formula::Add("\\bigwedge V");
         show << PlaceNextTo(algebra,1,0.1);
-        show << CameraView::Add(project_path + "kvectors.json");
+        show << CameraView::Add(UPS::Options::ProjectCachePath + "kvectors.json");
         auto origin = Point::Add((vec)vec::Zero(),0.01);
         vec u(1,0,0);
         vec v(0,1,0);
@@ -133,18 +132,18 @@ void init () {
     {
         auto title = Title("Differential k-forms");
         show << newFrame << title->at(TOP);
-        auto codim = Image::Add(project_path + "codim.png");
-        auto ext_d = Image::Add(project_path + "ext_der.png");
+        auto codim = Image::Add(UPS::Options::ProjectCachePath + "codim.png");
+        auto ext_d = Image::Add(UPS::Options::ProjectCachePath + "ext_der.png");
         show << inNextFrame << codim->at(CENTER);
         show << newFrameSameTitle;
         show << PlaceBelow(Latex::Add("exterior derivative"),title);
         show << inNextFrame << ext_d->at(0.8,0.5);
-        show << Image::Add(project_path + "d_boundary.png")->at(0.3,0.5);
+        show << Image::Add(UPS::Options::ProjectCachePath + "d_boundary.png")->at(0.3,0.5);
     }
     // TODO: SHOW EQUIVALENCE BETWEEN ONE FORMS AND VECTOR FIELDS
     if (false) {
         show << newFrame << Title("How to represent a shape in a computer")->at(CENTER) << inNextFrame << TOP;
-        show << CameraView::Add(project_path + "shape.json");
+        show << CameraView::Add(UPS::Options::ProjectCachePath + "shape.json");
         scalar off = 3;
         auto bco =bunny_coarse;
         bco->pc->setEdgeWidth(1.);
@@ -168,7 +167,7 @@ void init () {
     if (false) {
         show << newFrame << Title("Currents")->at(TOP);
         show << PlaceBelow(Latex::Add(tex::center("Currents are to differential forms \\\\ what distributions are to $\\mathcal{C}^{\\infty}$ functions")),0.1);
-        show << CameraView::Add(project_path + "currents.json");
+        show << CameraView::Add(UPS::Options::ProjectCachePath + "currents.json");
         show << inNextFrame << surface;
         show << PlaceRight(Formula::Add("\\langle \\delta_{\\Sigma},\\omega \\rangle = \\int_{\\Sigma} \\omega "));
         show << inNextFrame << PlaceBelow(Formula::Add("d\\delta_{\\Sigma}"),0.03);
@@ -196,10 +195,10 @@ void init () {
         show << newFrame << Title("The article's approach")->at(TOP);
         show << inNextFrame << Formula::Add("\\argmin_{\\Sigma : \\partial \\Sigma = \\Gamma} \\area(\\Sigma)")->at(0.3,0.25);
         show << inNextFrame << PlaceNextTo(Formula::Add(" = \\argmin_{\\Sigma : d \\delta_{\\Sigma} = \\delta_\\Gamma} ||\\delta_\\Sigma||_{\\mass}"),1);
-        show << CameraView::Add(project_path + "currents.json");
+        show << CameraView::Add(UPS::Options::ProjectCachePath + "currents.json");
         show << surface;
         show << inNextFrame << PlaceNextTo(Formula::Add("= \\argmin_{\\eta : d \\eta = \\delta_\\Gamma} ||\\eta||_{1}"),1);
-        show << inNextFrame << CameraView::Add(project_path + "field.json");
+        show << inNextFrame << CameraView::Add(UPS::Options::ProjectCachePath + "field.json");
         show >> surface;
         int N = 6;
         auto coord = buildRangeMapper(0,N-1,-0.5,0.5);
@@ -238,9 +237,7 @@ void init () {
 
 
 int main(int argc,char** argv) {
-    UPS::Options::PROJECT_ROOT = "../../projects/minimal_surf/";
-
-    show.init();
+    show.init("minimal_surf","",false);
     init();
 
     polyscope::state::userCallback = [](){

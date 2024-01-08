@@ -11,12 +11,7 @@ class Slideshow
 {
 public:
     
-    /// Main constructor.
-    /// @param debug to enable debug mode (default: false)
-    Slideshow(bool debug = false) : debug(debug) {
-        from_action = Time::now();
-        from_begin = Time::now();
-    }
+    Slideshow() {}
 
     void nextFrame();
 
@@ -196,7 +191,7 @@ public:
 
     void handleTransition();
 
-    void init(std::string script_file ="");
+    void init(std::string project_name,std::string script_file ="",bool debug = false);
 
     void setScriptFile(std::string file);
 
