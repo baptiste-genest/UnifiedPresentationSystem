@@ -10,7 +10,7 @@
 #include "geometrycentral/numerical/linear_solvers.h"
 
 using namespace UPS;
-UPS::Slideshow show(false);
+UPS::Slideshow show;
 
 PrimitiveID explorer_id;
 
@@ -1069,7 +1069,7 @@ void init () {
 
 
 int main(int argc,char** argv) {
-    show.init(Options::DataPath  + "../projects/course_MG/script.txt");
+    show.init("course_MG","script.txt");
     //show.init();
     init();
 

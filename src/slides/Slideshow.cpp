@@ -279,7 +279,7 @@ void UPS::Slideshow::init(std::string project_name, std::string script_file, boo
     std::cout << "[ PROJECT CACHE PATH ] " << UPS::Options::ProjectCachePath << std::endl;
 
     if (!script_file.empty())
-        setScriptFile(script_file);
+        setScriptFile(UPS::Options::ProjectPath+script_file);
     polyscope::init();
     polyscope::options::buildGui = false;
     polyscope::options::autocenterStructures = false;
