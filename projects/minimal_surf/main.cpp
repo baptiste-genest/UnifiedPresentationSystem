@@ -74,7 +74,7 @@ void init () {
         show << newFrame << Title("Minimal surface")->at(TOP);
         show << PlaceBelow(Latex::Add("Plateau's problem"));
 
-        show << CameraView::Add(UPS::Options::ProjectCachePath + "catenoid.json");
+        show << CameraView::Add(UPS::Options::ProjectViewsPath + "catenoid.json");
         show << inNextFrame;
         auto border = Formula::Add("\\Gamma",0.08);
         show << border->at("border");
@@ -86,12 +86,12 @@ void init () {
         show << PlaceBelow(Formula::Add("\\Sigma \\in \\text{argmin Area}(\\Sigma) "));
         show << PlaceBelow(Formula::Add("\\partial \\Sigma = \\Gamma "));
     }
-    if (false)
+    if (true)
     {
         show << newFrame << Title("k-vectors")->at(TOP);
         auto algebra = Formula::Add("\\bigwedge V");
         show << PlaceNextTo(algebra,1,0.1);
-        show << CameraView::Add(UPS::Options::ProjectCachePath + "kvectors.json");
+        show << CameraView::Add(UPS::Options::ProjectViewsPath + "kvectors.json");
         auto origin = Point::Add((vec)vec::Zero(),0.01);
         vec u(1,0,0);
         vec v(0,1,0);
@@ -121,29 +121,29 @@ void init () {
         };
 
         show << inNextFrame;
-        show << Latex::Add("multilinear and alternated $\\rightarrow$ det")->at(0.75,0.6);
+        show << Latex::Add("multilinear and alternating $\\rightarrow$ det")->at(0.75,0.6);
         show << uwv->at(0.35,0.75);
         show << inNextFrame << cube->apply(T)->at(0.5);
         show << origin->addVector([w](scalar) {return w;});
         show << PlaceBelow(Formula::Add("\\omega(u\\land v) = \\text{det}(u,v,w)"),uwv);
 
     }
-    if (false)
+    if (true)
     {
         auto title = Title("Differential k-forms");
         show << newFrame << title->at(TOP);
-        auto codim = Image::Add(UPS::Options::ProjectCachePath + "codim.png");
-        auto ext_d = Image::Add(UPS::Options::ProjectCachePath + "ext_der.png");
+        auto codim = Image::Add(UPS::Options::ProjectPath + "codim.png");
+        auto ext_d = Image::Add(UPS::Options::ProjectPath + "ext_der.png");
         show << inNextFrame << codim->at(CENTER);
         show << newFrameSameTitle;
         show << PlaceBelow(Latex::Add("exterior derivative"),title);
         show << inNextFrame << ext_d->at(0.8,0.5);
-        show << Image::Add(UPS::Options::ProjectCachePath + "d_boundary.png")->at(0.3,0.5);
+        show << Image::Add(UPS::Options::ProjectPath + "d_boundary.png")->at(0.3,0.5);
     }
     // TODO: SHOW EQUIVALENCE BETWEEN ONE FORMS AND VECTOR FIELDS
-    if (false) {
+    if (true) {
         show << newFrame << Title("How to represent a shape in a computer")->at(CENTER) << inNextFrame << TOP;
-        show << CameraView::Add(UPS::Options::ProjectCachePath + "shape.json");
+        show << CameraView::Add(UPS::Options::ProjectViewsPath + "shape.json");
         scalar off = 3;
         auto bco =bunny_coarse;
         bco->pc->setEdgeWidth(1.);
@@ -164,20 +164,22 @@ void init () {
             return vec(x,y,std::exp(x*x+y*y)-1);
         });
 
-    if (false) {
+    if (true) {
         show << newFrame << Title("Currents")->at(TOP);
         show << PlaceBelow(Latex::Add(tex::center("Currents are to differential forms \\\\ what distributions are to $\\mathcal{C}^{\\infty}$ functions")),0.1);
-        show << CameraView::Add(UPS::Options::ProjectCachePath + "currents.json");
+        show << CameraView::Add(UPS::Options::ProjectViewsPath + "currents.json");
         show << inNextFrame << surface;
         show << PlaceRight(Formula::Add("\\langle \\delta_{\\Sigma},\\omega \\rangle = \\int_{\\Sigma} \\omega "));
         show << inNextFrame << PlaceBelow(Formula::Add("d\\delta_{\\Sigma}"),0.03);
         show << inNextFrame << PlaceBelow(Formula::Add("\\langle d\\delta_{\\Sigma},\\omega \\rangle"),0.03);
-        show << inNextFrame << Replace(Formula::Add("=\\langle \\delta_{\\Sigma},d\\omega \\rangle"));
-        show << inNextFrame << Replace(Formula::Add("= \\int_{\\Sigma} d\\omega "));
-        show << inNextFrame << PlaceBelow(Formula::Add("\\stackrel{\\mathclap{\\normalfont\\mbox{Stokes}}}{=} \\int_{\\partial\\Sigma} \\omega"));
+        auto domega = Formula::Add("=\\langle \\delta_{\\Sigma},d\\omega \\rangle");
+        show << inNextFrame << Replace(domega);
+        show << inNextFrame << domega->at("d_omega");
+        show << PlaceNextTo(Formula::Add("= \\int_{\\Sigma} d\\omega "),1);
+        show << inNextFrame << PlaceBelow(Formula::Add("\\stackrel{\\mathclap{\\tiny\\mbox{Stokes}}}{=} \\int_{\\partial\\Sigma} \\omega"));
         show << inNextFrame << Replace(Formula::Add("= \\int_{\\Gamma} \\omega "));
         show << inNextFrame << Replace(Formula::Add("= \\langle \\delta_{\\Gamma},\\omega \\rangle"));
-        show << inNextFrame << Replace(Formula::Add("= \\delta_{\\Gamma}"));
+        show << inNextFrame << Replace(Formula::Add("d\\delta_{\\Sigma}= \\delta_{\\Gamma}"));
     }
     if (true) {
         show << newFrame << Title("Currents")->at(TOP);
@@ -195,10 +197,10 @@ void init () {
         show << newFrame << Title("The article's approach")->at(TOP);
         show << inNextFrame << Formula::Add("\\argmin_{\\Sigma : \\partial \\Sigma = \\Gamma} \\area(\\Sigma)")->at(0.3,0.25);
         show << inNextFrame << PlaceNextTo(Formula::Add(" = \\argmin_{\\Sigma : d \\delta_{\\Sigma} = \\delta_\\Gamma} ||\\delta_\\Sigma||_{\\mass}"),1);
-        show << CameraView::Add(UPS::Options::ProjectCachePath + "currents.json");
+        show << CameraView::Add(UPS::Options::ProjectViewsPath + "currents.json");
         show << surface;
         show << inNextFrame << PlaceNextTo(Formula::Add("= \\argmin_{\\eta : d \\eta = \\delta_\\Gamma} ||\\eta||_{1}"),1);
-        show << inNextFrame << CameraView::Add(UPS::Options::ProjectCachePath + "field.json");
+        show << inNextFrame << CameraView::Add(UPS::Options::ProjectViewsPath + "field.json");
         show >> surface;
         int N = 6;
         auto coord = buildRangeMapper(0,N-1,-0.5,0.5);
@@ -229,6 +231,7 @@ void init () {
         show << inNextFrame;
     }
     {
+        show << newFrame << Title("Quick recap");
 
     }
 
