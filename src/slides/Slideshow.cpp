@@ -141,7 +141,10 @@ void UPS::Slideshow::play() {
         std::cout << "current camera view exported at " << file << std::endl;
     }
     if (ImGui::IsKeyPressed(80)){
-        polyscope::screenshot(false);
+        static int screenshot_count = 0;
+        std::string file =  "/tmp/screenshot_" + std::to_string(screenshot_count++) + ".png";
+        UPS::screenshot(file);
+        std::cout << "screenshot saved at " << file << std::endl;
     }
     ImGui::End();
 }
@@ -273,10 +276,10 @@ void UPS::Slideshow::init(std::string project_name, std::string script_file, boo
     UPS::Options::DataPath = Options::UPSPath + "/data/";
     UPS::Options::ProjectName = project_name;
     UPS::Options::ProjectPath = UPS::Options::UPSPath+std::string("/projects/")+UPS::Options::ProjectName+std::string("/");
-    UPS::Options::ProjectCachePath = UPS::Options::ProjectPath+std::string("cache/");
+    UPS::Options::ProjectViewsPath = UPS::Options::ProjectPath+std::string("views/");
     std::cout << "[ UPS PATH ] " << UPS::Options::UPSPath << std::endl;
     std::cout << "[ PROJECT PATH ] " << UPS::Options::ProjectPath << std::endl;
-    std::cout << "[ PROJECT CACHE PATH ] " << UPS::Options::ProjectCachePath << std::endl;
+    std::cout << "[ PROJECT CACHE PATH ] " << UPS::Options::ProjectViewsPath << std::endl;
 
     if (!script_file.empty())
         setScriptFile(UPS::Options::ProjectPath+script_file);

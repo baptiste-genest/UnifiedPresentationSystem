@@ -19,8 +19,8 @@ void UPS::StateInSlide::writeAtLabel(double x, double y,bool overwrite)
 {
     if (label == "")
         return;
-    system(("mkdir " + UPS::Options::ProjectCachePath + " 2>/dev/null").c_str());
-    std::string filepath = UPS::Options::ProjectCachePath + label + ".pos";
+    system(("mkdir " + UPS::Options::ProjectViewsPath + " 2>/dev/null").c_str());
+    std::string filepath = UPS::Options::ProjectViewsPath + label + ".pos";
     if (!io::file_exists(filepath) || overwrite){
         std::ofstream file(filepath);
         if (!file.is_open()){
@@ -35,7 +35,7 @@ void UPS::StateInSlide::readFromLabel()
 {
     if (label == "")
         return;
-    std::ifstream file (UPS::Options::ProjectCachePath + label + ".pos");
+    std::ifstream file (UPS::Options::ProjectViewsPath + label + ".pos");
     if (!file.is_open()){
         std::cerr << "couldn't read label file" << std::endl;
         assert(0);

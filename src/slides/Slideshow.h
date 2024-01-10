@@ -4,6 +4,7 @@
 #include "Slide.h"
 #include "../content/Placement.h"
 #include "Prompter.h"
+#include "screenshot.h"
 
 namespace UPS {
 

@@ -13,7 +13,7 @@ static   std::string UPSPath;
 static   std::string DataPath;
 static   std::string ProjectName;
 static   std::string ProjectPath;
-static   std::string ProjectCachePath;
+static   std::string ProjectViewsPath;
 
 /// Latex paths
 static std::string UPS_pathPDFLATEX;

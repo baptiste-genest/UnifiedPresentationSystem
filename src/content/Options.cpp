@@ -10,7 +10,7 @@ std::string Options::DataPath = UPSPath + "/data/";
 
 std::string Options::ProjectName;
 std::string Options::ProjectPath;
-std::string Options::ProjectCachePath;
+std::string Options::ProjectViewsPath;
 
 std::string Options::UPS_pathPDFTEX = "";
 std::string Options::UPS_pathGS = "";
