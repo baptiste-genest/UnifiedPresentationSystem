@@ -9,6 +9,7 @@
 #include "content/PointCloud.h"
 #include "content/LateX.h"
 #include "content/Mesh.h"
+#include "content/vector_field.h"
 #include "content/Curve3D.h"
 #include "content/Point.h"
 #include "content/io.h"

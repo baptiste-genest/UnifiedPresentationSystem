@@ -123,24 +123,25 @@ void UPS::Slideshow::play() {
 
     prompt();
 
-    handleDragAndDrop();
+    if (ImGui::IsKeyPressed(341))//CTRL
+        handleDragAndDrop();
 
-    if (ImGui::IsKeyPressed(262) && !locked){
+    if (ImGui::IsKeyPressed(262) && !locked){ // RIGHT ARROW
         nextFrame();
     }
-    else if (ImGui::IsKeyPressed(263)){
+    else if (ImGui::IsKeyPressed(263)){// LEFT ARROW
         previousFrame();
-    }else if (ImGui::IsKeyPressed(264)){
+    }else if (ImGui::IsKeyPressed(264)){// DOWN ARROW
         forceNextFrame();
     }
 
-    if (ImGui::IsKeyPressed(67)){
+    if (ImGui::IsKeyPressed(67)){// C
         std::string file("/tmp/cam.json");
         std::ofstream camfile(file);
         camfile << polyscope::view::getCameraJson();
         std::cout << "current camera view exported at " << file << std::endl;
     }
-    if (ImGui::IsKeyPressed(80)){
+    if (ImGui::IsKeyPressed(80)){ // P
         static int screenshot_count = 0;
         std::string file =  "/tmp/screenshot_" + std::to_string(screenshot_count++) + ".png";
         UPS::screenshot(file);
@@ -315,7 +316,7 @@ UPS::PrimitiveID UPS::Slideshow::getPrimitiveUnderMouse(scalar x,scalar y) const
     for (auto& pis : slides[current_slide]){
         auto p = pis.second.relative_anchor_pos;
         auto sp = Primitive::get(pis.first);
-        if (!sp->isScreenSpace())
+        if (!sp->isScreenSpace() || pis.second.label == "")
             continue;
         auto rs = sp->getRelativeSize();
         if (std::abs(p.x - x) < rs.x && std::abs(p.y - y) < rs.y){

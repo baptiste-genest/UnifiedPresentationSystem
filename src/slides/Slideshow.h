@@ -77,7 +77,7 @@ public:
             int i = slides.size()-2;
             auto ex = slides[i].exclusive_prim;
             if (ex != -1){
-                addToLastSlide(Primitive::get(ex),slides[i-1][ex]);
+                addToLastSlide(Primitive::get(ex),slides[i][ex]);
             }
         }
         return *this;

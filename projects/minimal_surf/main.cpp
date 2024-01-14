@@ -4,6 +4,8 @@
 #include "imgui.h"
 using namespace UPS;
 
+#include <gif_lib.h>
+
 Slideshow show;
 
 
@@ -31,13 +33,86 @@ vec circle(scalar t){
         );
 }
 
-std::function<scalar(scalar)> buildRangeMapper(scalar a,scalar b,scalar c,scalar d) {
-    return [a,b,c,d] (scalar x) {
-        return c + (d-c)*(x-a)/(b-a);
-    };
-}
 mapping offset(const vec& x){
     return [x] (const vec& X){return X+x;};
+}
+
+vecs randomSmoothVectorField(int N,const UPS::Mesh::MeshPtr& quad) {
+    vecs result(N*N*N);
+    for (int k = 0;k<N;k++)
+        for (int j = 0;j<N;j++)
+            for (int i = 0;i<N;i++)
+                result[k*N*N+j*N+i]  = vec::Random();
+    double step = 0.1;
+    //iterative smoothing
+    for (int iter = 0;iter<50;iter++) {
+        for (int k = 0;k<N;k++)
+            for (int j = 0;j<N;j++)
+                for (int i = 0;i<N;i++) {
+                    vec sum = vec::Zero();
+                    int count = 0;
+                    for (int dk = -1;dk<=1;dk++)
+                        for (int dj = -1;dj<=1;dj++)
+                            for (int di = -1;di<=1;di++) {
+                                if (i+di<0 || i+di>=N || j+dj<0 || j+dj>=N || k+dk<0 || k+dk>=N)
+                                    continue;
+                                sum += result[(k+dk)*N*N+(j+dj)*N+(i+di)];
+                                count++;
+                            }
+                    result[k*N*N+j*N+i] += step*(sum/count - result[k*N*N+j*N+i]);
+                }
+    }
+
+    auto coord = buildRangeMapper(0,N-1,-0.5,0.5);
+    auto l = 0.5/N;
+    for (int k = 0;k<N;k++)
+        for (int j = 0;j<N;j++)
+            for (int i = 0;i<N;i++) {
+                auto field = [i,j,k,l,N,coord,&result,quad] (const Mesh::Vertex& v) {
+                    auto x = coord(i);
+                    auto y = coord(j);
+                    auto z = coord(k);
+                    auto X = vec(x,y,z);
+                    auto h = v.pos;
+                    vec grad = result[k*N*N+j*N+i];
+                    auto rp = CompleteBasis(grad);
+                    h = h(0)*rp.first + h(1)*rp.second;
+                    return vec(X+h*l);
+                };
+                auto kvec =  quad->apply(field);
+                kvec->pc->setSurfaceColor(glm::vec3(1.,0,0));
+                kvec->pc->setEdgeWidth(1.5);
+                show << kvec;
+            }
+    return result;
+}
+
+void shape_evolution(int N,const UPS::Mesh::MeshPtr& quad) {
+    auto coord = buildRangeMapper(0,N-1,-0.5,0.5);
+    auto l = 0.5/N;
+    for (int k = 0;k<N;k++)
+        for (int j = 0;j<N;j++)
+            for (int i = 0;i<N;i++) {
+                auto field = [i,j,k,l,coord] (const Mesh::Vertex& v,const TimeObject& t) {
+                    auto x = coord(i);
+                    auto y = coord(j);
+                    auto z = coord(k);
+                    auto X = vec(x,y,z);
+                    auto h = v.pos;
+                    if (t.relative_frame_number == 0)
+                        return vec(X+h*l);
+                    auto I = std::exp(-t.from_action);
+                    auto sdf = exp(x*x+y*y)-z-1;
+                    vec grad = vec(0,0,1)*I + (1-I)*vec(2*x*std::exp(x*x+y*y),2*y*std::exp(x*x+y*y),-1).normalized();
+                    auto rp = CompleteBasis(grad);
+                    h = h(0)*rp.first + h(1)*rp.second;
+                    return vec(X+h*l*std::exp(-t.from_action*std::pow(sdf,2)*10));
+                };
+                auto kvec =  quad->applyDynamic(field);
+                kvec->pc->setSurfaceColor(glm::vec3(1.,0,0));
+                kvec->pc->setEdgeWidth(1.5);
+                show << kvec;
+            }
 }
 
 void init () {
@@ -53,7 +128,10 @@ void init () {
 
     Latex::DeclareMathOperator("argmin","arg\\,min");
     Latex::DeclareMathOperator("area","Area");
+    Latex::NewCommand("curl","\\text{curl}");
+    //Latex::NewCommand("div","\\text{div}");
     Latex::NewCommand("mass","\\text{mass}");
+    Latex::NewCommand("VA","\\Vec{A}");
 
     Style::default_font = CMFONTID;
 
@@ -63,7 +141,7 @@ void init () {
     {
         auto title = Title(tex::center("Computing Minimal Surfaces\\\\ using Differential forms"));
         show << title->at(CENTER);
-        show << PlaceBelow(Latex::Add("Albert Cheng"));
+        show << PlaceBelow(Latex::Add("Albert Chern"));
         show << PlaceBelow(Latex::Add("Stephanie Wang"));
     }
 
@@ -134,13 +212,23 @@ void init () {
         show << newFrame << title->at(TOP);
         auto codim = Image::Add(UPS::Options::ProjectPath + "codim.png");
         auto ext_d = Image::Add(UPS::Options::ProjectPath + "ext_der.png");
+        show << Latex::Add("smooth field of k-forms : $\\mathbb{R}^n \\mapsto \\bigwedge V^*$")->at("diff_forms");
         show << inNextFrame << codim->at(CENTER);
+        show << Latex::Add("$x \\mapsto $Ker$(\\omega(x))$")->at("codim");
         show << newFrameSameTitle;
         show << PlaceBelow(Latex::Add("exterior derivative"),title);
         show << inNextFrame << ext_d->at(0.8,0.5);
         show << Image::Add(UPS::Options::ProjectPath + "d_boundary.png")->at(0.3,0.5);
     }
-    // TODO: SHOW EQUIVALENCE BETWEEN ONE FORMS AND VECTOR FIELDS
+    if (true) {
+        auto title = Title("Example : differential 1-form");
+        show << newFrame << title->at(TOP);
+        auto form = Formula::Add("\\omega(x) = f(x)dx + g(x)dy + h(x)dz");
+        auto cam = CameraView::Add(Options::ProjectViewsPath + "1_form.json");
+        show << cam << PlaceBelow(form);
+        auto V = randomSmoothVectorField(7,quad);
+        show << newFrameSameTitle << VectorField::AddOnGrid(V) << cam << PlaceBelow(form);
+    }
     if (true) {
         show << newFrame << Title("How to represent a shape in a computer")->at(CENTER) << inNextFrame << TOP;
         show << CameraView::Add(UPS::Options::ProjectViewsPath + "shape.json");
@@ -166,7 +254,7 @@ void init () {
 
     if (true) {
         show << newFrame << Title("Currents")->at(TOP);
-        show << PlaceBelow(Latex::Add(tex::center("Currents are to differential forms \\\\ what distributions are to $\\mathcal{C}^{\\infty}$ functions")),0.1);
+        show << PlaceBelow(Latex::Add(tex::center("Currents are to differential forms \\\\ what distributions are to $\\mathcal{C}^{\\infty}_c$ functions")),0.1);
         show << CameraView::Add(UPS::Options::ProjectViewsPath + "currents.json");
         show << inNextFrame << surface;
         show << PlaceRight(Formula::Add("\\langle \\delta_{\\Sigma},\\omega \\rangle = \\int_{\\Sigma} \\omega "));
@@ -195,43 +283,51 @@ void init () {
     if (true)
     {
         show << newFrame << Title("The article's approach")->at(TOP);
-        show << inNextFrame << Formula::Add("\\argmin_{\\Sigma : \\partial \\Sigma = \\Gamma} \\area(\\Sigma)")->at(0.3,0.25);
+        show << inNextFrame << Formula::Add("\\argmin_{\\Sigma : \\partial \\Sigma = \\Gamma} \\area(\\Sigma)")->at("opti");
         show << inNextFrame << PlaceNextTo(Formula::Add(" = \\argmin_{\\Sigma : d \\delta_{\\Sigma} = \\delta_\\Gamma} ||\\delta_\\Sigma||_{\\mass}"),1);
         show << CameraView::Add(UPS::Options::ProjectViewsPath + "currents.json");
         show << surface;
-        show << inNextFrame << PlaceNextTo(Formula::Add("= \\argmin_{\\eta : d \\eta = \\delta_\\Gamma} ||\\eta||_{1}"),1);
+        show << inNextFrame << PlaceNextTo(Formula::Add("= \\argmin_{\\eta : d \\eta = \\delta_\\Gamma} ||\\eta||_{1} = \\argmin_{X : \\curl(X) = \\delta_\\Gamma} ||X||_{1}"),1);
         show << inNextFrame << CameraView::Add(UPS::Options::ProjectViewsPath + "field.json");
         show >> surface;
         int N = 6;
-        auto coord = buildRangeMapper(0,N-1,-0.5,0.5);
-        auto l = 0.5/N;
-        for (int k = 0;k<N;k++)
-            for (int j = 0;j<N;j++)
-                for (int i = 0;i<N;i++) {
-                    auto field = [i,j,k,l,coord] (const Mesh::Vertex& v,const TimeObject& t) {
-                        auto x = coord(i);
-                        auto y = coord(j);
-                        auto z = coord(k);
-                        auto X = vec(x,y,z);
-                        auto h = v.pos;
-                        if (t.relative_frame_number == 0)
-                            return vec(X+h*l);
-                        auto I = std::exp(-t.from_action);
-                        auto sdf = exp(x*x+y*y)-z-1;
-                        vec grad = vec(0,0,1)*I + (1-I)*vec(2*x*std::exp(x*x+y*y),2*y*std::exp(x*x+y*y),-1).normalized();
-                        auto rp = CompleteBasis(grad);
-                        h = h(0)*rp.first + h(1)*rp.second;
-                        return vec(X+h*l*std::exp(-t.from_action*std::pow(sdf,2)*10));
-                    };
-                    auto kvec =  quad->applyDynamic(field);
-                    kvec->pc->setSurfaceColor(glm::vec3(1.,0,0));
-                    kvec->pc->setEdgeWidth(1.5);
-                    show << kvec;
-                }
+        shape_evolution(N,quad);
+
         show << inNextFrame;
     }
     {
-        show << newFrame << Title("Quick recap");
+        show << newFrame << Title("Quick recap")->at(TOP);
+    }
+    {
+        show << newFrame << Title("The Helmholtz-Hodge Decomposition")->at(TOP);
+        show << Image::Add(UPS::Options::ProjectPath + "helmholtz_hodge.png")->at("HH");
+        show << inNextFrame << Formula::Add("v = \\alpha \\oplus \\beta \\oplus \\gamma")->at("HH_decomp");
+        show << PlaceBelow(Formula::Add("\\alpha \\in \\text{Ker}(d^1) \\iff \\text{div}(\\alpha) = 0"));
+        show << PlaceBelow(Formula::Add("\\beta \\in \\text{Im}(d^0) \\iff \\text{curl}(\\beta) = 0 \\iff \\beta = d\\varphi"));
+        show << PlaceBelow(Formula::Add("\\gamma \\in \\frac{\\text{Ker}(d^1)}{\\text{Im}(d^0)}"));
+    }
+    {
+        show << newFrame << Title("FFT and Topology")->at(TOP);
+        show << inNextFrame << Latex::Add("Implicit representation $\\implies$ high computational cost")->at("fft");
+        show << inNextFrame << Replace(Latex::Add("Imposing Curl$(X) = v \\implies$ solving many $\\Delta X = Y$"));
+        show << inNextFrame << PlaceBelow(Latex::Add("To speed things up : FFT!"));
+        show << newFrameSameTitle << Image::Add(Options::ProjectPath + "T3.png")->at(CENTER);
+    }
+    {
+        show << newFrame << Title("Vector Area")->at(TOP);
+        show << inNextFrame << Formula::Add("\\int_{\\Sigma} n_{\\Sigma} dS");
+        show << inNextFrame << PlaceNextTo(Formula::Add("\\stackrel{\\mathclap{\\tiny\\mbox{Stokes}}}{=} \\int \\gamma \\times d\\gamma"),1);
+    }
+    {
+        show << newFrame << Title("Going back to our optimization problem")->at(TOP);
+        show << Formula::Add("\\argmin_{X : \\curl(X) = \\delta_\\Gamma,\\VA(X) = \\VA(\\Sigma)} ||X||_{1}")->at(0.5,0.3);
+        show << inNextFrame << PlaceBelow(Formula::Add("\\argmin_{\\varphi} ||\\eta_0 + \\nabla \\varphi ||_1 \\text{, where } \\curl(\\eta_0) = \\delta_\\Gamma,\\VA(\\eta_0) = \\VA(\\Sigma)"),0.1);
+        show <<  Title("Factorizing the constraints")->at(TOP);
+        show << newFrame << Title("Final optimization Problem")->at(TOP);
+        show << Formula::Add("\\argmin_{\\varphi,Y : Y = \\eta_0 + \\nabla \\varphi} ||Y||_1")->at(CENTER);
+        show << inNextFrame << PlaceBelow(Latex::Add("Minimizing a convex function under linear constraints $\\implies$ ADMM"));
+    }
+    {
 
     }
 
