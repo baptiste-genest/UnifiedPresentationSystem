@@ -75,6 +75,7 @@ void UPS::Mesh::updateMesh(const vecs &X)
 void UPS::Mesh::initPolyscope()
 {
     pc = polyscope::registerSurfaceMesh(getPolyscopeName(),vertices,faces);
+    pc->setBackFacePolicy(polyscope::BackFacePolicy::Identical);
     initPolyscopeData(pc);
     setSmooth(smooth);
 }

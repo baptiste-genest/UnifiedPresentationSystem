@@ -25,6 +25,8 @@ struct TimeObject
     }
 };
 
+using VertexTimeMap = std::function<vec(const Vertex&,const TimeObject&)>;
+
 }
 
 #endif // TIMEOBJECT_H

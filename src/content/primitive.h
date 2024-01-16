@@ -135,20 +135,6 @@ std::shared_ptr<T> NewPrimitive(Args&& ... args){
     return ptr;
 }
 
-struct PrimitiveGroup : public std::vector<PrimitiveInSlide> {
-
-    PrimitiveGroup& operator<<(PrimitivePtr ptr) {
-        std::vector<PrimitiveInSlide>::push_back(ptr->at(1));
-        return *this;
-    }
-
-    PrimitiveGroup& operator<<(const PrimitiveInSlide& pis) {
-        std::vector<PrimitiveInSlide>::push_back(pis);
-        return *this;
-    }
-
-};
-
 
 }
 

@@ -45,9 +45,9 @@ void UPS::generate_latex(const std::string &filename,
     std::string latex_cmd = Options::UPS_pathPDFLATEX+"pdflatex -output-directory=/tmp /tmp/formula.tex  >>/tmp/UPS.log";
     if (std::system(latex_cmd.c_str())) {
         std::cerr << "[error while generating latex] " <<  std::endl;
-        assert(false);
+        exit(1);
     }
-    if (std::system((Options::UPS_pathCONVERT+"convert -trim -density "+std::to_string(Options::UPS_density)+" -quality 100 /tmp/formula.pdf -colorspace RGB " + filename + " >>/tmp/UPS.log").c_str())) {
+    if (std::system((Options::UPS_pathCONVERT+"convert -density "+std::to_string(Options::UPS_density)+" -quality 100 -trim -border 10 -bordercolor none /tmp/formula.pdf -colorspace RGB " + filename + " >>/tmp/UPS.log").c_str())) {
         std::cerr << "[error while converting to png]" << std::endl;
         assert(false);
     }

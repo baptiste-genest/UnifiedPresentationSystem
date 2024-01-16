@@ -66,7 +66,13 @@ using Vec = Eigen::Vector<scalar,-1>;
 using Mat = Eigen::Matrix<scalar,-1,-1>;
 using SMat = Eigen::SparseMatrix<scalar>;
 using mat2 = Eigen::Matrix<scalar,2,2>;
+using mat = Eigen::Matrix<scalar,3,3>;
 using vecs = std::vector<vec>;
+
+struct Vertex {
+    vec pos;
+    int id;
+};
 
 using Face = std::vector<size_t>;
 using Faces = std::vector<Face>;

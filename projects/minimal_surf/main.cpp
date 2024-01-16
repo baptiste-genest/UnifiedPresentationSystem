@@ -68,7 +68,7 @@ vecs randomSmoothVectorField(int N,const UPS::Mesh::MeshPtr& quad) {
     for (int k = 0;k<N;k++)
         for (int j = 0;j<N;j++)
             for (int i = 0;i<N;i++) {
-                auto field = [i,j,k,l,N,coord,&result,quad] (const Mesh::Vertex& v) {
+                auto field = [i,j,k,l,N,coord,&result,quad] (const Vertex& v) {
                     auto x = coord(i);
                     auto y = coord(j);
                     auto z = coord(k);
@@ -93,7 +93,7 @@ void shape_evolution(int N,const UPS::Mesh::MeshPtr& quad) {
     for (int k = 0;k<N;k++)
         for (int j = 0;j<N;j++)
             for (int i = 0;i<N;i++) {
-                auto field = [i,j,k,l,coord] (const Mesh::Vertex& v,const TimeObject& t) {
+                auto field = [i,j,k,l,coord] (const Vertex& v,const TimeObject& t) {
                     auto x = coord(i);
                     auto y = coord(j);
                     auto z = coord(k);

@@ -123,8 +123,7 @@ void UPS::Slideshow::play() {
 
     prompt();
 
-    if (ImGui::IsKeyPressed(341))//CTRL
-        handleDragAndDrop();
+    handleDragAndDrop();
 
     if (ImGui::IsKeyPressed(262) && !locked){ // RIGHT ARROW
         nextFrame();
@@ -161,6 +160,11 @@ void UPS::Slideshow::setInnerTime()
 
 void UPS::Slideshow::handleDragAndDrop()
 {
+    if (!ImGui::IsKeyPressed(341)){//CTRL {
+        selected_primitive = -1;
+        return;
+    }
+
     auto io = ImGui::GetIO();
     auto S = ImGui::GetWindowSize();
     auto x = double(io.MousePos.x)/S.x;
@@ -313,13 +317,14 @@ void UPS::Slideshow::setScriptFile(std::string file)
 
 UPS::PrimitiveID UPS::Slideshow::getPrimitiveUnderMouse(scalar x,scalar y) const
 {
+    auto io = ImGui::GetIO();
+    auto S = ImGui::GetWindowSize();
     for (auto& pis : slides[current_slide]){
         auto p = pis.second.relative_anchor_pos;
         auto sp = Primitive::get(pis.first);
         if (!sp->isScreenSpace() || pis.second.label == "")
             continue;
-        auto rs = sp->getRelativeSize();
-        if (std::abs(p.x - x) < rs.x && std::abs(p.y - y) < rs.y){
+        if (std::abs(p.x - x) < sp->getSize().x/2/S.x && std::abs(p.y - y) < sp->getSize().y/2/S.y){
             return pis.first;
         }
     }

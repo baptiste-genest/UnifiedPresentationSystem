@@ -15,11 +15,16 @@ public:
 
     static PointCloudPtr Add(const vecs& P);
     PointCloudPtr apply(const mapping& phi);
+    PointCloudPtr applyDynamic(const VertexTimeMap& phi);
 
     polyscope::PointCloud* pc;
     const vecs& getPoints() const {return points;}
+    void updateCloud(const vecs& X) {
+        points = X;
+        pc->updatePointPositions(points);
+    }
 private:
-    vecs points;
+    vecs points,original_points;
 
     // PolyscopePrimitive interface
 public:

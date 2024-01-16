@@ -3,6 +3,7 @@
 
 #include "Slide.h"
 #include "../content/Placement.h"
+#include "../content/PrimitiveGroup.h"
 #include "Prompter.h"
 #include "screenshot.h"
 
@@ -125,8 +126,31 @@ public:
     }
 
     inline Slideshow& operator<<(const PrimitiveGroup& G) {
-        for (const auto& ps : G)
-            addToLastSlide(ps.first,ps.second);
+        auto mean = G.getRelativeAnchorPos();
+        for (auto [id,sis] : G.buffer){
+            sis.relative_anchor_pos.x += G.relative_anchor.x - mean.x();
+            sis.relative_anchor_pos.y += G.relative_anchor.y - mean.y();
+            addToLastSlide(Primitive::get(id),sis);
+        }
+        return *this;
+    }
+
+    void removeFromCurrentSlide(PrimitivePtr ptr) {
+        slides.back().remove(ptr);
+    }
+
+    void removeFromCurrentSlide(const PrimitiveGroup& G) {
+        for (const auto& pid : G.buffer)
+            removeFromCurrentSlide(Primitive::get(pid.first));
+    }
+
+    inline Slideshow& operator>>(PrimitivePtr ptr) {
+        removeFromCurrentSlide(ptr);
+        return *this;
+    }
+
+    inline Slideshow& operator>>(const PrimitiveGroup& G) {
+        removeFromCurrentSlide(G);
         return *this;
     }
 
@@ -164,25 +188,6 @@ public:
         T.from_action = TimeFrom(from_action);
         T.absolute_frame_number = current_slide;
         return T;
-    }
-
-    void removeFromCurrentSlide(PrimitivePtr ptr) {
-        slides.back().remove(ptr);
-    }
-
-    void removeFromCurrentSlide(const PrimitiveGroup& G) {
-        for (const auto& ps : G)
-            removeFromCurrentSlide(ps.first);
-    }
-
-    inline Slideshow& operator>>(PrimitivePtr ptr) {
-        removeFromCurrentSlide(ptr);
-        return *this;
-    }
-
-    inline Slideshow& operator>>(const PrimitiveGroup& G) {
-        removeFromCurrentSlide(G);
-        return *this;
     }
 
     void handleDragAndDrop();

@@ -55,7 +55,7 @@ mat2 hessian(vec X) {
 }
 scalar zoffset = 0.02;
 
-vec taylor(const Mesh::Vertex& v,TimeObject T) {
+vec taylor(const Vertex& v,TimeObject T) {
     auto& H = v.pos;
     auto t = Primitive::get(explorer_id)->getInnerTime();
     auto x = point_explore(t);
@@ -115,8 +115,10 @@ Mat illustratePoissonProblem() {
     B(114) = 1;
     Vec rhs = M*B.col(0);
     B.col(1) = solver.solve(rhs);
+    /*
     if (solver.info() != Eigen::Success)
         std::cout << "error eigen solve" << solver.info() << std::endl;
+*/
     io::SaveMatrix(cache,B);
     return B;
 }
@@ -551,7 +553,7 @@ void init () {
                 auto po = point_param->apply(offset);
                 auto ps = point_param->apply(sphere_offset);
                 show << PlaceLeft(plane,0.3) << po << ps;
-                auto TM =  grid->applyDynamic([po](const Mesh::Vertex& v,TimeObject){
+                auto TM =  grid->applyDynamic([po](const Vertex& v,TimeObject){
                     auto x = v.pos;
                         vec p = po->getCurrentPos() + vec(1.5,0,0);
                         auto h = 1e-3;
@@ -902,7 +904,7 @@ void init () {
 
     if (false)
     {
-        auto parabola = [] (const Mesh::Vertex& v,const TimeObject& t) {
+        auto parabola = [] (const Vertex& v,const TimeObject& t) {
             const auto& h = v.pos;
             if (t.relative_frame_number == 0)
                 return h;
@@ -943,7 +945,7 @@ void init () {
         show << newFrame << Title("Discrétisation courbure de Gauss")->at(TOP);
         auto deflect = PlaceRight(Formula::Add("K = 2\\pi - \\sum_{n \\in N_i} \\theta_n",0.06),0.4,0.1);
         auto fan = Mesh::Add(Options::DataPath + "meshes/fan.obj");
-        auto curvature = [] (const Mesh::Vertex& v,const TimeObject& t) {
+        auto curvature = [] (const Vertex& v,const TimeObject& t) {
             const auto& h = v.pos;
             if (t.relative_frame_number == 0)
                 return h;

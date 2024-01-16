@@ -12,12 +12,7 @@ namespace UPS {
   {
   public:
     
-    struct Vertex {
-      vec pos;
-      int id;
-    };
     
-    using VertexTimeMap = std::function<vec(const Vertex&,const TimeObject&)>;
     using VertexMap = std::function<vec(const Vertex&)>;
     
     using MeshPtr = std::shared_ptr<Mesh>;

@@ -31,12 +31,6 @@ struct Formula {
 
 
 
-inline Latex::LatexPtr Title(TexObject s) {
-    auto rslt = Latex::Add(s,Options::UPS_TITLE);
-    rslt->exclusive = true;
-    return rslt;
-}
-
 
 namespace tex {
 
@@ -147,6 +141,23 @@ TexObject cases(ARGS... arguments) {
     return cases(data);
 }
 
+inline TexObject enumerate(const std::vector<TexObject>& texs) {
+    TexObject rslt = "\\begin{enumerate}\n";
+    for (int i= 0;i<texs.size();i++)
+        rslt +=  "\\item " + texs[i] + '\n';
+    rslt += "\\end{enumerate}";
+    return rslt;
+}
+
+template <typename... ARGS>
+TexObject enumerate(ARGS... arguments) {
+    std::vector<TexObject> data;
+    data.reserve(sizeof...(arguments));
+    (data.emplace_back(arguments), ...);
+    return enumerate(data);
+}
+
+
 
 template <int col,int row>
 inline TexObject Mat(const std::vector<TexObject>& texs) {
@@ -172,6 +183,15 @@ TexObject Mat(ARGS... arguments) {
 }
 
 }
+
+inline Latex::LatexPtr Title(TexObject s,bool center = true) {
+    if (center)
+        s = tex::center(s);
+    auto rslt = Latex::Add(s,Options::UPS_TITLE);
+    rslt->exclusive = true;
+    return rslt;
+}
+
 
 }
 
