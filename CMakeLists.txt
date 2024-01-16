@@ -48,3 +48,6 @@ target_link_libraries(tuto_helloworld UPS)
 
 add_executable(tuto_mesh projects/tutorials/tuto_mesh.cpp)
 target_link_libraries(tuto_mesh UPS)
+
+add_executable(NESOTS projects/NESOTS/main.cpp)
+target_link_libraries(NESOTS UPS)
