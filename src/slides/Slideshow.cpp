@@ -1,5 +1,5 @@
 #include "Slideshow.h"
-#include <GL/gl.h>
+//#include <GL/gl.h>
 
 
 void UPS::Slideshow::nextFrame()

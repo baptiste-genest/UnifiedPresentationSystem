@@ -1,15 +1,10 @@
 #include "screenshot.h"
-Window get_focus_window(Display* d){
-    Window w;
-    int revert_to;
-    XGetInputFocus(d, &w, &revert_to); // see man
-    if(w == None){
-        printf("no focus window\n");
-        exit(1);
-    }
-    return w;
-}
 
+#ifdef __APPLE__
+void UPS::screenshot(std::string file)
+{
+}
+#else
 void UPS::screenshot(std::string file)
 {
     Display* display = XOpenDisplay(nullptr);
@@ -36,3 +31,4 @@ void UPS::screenshot(std::string file)
                 IMG[(i*Width+j)*3+k] = Pixels[((Height-1-i)*Width+j)*4+(2-k)];
     polyscope::saveImage(file,IMG.data(),Width,Height,3);
 }
+#endif
