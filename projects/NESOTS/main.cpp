@@ -55,6 +55,7 @@ using VFPC = std::shared_ptr<PolyscopeQuantity<polyscope::PointCloudVectorQuanti
 bool runall = false;
 void init() {
 
+    srand(time(NULL));
 
     Latex::NewCommand("W","\\mathcal{W}");
     Latex::NewCommand("U","\\mathcal{U}");
@@ -143,14 +144,41 @@ void init() {
     if (false || runall)
     {
         show << newFrame << Title("Sliced Optimal Transport Sampling")->at(TOP);
-        show << inNextFrame << PlaceBelow(Latex::Add("Stochastic Gradient Descent on $\\mu \\mapsto \\W(\\mu,\\nu)$"),0.04);
+        show << inNextFrame << PlaceBelow(Latex::Add("Stochastic Gradient Descent on $\\mu \\mapsto SW(\\mu,\\nu)$"),0.04);
+        auto back = show.getCurrentSlide();
+        show << CameraView::Add(Options::ProjectViewsPath + "planar_close.json");
+
+        {
+            auto swgrad = Formula::Add("\\nabla_{x_i} SW^\\theta ?");
+            vec theta = vec(1,0,0);
+            auto pct = Curve3D::Add(vecs{-theta*3,theta*3},false,0.002);
+
+            auto mu = project(randomPointCloud(8),theta);
+            auto mupc = PointCloud::Add(mu);
+            auto nu = project(randomPointCloud(8),theta);
+            auto nupc = PointCloud::Add(nu);
+
+            show << inNextFrame << PlaceBelow(swgrad) <<  pct << mupc << nupc;
+
+            auto mup =mu;auto nup = nu;
+            std::sort(mup.begin(),mup.end(),[theta](const vec& x,const vec& y) {return x.dot(theta) < y.dot(theta);});
+            std::sort(nup.begin(),nup.end(),[theta](const vec& x,const vec& y) {return x.dot(theta) < y.dot(theta);});
+
+            PrimitiveGroup Assignments;
+            for (int i = 0;i<N;i++){
+                Assignments << Curve3D::Add(roundArrowParam(proj(mup[i],theta),proj(nup[i],theta)),100,false,0.002);
+            }
+            show << Assignments;
+            show << inNextFrame << Replace(Formula::Add("\\nabla_{x_i} SW^{\\theta} = T^{\\theta}(x_i) - x_i"),swgrad);
+        }
+
+        show << back << CameraView::Add(Options::ProjectViewsPath + "planar.json");
         auto mu = randomPointCloud(N);
         auto mupc = PointCloud::Add(mu);
         auto NU = randomPointCloud(N*20);
         auto NUpc = PointCloud::Add(NU);
 
         show << inNextFrame << mupc << NUpc;
-        show << CameraView::Add(Options::ProjectViewsPath + "planar.json");
 
         show << inNextFrame << NUpc->at(0.5) << inNextFrame;
 
@@ -211,6 +239,8 @@ void init() {
             show << inNextFrame >> pct >> m >> n >> nupc;
         }
 
+        show << PlaceLeft(Formula::Add("\\nabla_{x_i} SW\\leftarrow  \\frac{1}{\\Theta}\\sum_{\\theta}\\nabla_{x_i} SW^\\theta"),0.5,0.03);
+
         vecs combined_gradients(N,vec::Zero());
         show << inNextFrame;
         for (int j = 0;j<K;j++){
@@ -241,9 +271,6 @@ void init() {
         });
         show << Formula::Add("\\mathbb{S}^2")->at("S2");
         show << Formula::Add("\\mathbb{H}^2")->at("H2");
-        show << newFrameSameTitle;
-        show << Image::Add("nesots_algo.png",0.8)->at("nesots");
-        show << Image::Add("logexp.png",1)->at("logexp");
         show << newFrame << Title("Contributions")->at(TOP);
         show << Image::Add("sphere_sampling.png",0.6)->at("sphere_sampling");
         show << Image::Add("geomed_gain.png",0.6)->at("geomed");
@@ -254,6 +281,9 @@ void init() {
             "Use of the geometric median",
             "Intrinsic Mesh sampling",
             "Projective plane sampling")),0.5,0.05);
+        show << newFrame << Title("NESOTS algorithm")->at(TOP);
+        show << Image::Add("nesots_algo.png",0.8)->at("nesots");
+        show << Image::Add("logexp.png",1)->at("logexp");
     }
     if (true || runall) {
         show << newFrame << Title("Geometric Median for robust SGD")->at(TOP);
@@ -276,9 +306,13 @@ void init() {
         show << inNextFrame << Formula::Add("q^{-1}\\Vec{x}q")->at("quat");
         show << inNextFrame << PlaceNextTo(Formula::Add("=(-q)^{-1}\\Vec{x}(-q)"),1);
         show << inNextFrame << Image::Add("rot_sampling.png")->at("rot2");
-        show << PlaceLeft(Latex::Add("Direction Sampling"),0.5);
+        show << PlaceLeft(Latex::Add("Direction Sampling \\& more"),0.5);
         show << inNextFrame << Image::Add("dir_sampling.png",0.8)->at("dir");
+        show << inNextFrame << Image::Add("line_sampling.png",0.8)->at("line");
     }
+
+    show << newFrame << Title("Thank you for your attention");
+    show << PlaceBelow(Latex::Add("Code Available : Eulerson314 (Github)"));
 
 
 }

@@ -5,6 +5,17 @@ void UPS::screenshot(std::string file)
 {
 }
 #else
+
+Window get_focus_window(Display* d){
+    Window w;
+    int revert_to;
+    XGetInputFocus(d, &w, &revert_to); // see man
+    if(w == None){
+        printf("no focus window\n");
+        exit(1);
+    }
+    return w;
+}
 void UPS::screenshot(std::string file)
 {
     Display* display = XOpenDisplay(nullptr);
