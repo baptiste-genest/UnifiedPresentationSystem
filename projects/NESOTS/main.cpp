@@ -258,7 +258,7 @@ void init() {
     if (true || runall) {
         show << newFrame << Title("Geometric Median for robust SGD")->at(TOP);
         show << Latex::Add("Classic SGD:")->at("SGD");
-        show << PlaceBelow(Formula::Add("\\nabla_{x_i} \\W(\\sum_i \\delta_{x_i},\\nu) \\leftarrow \\frac{1}{L}\\sum_{l = 1}^{L} \\left( T(x_i) - x_i\\right) "));
+        show << PlaceBelow(Formula::Add("\\nabla_{x_i} \\mathcal{SW}(\\sum_i \\delta_{x_i},\\nu) \\leftarrow \\frac{1}{L}\\sum_{l = 1}^{L} \\left( T(x_i) - x_i\\right) "));
         show << inNextFrame;
         show << Latex::Add("GeoMed Descent:")->at("GMD");
         show << PlaceBelow(Formula::Add("\\text{GeoMed}(\\{ T(x_i) - x_i\\}_i)"));
@@ -275,7 +275,7 @@ void init() {
         show << PlaceLeft(Latex::Add("Rotation sampling $\\rightarrow$ sampling unit Quaternions $\\subset \\mathbb{S}^3$"),0.25);
         show << inNextFrame << Formula::Add("q^{-1}\\Vec{x}q")->at("quat");
         show << inNextFrame << PlaceNextTo(Formula::Add("=(-q)^{-1}\\Vec{x}(-q)"),1);
-        show << inNextFrame << Image::Add("rot_sampling.png")->at("rot");
+        show << inNextFrame << Image::Add("rot_sampling.png")->at("rot2");
         show << PlaceLeft(Latex::Add("Direction Sampling"),0.5);
         show << inNextFrame << Image::Add("dir_sampling.png",0.8)->at("dir");
     }
