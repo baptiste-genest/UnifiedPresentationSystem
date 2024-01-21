@@ -2,12 +2,12 @@
 #define CAMERAVIEW_H
 
 #include "polyscope/polyscope.h"
-#include "primitive.h"
+#include "PolyscopePrimitive.h"
 #include <fstream>
 
 namespace UPS {
 
-class CameraView : public Primitive
+class CameraView : public PolyscopePrimitive
 {
 public:
     static glm::vec3 toVec3(const vec& x) {
@@ -25,7 +25,6 @@ public:
     using CameraViewPtr = std::shared_ptr<CameraView>;
     static CameraViewPtr Add(const vec& from,const vec& to,const vec& up = vec(0,1,0),bool flyTo = false);
     static CameraViewPtr Add(std::string json_file,bool flyTo = false);
-    bool isScreenSpace() override {return false;}
 
     // Primitive interface
 public:

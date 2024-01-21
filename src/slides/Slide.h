@@ -2,6 +2,7 @@
 #define SLIDE_H
 
 #include "../content/primitive.h"
+#include "../content/ScreenPrimitive.h"
 
 namespace UPS {
 
@@ -12,24 +13,35 @@ struct Transition{
 };
 using Transitions = std::vector<Transition>;
 
-struct Slide : public std::map<PrimitiveID,StateInSlide> {
+struct Slide : public std::map<PrimitivePtr,StateInSlide> {
+
     void add(PrimitivePtr p,const StateInSlide& sis = {}){
         if (p->isExclusive()){
-            if (exclusive_prim != -1)
+            if (exclusive_prim != nullptr)
                 this->erase(exclusive_prim);
-            exclusive_prim = p->pid;
+            exclusive_prim = p;
         }
-        (*this)[p->pid] = sis;
+        (*this)[p] = sis;
     }
-    void add(PrimitivePtr p,const Vec2& pos){
-        add(p,StateInSlide{pos});
+    void add(PrimitivePtr p,const vec2& pos){
+        add(p,StateInSlide(pos));
     }
 
     void remove(PrimitivePtr ptr) {
-        this->erase(ptr->pid);
+        this->erase(ptr);
     }
 
-    PrimitiveID exclusive_prim = -1;
+    PrimitivePtr exclusive_prim = nullptr;
+
+    std::map<ScreenPrimitivePtr,StateInSlide> getScreenPrimitives() const {
+        std::map<ScreenPrimitivePtr,StateInSlide> rslt;
+        for (auto&& [ptr,sis] : *this) {
+            if (!ptr->isScreenSpace())
+                continue;
+            rslt[std::dynamic_pointer_cast<ScreenPrimitive>(ptr)] = sis;
+        }
+        return rslt;
+    }
 
 };
 

@@ -194,7 +194,7 @@ void init () {
         show << inNextFrame << PlaceRight(anti_comm,0.35);
 
 
-        show << inNextFrame << Title("k-forms")->at(TOP);
+        //show << inNextFrame << Title("k-forms")->at(TOP);
         show << PlaceBelow(Formula::Add("\\omega(u\\land v) = -\\omega(v\\land u) \\rightarrow \\mathbb{R}"),anti_comm,0.05);
         show << Replace(Formula::Add("\\bigwedge V^*"),algebra);
 

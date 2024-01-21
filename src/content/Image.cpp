@@ -80,14 +80,16 @@ void UPS::Image::outro(const TimeObject& t, const StateInSlide &sis)
 void UPS::Image::display(const StateInSlide &sis) const
 {
     RGBA color_multiplier = ImColor(1.f,1.f,1.f,sis.alpha);
-    auto P = sis.getAbsoluteAnchorPos();
+    auto P = toVec2(sis.captured_pos);
+    P.x *= Options::UPS_screen_resolution_x;
+    P.y *= Options::UPS_screen_resolution_y;
     if (std::abs(sis.angle) > 0.001 || std::abs(1-scale) > 1e-2)
         ImageRotated((void*)(intptr_t)texture,P,ImVec2(width*scale,height*scale),sis.angle,color_multiplier);
     else {
         P.x -= width*0.5;
         P.y -= height*0.5;
         ImGui::SetCursorPos(P);
-        ImGui::Image((void*)(intptr_t)texture, getSize(), ImVec2(0.0f, 0.0f), ImVec2(1.0f, 1.0f), color_multiplier);
+        ImGui::Image((void*)(intptr_t)texture, toVec2(getSize()), ImVec2(0.0f, 0.0f), ImVec2(1.0f, 1.0f), color_multiplier);
     }
 }
 
@@ -113,13 +115,4 @@ void UPS::Image::ImageRotated(ImTextureID tex_id, ImVec2 center, ImVec2 size, fl
         };
 
     draw_list->AddImageQuad(tex_id, pos[0], pos[1], pos[2], pos[3], uvs[0], uvs[1], uvs[2], uvs[3], color_mult);
-}
-
-UPS::Gif::GifPtr UPS::Gif::Add(std::string filename)
-{
-
-
-
-
-
 }

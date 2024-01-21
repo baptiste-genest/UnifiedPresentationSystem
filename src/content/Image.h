@@ -1,14 +1,14 @@
 #ifndef IMAGE_H
 #define IMAGE_H
 
-#include "primitive.h"
+#include "ScreenPrimitive.h"
 #include "GLFW/glfw3.h"
 #include "../math/kernels.h"
 #include "../math/geometry.h"
 
 namespace UPS {
 
-class Image : public Primitive {
+class Image : public ScreenPrimitive {
 public:
     using ImagePtr = std::shared_ptr<Image>;
 
@@ -38,9 +38,9 @@ public:
     void intro(const TimeObject& t, const StateInSlide &sis) override;
     void outro(const TimeObject& t, const StateInSlide &sis) override;
     Size getSize() const override {return Size(width,height);}
-    bool isScreenSpace() override {return true;}
 };
 
+/*
 class Gif : public Primitive {
 public:
     using GifPtr = std::shared_ptr<Gif>;
@@ -73,6 +73,7 @@ public:
     Size getSize() const override {return Size(width,height);}
     bool isScreenSpace() override {return true;}
 };
+*/
 
 
 }

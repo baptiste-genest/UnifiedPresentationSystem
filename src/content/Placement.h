@@ -1,52 +1,55 @@
 #ifndef PLACEMENT_H
 #define PLACEMENT_H
 
-#include "primitive.h"
+#include "ScreenPrimitive.h"
+
 
 namespace UPS {
 
-const Vec2 CENTER(0.5,0.5);
-const Vec2 TOP(0.5,0.1);
-const Vec2 BOTTOM(0.5,0.9);
+const vec2 CENTER(0.5,0.5);
+const vec2 TOP(0.5,0.1);
+const vec2 BOTTOM(0.5,0.9);
 
 struct Replace {
-    Replace(PrimitivePtr ptr,PrimitivePtr ptr_other = nullptr) : ptr(ptr),ptr_other(ptr_other) {}
-    PrimitivePtr ptr;
-    PrimitivePtr ptr_other = nullptr;
+    Replace(ScreenPrimitivePtr ptr,ScreenPrimitivePtr ptr_other = nullptr) : ptr(ptr),ptr_other(ptr_other) {}
+    ScreenPrimitivePtr ptr;
+    ScreenPrimitivePtr ptr_other = nullptr;
 };
 
 
 struct RelativePlacement {
 
-    RelativePlacement(PrimitivePtr ptr,PrimitivePtr ptr_other = nullptr) : ptr(ptr),ptr_other(ptr_other) {}
+    RelativePlacement(ScreenPrimitivePtr ptr,ScreenPrimitivePtr ptr_other = nullptr) : ptr(ptr),ptr_other(ptr_other) {}
 
-    virtual Vec2 computePlacement(const PrimitiveInSlide& other) const = 0;
+    virtual PositionPtr computePlacement(const ScreenPrimitivePtr& other) const = 0;
 
-    PrimitivePtr ptr;
-    PrimitivePtr ptr_other = nullptr;
+    ScreenPrimitivePtr ptr;
+    ScreenPrimitivePtr ptr_other = nullptr;
 };
 
-inline PrimitiveInSlide PlaceABelowB(PrimitivePtr ptr,const PrimitiveInSlide& other,scalar padding = 0.01) {
-    Vec2 P;
-    P.x = other.second.relative_anchor_pos.x;
-    P.y = other.second.relative_anchor_pos.y
-            + other.first->getRelativeSize().y*0.5
+/*
+inline PrimitiveInSlide PlaceABelowB(ScreenPrimitivePtr ptr,const PrimitiveInSlide& other,scalar padding = 0.01) {
+    vec2 P;
+    P(0) = other.second.relative_anchor_pos(0);
+    P(0) = other.second.relative_anchor_pos(0)
+            + other.first->getRelativeSize()(0)*0.5
             + padding
-            + ptr->getRelativeSize().y*0.5
+            + ptr->getRelativeSize()(0)*0.5
             ;
     return {ptr,P};
 }
 
-inline PrimitiveInSlide PlaceANextToB(PrimitivePtr ptr,const PrimitiveInSlide& other,int side = 1,scalar padding = 0.01) {
-    Vec2 P;
-    P.y = other.second.relative_anchor_pos.y;
-    P.x = other.second.relative_anchor_pos.x
-          + side*(other.first->getRelativeSize().x*0.5
+inline PrimitiveInSlide PlaceANextToB(ScreenPrimitivePtr ptr,const PrimitiveInSlide& other,int side = 1,scalar padding = 0.01) {
+    vec2 P;
+    P(0) = other.second.relative_anchor_pos(0);
+    P(0) = other.second.relative_anchor_pos(0)
+          + side*(other.first->getRelativeSize()(0)*0.5
                     + padding
-                    + ptr->getRelativeSize().x*0.5)
+                    + ptr->getRelativeSize()(0)*0.5)
         ;
     return {ptr,P};
 }
+*/
 
 
     enum placeX {
@@ -67,62 +70,64 @@ inline PrimitiveInSlide PlaceANextToB(PrimitivePtr ptr,const PrimitiveInSlide& o
     };
 
 struct PlaceRelative : public RelativePlacement {
-    PlaceRelative(PrimitivePtr ptr,placeX X,placeY Y,scalar paddingx = 0.01,scalar paddingy = 0.01) : RelativePlacement(ptr),X(X),Y(Y),paddingx(paddingx),paddingy(paddingy) {}
-    PlaceRelative(PrimitivePtr ptr,PrimitivePtr ptr_other,placeX X,placeY Y,scalar paddingx = 0.01,scalar paddingy = 0.01) : RelativePlacement(ptr,ptr_other),X(X),Y(Y),paddingx(paddingx),paddingy(paddingy) {}
+    PlaceRelative(ScreenPrimitivePtr ptr,placeX X,placeY Y,scalar paddingx = 0.01,scalar paddingy = 0.01) : RelativePlacement(ptr),X(X),Y(Y),paddingx(paddingx),paddingy(paddingy) {
 
-    Vec2 computePlacement(const PrimitiveInSlide& other) const override;
+    }
+    PlaceRelative(ScreenPrimitivePtr ptr,ScreenPrimitivePtr ptr_other,placeX X,placeY Y,scalar paddingx = 0.01,scalar paddingy = 0.01) : RelativePlacement(ptr,ptr_other),X(X),Y(Y),paddingx(paddingx),paddingy(paddingy) {}
+
+    PositionPtr computePlacement(const ScreenPrimitivePtr& other) const override;
 
     scalar paddingx,paddingy;
     placeX X;
     placeY Y;
 };
 
-inline PlaceRelative PlaceNextTo(PrimitivePtr ptr,int side,scalar paddingx = 0.01,PrimitivePtr other = nullptr) {
+inline PlaceRelative PlaceNextTo(ScreenPrimitivePtr ptr,int side,scalar paddingx = 0.01,ScreenPrimitivePtr other = nullptr) {
     if (side == 1)
         return PlaceRelative(ptr,placeX::REL_RIGHT,SAME_Y,paddingx);
     return PlaceRelative(ptr,placeX::REL_LEFT,SAME_Y,paddingx);
 }
 
-inline PlaceRelative PlaceBelow(PrimitivePtr ptr,scalar paddingy = 0.01) {
+inline PlaceRelative PlaceBelow(ScreenPrimitivePtr ptr,scalar paddingy = 0.01) {
     return PlaceRelative(ptr,placeX::SAME_X,placeY::REL_BOTTOM,0.01,paddingy);
 }
-inline PlaceRelative PlaceBelow(PrimitivePtr ptr,PrimitivePtr other,scalar paddingy = 0.01) {
+inline PlaceRelative PlaceBelow(ScreenPrimitivePtr ptr,ScreenPrimitivePtr other,scalar paddingy = 0.01) {
     return PlaceRelative(ptr,other,placeX::SAME_X,placeY::REL_BOTTOM,0.01,paddingy);
 }
-inline PlaceRelative PlaceAbove(PrimitivePtr ptr,scalar paddingy = 0.01) {
+inline PlaceRelative PlaceAbove(ScreenPrimitivePtr ptr,scalar paddingy = 0.01) {
     return PlaceRelative(ptr,placeX::SAME_X,placeY::REL_TOP,0.01,paddingy);
 }
-inline PlaceRelative PlaceAbove(PrimitivePtr ptr,PrimitivePtr other,scalar paddingy = 0.01) {
+inline PlaceRelative PlaceAbove(ScreenPrimitivePtr ptr,ScreenPrimitivePtr other,scalar paddingy = 0.01) {
     return PlaceRelative(ptr,other,placeX::SAME_X,placeY::REL_TOP,0.01,paddingy);
 }
 
 
-inline PrimitiveInSlide PlaceLeft(PrimitivePtr ptr,scalar y = 0.5,scalar padding = 0.1) {
-    Vec2 P;
-    P.x = ptr->getRelativeSize().x*0.5+padding;
-    P.y = y;
+inline PrimitiveInSlide PlaceLeft(ScreenPrimitivePtr ptr,scalar y = 0.5,scalar padding = 0.1) {
+    vec2 P;
+    P(0) = ptr->getRelativeSize()(0)*0.5+padding;
+    P(1) = y;
     return {ptr,StateInSlide(P)};
 }
 
 
-inline PrimitiveInSlide PlaceRight(PrimitivePtr ptr,scalar y = 0.5,scalar padding = 0.1) {
-    Vec2 P;
-    P.x = 1-ptr->getRelativeSize().x*0.5-padding;
-    P.y = y;
+inline PrimitiveInSlide PlaceRight(ScreenPrimitivePtr ptr,scalar y = 0.5,scalar padding = 0.1) {
+    vec2 P;
+    P(0) = 1-ptr->getRelativeSize()(0)*0.5-padding;
+    P(1) = y;
     return {ptr,StateInSlide(P)};
 }
 
-inline PrimitiveInSlide PlaceBottom(PrimitivePtr ptr,scalar x = 0.5,scalar padding = 0.1) {
-    Vec2 P;
-    P.x = x;
-    P.y = 1. - ptr->getRelativeSize().y*0.5+padding;
+inline PrimitiveInSlide PlaceBottom(ScreenPrimitivePtr ptr,scalar x = 0.5,scalar padding = 0.1) {
+    vec2 P;
+    P(0) = x;
+    P(1) = 1. - ptr->getRelativeSize()(1)*0.5+padding;
     return {ptr,StateInSlide(P)};
 }
 
-inline PrimitiveInSlide PlaceTop(PrimitivePtr ptr,scalar x = 0.5,scalar padding = 0.1) {
-    Vec2 P;
-    P.x = x;
-    P.y = ptr->getRelativeSize().y*0.5+padding;
+inline PrimitiveInSlide PlaceTop(ScreenPrimitivePtr ptr,scalar x = 0.5,scalar padding = 0.1) {
+    vec2 P;
+    P(0) = x;
+    P(1) = ptr->getRelativeSize()(1)*0.5+padding;
     return {ptr,StateInSlide(P)};
 }
 

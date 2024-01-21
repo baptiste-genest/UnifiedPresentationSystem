@@ -18,12 +18,12 @@ void UPS::Slideshow::previousFrame()
     if (!current_slide)
         return;
     for (auto& s : uniqueNext(transitions[current_slide-1]))
-        Primitive::get(s)->forceDisable();
+        s->forceDisable();
     for (auto& s : uniquePrevious(transitions[current_slide-1]))
-        Primitive::get(s)->forceEnable();
+        s->forceEnable();
     current_slide--;
     for (auto& s : slides[current_slide]){
-        auto p = Primitive::get(s.first);
+        auto p = s.first;
         p->intro(TimeObject(p->getInnerTime(),1),s.second);
     }
     from_action = Time::now();
@@ -36,13 +36,13 @@ void UPS::Slideshow::forceNextFrame()
     if (current_slide == slides.size()-1)
         return;
     for (auto& s : uniquePrevious(transitions[current_slide]))
-        Primitive::get(s)->forceDisable();
+        s->forceDisable();
     for (auto& s : uniqueNext(transitions[current_slide]))
-        Primitive::get(s)->forceEnable();
+        s->forceEnable();
     current_slide++;
     for (auto& s : slides[current_slide]){
-        auto p = Primitive::get(s.first);
-        p->intro(TimeObject(p->getInnerTime(),1),s.second);
+        auto p = s.first;
+        p->intro(TimeObject(p->getInnerTime(),1),s.second.capturePos(slides[current_slide]));
     }
     from_action = Time::now();
     backward = false;
@@ -59,6 +59,9 @@ void UPS::Slideshow::play() {
     auto t = TimeFrom(from_action);
 
     auto& CS = slides[current_slide];
+    for (auto& s : CS)
+        s.second.capturePos(CS);
+
 
     setInnerTime();
 
@@ -67,55 +70,56 @@ void UPS::Slideshow::play() {
     TimeObject T = getTimeObject();
 
 
-    for (auto& s : CS)
-        CS[s.first].readFromLabel();
-
     if (backward || !locked) {
         locked = false;
-        for (auto s : CS)
-            Primitive::get(s.first)->play(T,CS[s.first]);
+        for (auto& s : CS)
+            s.first->play(T,CS[s.first]);
     }
     else {
         if (current_slide > 0){
+
             auto& PS = slides[current_slide-1];
+            for (auto& s : PS)
+                s.second.capturePos(PS);
+
             auto&& [common,UA,UB] = transitions[current_slide-1];
             if (t < 2*transitionTime){
-                for (auto c : common) {
+                for (auto& c : common) {
                     auto st = transition(0.5*t/transitionTime,
                                          PS[c],
                                          CS[c]);
-                    Primitive::get(c)->play(T,st);
+                    c->play(T,st);
                 }
                 if (t < transitionTime){
                     T.transitionParameter = t/transitionTime;
-                    for (auto ua : UA){
-                        auto p = Primitive::get(ua);
+                    for (auto& ua : UA){
+                        auto p = ua;
                         p->outro(T(t/transitionTime),PS[ua]);
                     }
                 }
                 else {
                     handleTransition();
-                    for (auto ub : UB){
-                        Primitive::get(ub)->intro(T(t/transitionTime-1.),CS[ub]);
+                    for (auto& ub : UB){
+                        ub->intro(T(t/transitionTime-1.),CS[ub]);
                     }
                 }
             }
             else {
                 for (auto& s : CS){
-                    Primitive::get(s.first)->play(T,CS[s.first]);
+                    s.first->play(T,CS[s.first]);
                 }
                 locked = false;
             }
         }
         else {
             if (t < transitionTime){
-                for (auto s : CS){
-                    Primitive::get(s.first)->intro(T(t/transitionTime),CS[s.first]);
+                for (auto& s : CS){
+                    s.first->intro(T(t/transitionTime),CS[s.first]);
                 }
             }
             else {
-                for (auto s : CS)
-                    Primitive::get(s.first)->play(T,CS[s.first]);
+                for (auto& s : CS)
+                    s.first->play(T,CS[s.first]);
                 locked = false;
             }
         }
@@ -154,7 +158,7 @@ void UPS::Slideshow::setInnerTime()
     if (visited_slide == current_slide)
         return;
     for (auto& p : appearing_primitives[current_slide])
-        Primitive::get(p)->handleInnerTime();
+        p->handleInnerTime();
     visited_slide = current_slide;
 }
 
@@ -162,22 +166,25 @@ void UPS::Slideshow::handleDragAndDrop()
 {
     auto io = ImGui::GetIO();
     if (!ImGui::IsKeyPressed(341) || io.MouseReleased[0] > 0){//CTRL {
-        selected_primitive = -1;
+        selected_primitive = nullptr;
+        io.WantCaptureMouse = false;
         return;
     }
+
+    io.WantCaptureMouse = true;
 
     auto S = ImGui::GetWindowSize();
     auto x = double(io.MousePos.x)/S.x;
     auto y = double(io.MousePos.y)/S.y;
-    if (selected_primitive == -1 && io.MouseDown[0] > 0){
+    if (selected_primitive == nullptr && io.MouseDown[0] > 0){
         selected_primitive = getPrimitiveUnderMouse(x,y);
     }
-    else if (io.MouseDown[0] == 0. && selected_primitive != -1) {
-        selected_primitive = -1;
+    else if (io.MouseReleased[0] > 0. && selected_primitive != nullptr) {
+        selected_primitive = nullptr;
     }
-    if (io.MouseDown[0] > 0 && selected_primitive != -1) {
+    if (io.MouseDown[0] > 0 && selected_primitive != nullptr) {
         auto& pis = slides[current_slide][selected_primitive];
-        pis.writeAtLabel(x,y,true);
+        pis.p->writeAtLabel(x,y,true);
     }
 }
 
@@ -199,15 +206,14 @@ void UPS::Slideshow::handleTransition()
         return;
     transition_done = true;
     for (auto& s : uniquePrevious(transitions[current_slide-1]))
-        Primitive::get(s)->forceDisable();
+        s->forceDisable();
     for (auto& s : uniqueNext(transitions[current_slide-1]))
-        Primitive::get(s)->forceEnable();
+        s->forceEnable();
 }
 
 UPS::StateInSlide UPS::Slideshow::transition(parameter t, const StateInSlide &sa, const StateInSlide &sb){
     StateInSlide St;
-    St.relative_anchor_pos.x = std::lerp(sa.relative_anchor_pos.x,sb.relative_anchor_pos.x,smoothstep(t));
-    St.relative_anchor_pos.y = std::lerp(sa.relative_anchor_pos.y,sb.relative_anchor_pos.y,smoothstep(t));
+    St.captured_pos = lerp(sa.captured_pos,sb.captured_pos,smoothstep(t));
     St.alpha = std::lerp(sa.alpha,sb.alpha,smoothstep(t));
     St.angle = std::lerp(sa.angle,sb.angle,smoothstep(t));
     return St;
@@ -232,7 +238,7 @@ void UPS::Slideshow::precomputeTransitions()
     if (debug){
         current_slide = slides.size()-1;
         for (auto& s : slides.back()){
-            auto p = Primitive::get(s.first);
+            auto p = s.first;
             p->forceEnable();
             p->handleInnerTime();
             p->intro(TimeObject(p->getInnerTime(),1),s.second);
@@ -315,18 +321,16 @@ void UPS::Slideshow::setScriptFile(std::string file)
 
 }
 
-UPS::PrimitiveID UPS::Slideshow::getPrimitiveUnderMouse(scalar x,scalar y) const
+UPS::PrimitivePtr UPS::Slideshow::getPrimitiveUnderMouse(scalar x,scalar y) const
 {
     auto io = ImGui::GetIO();
     auto S = ImGui::GetWindowSize();
-    for (auto& pis : slides[current_slide]){
-        auto p = pis.second.relative_anchor_pos;
-        auto sp = Primitive::get(pis.first);
-        if (!sp->isScreenSpace() || pis.second.label == "")
+    for (auto& pis : slides[current_slide].getScreenPrimitives()){
+        if (!pis.second.p->isPersistant())
             continue;
-        if (std::abs(p.x - x) < sp->getSize().x/2/S.x && std::abs(p.y - y) < sp->getSize().y/2/S.y){
+        auto p = pis.second.getPosition(slides[current_slide]);
+        if (std::abs(p(0) - x) < pis.first->getSize()(0)/2/S.x && std::abs(p(1) - y) < pis.first->getSize()(1)/2/S.y)
             return pis.first;
-        }
     }
-    return -1;
+    return nullptr;
 }

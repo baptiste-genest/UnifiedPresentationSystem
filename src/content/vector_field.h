@@ -6,7 +6,7 @@
 
 namespace UPS {
 
-class VectorField : public Primitive
+class VectorField : public PolyscopePrimitive
 {
 private:
     vecs V,X;
@@ -35,10 +35,6 @@ public:
     virtual void forceEnable() override {
         pc->setEnabled(true);
         pq->setEnabled(true);
-    }
-
-    virtual bool isScreenSpace() override {
-        return false;
     }
 
 

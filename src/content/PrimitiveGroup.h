@@ -10,27 +10,27 @@ struct PrimitiveGroup {
     Slide buffer;
     Vec2 relative_anchor = Vec2(0.5,0.5);
 
-    PrimitiveInSlide last_screen_primitive_inserted;
+    ScreenPrimitivePtr last_screen_primitive_inserted;
 
     PrimitiveGroup& operator<<(PrimitivePtr ptr) {
         buffer.add(ptr);
-        last_screen_primitive_inserted = {ptr,Vec2(0,0)};
+        if (ptr->isScreenSpace())
+            last_screen_primitive_inserted = std::static_pointer_cast<ScreenPrimitive>(ptr);
         return *this;
     }
 
     PrimitiveGroup& operator<<(const PrimitiveInSlide& pis) {
         buffer.add(pis.first,pis.second);
-        last_screen_primitive_inserted = pis;
+        if (pis.first->isScreenSpace())
+            last_screen_primitive_inserted = std::static_pointer_cast<ScreenPrimitive>(pis.first);
         return *this;
     }
 
+    /*
     vec2 getRelativeSize() const {
         float x_min = 100,y_min = 100,x_max = 0,y_max = 0;
         bool all_none_screen = true;
-        for (auto&& [pid,sis] : buffer) {
-            auto ptr = Primitive::get(pid);
-            if (!ptr->isScreenSpace())
-                continue;
+        for (auto&& [ptr,sis] : buffer.getScreenPrimitives()) {
             all_none_screen = false;
             auto pos = sis.relative_anchor_pos;
             auto size = ptr->getRelativeSize();
@@ -47,10 +47,7 @@ struct PrimitiveGroup {
     vec2 getRelativeAnchorPos() const {
         vec2 anchor(0,0);
         int nb_inscreen = 0;
-        for (auto&& [pid,sis] : buffer) {
-            auto ptr = Primitive::get(pid);
-            if (!ptr->isScreenSpace())
-                continue;
+        for (auto&& [ptr,sis] : buffer.getScreenPrimitives()) {
             nb_inscreen++;
             auto pos = sis.relative_anchor_pos;
             anchor(0) += pos.x;
@@ -73,6 +70,7 @@ struct PrimitiveGroup {
         }
         return *this;
     }
+*/
 
 
 

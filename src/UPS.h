@@ -87,7 +87,7 @@ struct Font {
 struct Primitive;
 using PrimitivePtr = std::shared_ptr<Primitive>;
 using PrimitiveID = long;
-using Primitives = std::set<PrimitiveID>;
+using Primitives = std::set<PrimitivePtr>;
 
 using curve_param = std::function<vec(scalar)>;
 
@@ -95,6 +95,10 @@ using mapping = std::function<vec(const vec&)>;
 using scalar_function = std::function<scalar(scalar)>;
 struct TimeObject;
 using time_mapping = std::function<vec(const vec&,const TimeObject&)>;
+
+inline ImVec2 toVec2(const vec2& x) {
+    return ImVec2(x(0),x(1));
+}
 
 }
 

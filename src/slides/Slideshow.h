@@ -6,6 +6,7 @@
 #include "../content/PrimitiveGroup.h"
 #include "Prompter.h"
 #include "screenshot.h"
+#include "../math/utils.h"
 
 namespace UPS {
 
@@ -46,14 +47,9 @@ public:
         transitions_computed = false;
         if (slides.empty())
             slides.push_back(Slide());
-        last_primitive_inserted = {ptr,sis};
         if (ptr->isScreenSpace())
-            last_screen_primitive_inserted = {ptr,sis};
+            last_screen_primitive_inserted = std::static_pointer_cast<ScreenPrimitive>(ptr);
         slides.back().add(ptr,sis);
-    }
-
-    PrimitiveInSlide& lastPrimitiveInserted() {
-        return last_primitive_inserted;
     }
 
     struct in_next_frame{};
@@ -77,8 +73,8 @@ public:
         if (nf.same_title){
             int i = slides.size()-2;
             auto ex = slides[i].exclusive_prim;
-            if (ex != -1){
-                addToLastSlide(Primitive::get(ex),slides[i][ex]);
+            if (ex != nullptr){
+                addToLastSlide(ex,slides[i][ex]);
             }
         }
         return *this;
@@ -87,24 +83,22 @@ public:
     inline Slideshow& operator<<(const Replace& R) {
         PrimitiveInSlide old;
         if (!R.ptr_other)
-            old = last_screen_primitive_inserted;
+            old = {last_screen_primitive_inserted,slides.back()[last_screen_primitive_inserted]};
         else
-            old = {R.ptr_other,slides.back()[R.ptr_other->pid]};
+            old = {R.ptr_other,slides.back()[R.ptr_other]};
         auto pos = old.second;
         removeFromCurrentSlide(old.first);
-        addToLastSlide(R.ptr,StateInSlide(pos));
+        addToLastSlide(R.ptr,pos);
         return *this;
     }
 
     inline Slideshow& operator<<(const RelativePlacement& P) {
-        if (!P.ptr_other){
-            auto pos = P.computePlacement(last_screen_primitive_inserted);
-            addToLastSlide(P.ptr,StateInSlide(pos));
-        }
-        else {
-            auto pos = P.computePlacement({P.ptr_other,slides.back()[P.ptr_other->pid]});
-            addToLastSlide(P.ptr,StateInSlide(pos));
-        }
+        StateInSlide sis;
+        if (!P.ptr_other)
+            sis.p = P.computePlacement(last_screen_primitive_inserted);
+        else
+            sis.p = P.computePlacement(P.ptr_other);
+        addToLastSlide(P.ptr,sis);
         return *this;
     }
 
@@ -115,22 +109,21 @@ public:
     }
 
     inline Slideshow& operator<<(PrimitivePtr ptr) {
-        addToLastSlide(ptr,{StateInSlide(CENTER)});
+        addToLastSlide(ptr,StateInSlide(vec2(0.5,0.5)));
         return *this;
     }
 
     inline Slideshow& operator<<(const StateInSlide& sis) {
-        slides.back()[last_screen_primitive_inserted.first->pid] = sis;
-        last_screen_primitive_inserted.second = sis;
+        slides.back()[last_screen_primitive_inserted] = sis;
         return *this;
     }
 
     inline Slideshow& operator<<(const PrimitiveGroup& G) {
-        auto mean = G.getRelativeAnchorPos();
-        for (auto [id,sis] : G.buffer){
-            sis.relative_anchor_pos.x += G.relative_anchor.x - mean.x();
-            sis.relative_anchor_pos.y += G.relative_anchor.y - mean.y();
-            addToLastSlide(Primitive::get(id),sis);
+        //auto mean = G.getRelativeAnchorPos();
+        for (auto [ptr,sis] : G.buffer.getScreenPrimitives()){
+        //    sis.relative_anchor_pos.x += G.relative_anchor.x - mean.x();
+        //    sis.relative_anchor_pos.y += G.relative_anchor.y - mean.y();
+            addToLastSlide(ptr,sis);
         }
         return *this;
     }
@@ -140,8 +133,8 @@ public:
     }
 
     void removeFromCurrentSlide(const PrimitiveGroup& G) {
-        for (const auto& pid : G.buffer)
-            removeFromCurrentSlide(Primitive::get(pid.first));
+        for (const auto& p : G.buffer)
+            removeFromCurrentSlide(p.first);
     }
 
     inline Slideshow& operator>>(PrimitivePtr ptr) {
@@ -203,8 +196,8 @@ public:
 
 private:
 
-    PrimitiveID selected_primitive =-1;
-    PrimitiveID getPrimitiveUnderMouse(scalar x,scalar y) const;
+    PrimitivePtr selected_primitive = nullptr;
+    PrimitivePtr getPrimitiveUnderMouse(scalar x,scalar y) const;
 
     struct prompt_range {
         int begin,end;
@@ -219,7 +212,7 @@ private:
     std::vector<prompt_range> scripts_ranges;
     std::unique_ptr<Prompter> prompter_ptr;
 
-    PrimitiveInSlide last_primitive_inserted,last_screen_primitive_inserted;
+    ScreenPrimitivePtr last_screen_primitive_inserted;
 
     bool transition_done = false;
     bool backward = false;
