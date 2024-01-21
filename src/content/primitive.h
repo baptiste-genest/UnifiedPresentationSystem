@@ -4,20 +4,31 @@
 #include "../UPS.h"
 #include "../math/kernels.h"
 #include "TimeObject.h"
+#include "Options.h"
+#include <fstream>
+#include <iostream>
+#include "io.h"
 
 namespace UPS {
 
+//Make it into a class to force read pos from label if non null
 struct StateInSlide {
     Vec2 relative_anchor_pos = {0.,0.};
     scalar alpha = 1,angle=0;
+    std::string label = "";
 
     StateInSlide() {}
     StateInSlide(const Vec2& p) : relative_anchor_pos(p) {}
+
+    void setLabel(std::string label);
+    void writeAtLabel(double x,double y,bool overwrite);
 
     Vec2 getAbsoluteAnchorPos() const {
         auto S = ImGui::GetWindowSize();
         return Vec2(relative_anchor_pos.x*S.x,relative_anchor_pos.y*S.y);
     }
+
+    void readFromLabel();
 };
 
 using PrimitiveInSlide = std::pair<PrimitivePtr,StateInSlide>;
@@ -31,6 +42,8 @@ struct Primitive {
 
     PrimitiveID pid;
     static std::vector<PrimitivePtr> primitives;
+
+    virtual bool isScreenSpace() {return true;}
 
     static void addPrimitive(PrimitivePtr ptr) {
         ptr->pid = primitives.size();
@@ -54,6 +67,12 @@ struct Primitive {
     inline std::pair<PrimitivePtr,StateInSlide> at(scalar alpha) {
         StateInSlide sis;
         sis.alpha = alpha;
+        return {get(pid),sis};
+    }
+
+    inline std::pair<PrimitivePtr,StateInSlide> at(std::string label) {
+        StateInSlide sis;
+        sis.setLabel(label);
         return {get(pid),sis};
     }
 
@@ -82,7 +101,7 @@ struct Primitive {
     virtual void initPolyscope() {}
 
     Size getRelativeSize() const {
-        auto S = UPS_screen_resolution;
+        auto S = Vec2(Options::UPS_screen_resolution_x, UPS::Options::UPS_screen_resolution_y);
         auto s = getSize();
         return Vec2(s.x/S.x,s.y/S.y);
     }
@@ -115,20 +134,6 @@ std::shared_ptr<T> NewPrimitive(Args&& ... args){
     ptr->initPolyscope();
     return ptr;
 }
-
-struct PrimitiveGroup : public std::vector<PrimitiveInSlide> {
-
-    PrimitiveGroup& operator<<(PrimitivePtr ptr) {
-        std::vector<PrimitiveInSlide>::push_back(ptr->at(1));
-        return *this;
-    }
-
-    PrimitiveGroup& operator<<(const PrimitiveInSlide& pis) {
-        std::vector<PrimitiveInSlide>::push_back(pis);
-        return *this;
-    }
-
-};
 
 
 }

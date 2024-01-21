@@ -15,6 +15,20 @@ inline ImVec2 ImRotate(const ImVec2& v, float cos_a, float sin_a)
 }
 using mapping = std::function<vec(const vec&)>;
 
+
+inline std::pair<vec,vec> CompleteBasis(const vec& x) {
+    vec n = x.normalized();
+    vec tmp(1.,0.,0.);
+    if (std::abs(n[0]) > 0.999)
+        tmp = vec(0.,1.,0.);
+    vec a1 = n.cross(tmp);
+    vec a2 = n.cross(a1);
+    return {a1,a2};
+
+}
+
+
+
 }
 
 

@@ -3,6 +3,7 @@
 
 #include "PolyscopePrimitive.h"
 #include "polyscope/curve_network.h"
+#include "../math/Parametrization.h"
 
 namespace UPS {
 
@@ -12,10 +13,9 @@ public:
     Curve3D() {}
     using Curve3DPtr = std::shared_ptr<Curve3D>;
 
-    static Curve3DPtr Add(const vecs& nodes, bool loop = false);
-    static Curve3DPtr Add(const param& param,int N = 100,bool loop = false);
+    static Curve3DPtr Add(const vecs& nodes, bool loop = false, scalar r = 0.01);
+    static Curve3DPtr Add(const curve_param& param,int N = 100,bool loop = false,scalar r = 0.01);
 
-    void setRadius(scalar r);
 
     polyscope::CurveNetwork* pc;
 
@@ -29,8 +29,8 @@ private:
 
     // PolyscopePrimitive interface
 public:
-    Curve3D(const vecs &nodes,bool loop);
-    Curve3D(const param& param,int N = 100,bool loop = false);
+    Curve3D(const vecs &nodes,bool loop,scalar r);
+    Curve3D(const curve_param& param,int N = 100,bool loop = false,scalar r = 0.01);
     virtual void initPolyscope() override;
 };
 

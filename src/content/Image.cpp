@@ -6,9 +6,14 @@ std::vector<UPS::Image> UPS::Image::images;
 //#define STB_IMAGE_IMPLEMENTATION
 #include "../extern/stb_image.h"
 
+#include <spdlog/spdlog.h>
 
-UPS::Image::ImagePtr UPS::Image::Add(std::string file)
+UPS::Image::ImagePtr UPS::Image::Add(std::string file,scalar scale)
 {
+    if (file[0] != '/'){
+        //spdlog::info("relative path given, assumes project folder");
+        file = UPS::Options::ProjectPath + file;
+    }
     auto filename = file.c_str();
     int w,h;
     // Load from file
@@ -19,18 +24,22 @@ UPS::Image::ImagePtr UPS::Image::Add(std::string file)
     }
 
     ImagePtr rslt = NewPrimitive<Image>();
+
     rslt->width = w;
     rslt->height = h;
+    rslt->scale = scale;
 
     // Create a OpenGL texture identifier
     glGenTextures(1, &rslt->texture);
     glBindTexture(GL_TEXTURE_2D, rslt->texture);
+
 
     // Setup filtering parameters for display
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE); // This is required on WebGL for non power-of-two textures
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE); // Same
+
 
 // Upload pixels into texture
 #if defined(GL_UNPACK_ROW_LENGTH) && !defined(__EMSCRIPTEN__)
@@ -72,8 +81,8 @@ void UPS::Image::display(const StateInSlide &sis) const
 {
     RGBA color_multiplier = ImColor(1.f,1.f,1.f,sis.alpha);
     auto P = sis.getAbsoluteAnchorPos();
-    if (std::abs(sis.angle) > 0.001)
-        ImageRotated((void*)(intptr_t)texture,P,ImVec2(width,height),sis.angle,color_multiplier);
+    if (std::abs(sis.angle) > 0.001 || std::abs(1-scale) > 1e-2)
+        ImageRotated((void*)(intptr_t)texture,P,ImVec2(width*scale,height*scale),sis.angle,color_multiplier);
     else {
         P.x -= width*0.5;
         P.y -= height*0.5;
@@ -104,4 +113,13 @@ void UPS::Image::ImageRotated(ImTextureID tex_id, ImVec2 center, ImVec2 size, fl
         };
 
     draw_list->AddImageQuad(tex_id, pos[0], pos[1], pos[2], pos[3], uvs[0], uvs[1], uvs[2], uvs[3], color_mult);
+}
+
+UPS::Gif::GifPtr UPS::Gif::Add(std::string filename)
+{
+
+
+
+
+
 }

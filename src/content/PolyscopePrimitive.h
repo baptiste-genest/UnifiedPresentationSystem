@@ -29,9 +29,10 @@ public:
     void intro(const TimeObject& t, const StateInSlide &sis) override {q->setEnabled(true);}
     void outro(const TimeObject& t, const StateInSlide &sis) override {q->setEnabled(false);}
     void forceDisable() override {q->setEnabled(false);}
+    bool isScreenSpace() override {return false;}
 };
 
-template<class T>
+template<typename T>
 static PolyscopeQuantity<T>::PCQuantityPtr AddPolyscopeQuantity(T* ptr) {
     return PolyscopeQuantity<T>::Add(ptr);
 }
@@ -69,6 +70,7 @@ public:
             q->setEnabled(false);
     }
     void forceDisable() override {q->setEnabled(false);}
+    bool isScreenSpace() override {return false;}
 };
 
 template<>
@@ -116,6 +118,7 @@ public:
         polyscope_ptr->setTransparency(0);
         //initPolyscope();
     }
+    bool isScreenSpace() override {return false;}
 
 
 protected:

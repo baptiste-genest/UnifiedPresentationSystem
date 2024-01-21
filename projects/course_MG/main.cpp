@@ -10,7 +10,7 @@
 #include "geometrycentral/numerical/linear_solvers.h"
 
 using namespace UPS;
-UPS::Slideshow show(false);
+UPS::Slideshow show;
 
 PrimitiveID explorer_id;
 
@@ -55,7 +55,7 @@ mat2 hessian(vec X) {
 }
 scalar zoffset = 0.02;
 
-vec taylor(const Mesh::Vertex& v,TimeObject T) {
+vec taylor(const Vertex& v,TimeObject T) {
     auto& H = v.pos;
     auto t = Primitive::get(explorer_id)->getInnerTime();
     auto x = point_explore(t);
@@ -97,7 +97,7 @@ io::GeometryCentralMesh bunnyGC;
 
 Mat illustratePoissonProblem() {
     Mat B;
-    std::string cache = UPS_prefix + "cache/poisson.csv";
+    std::string cache = Options::DataPath + "cache/poisson.csv";
     if (io::MatrixCache(cache,B))
         return B;
     auto& mesh = bunnyGC;
@@ -115,8 +115,10 @@ Mat illustratePoissonProblem() {
     B(114) = 1;
     Vec rhs = M*B.col(0);
     B.col(1) = solver.solve(rhs);
+    /*
     if (solver.info() != Eigen::Success)
         std::cout << "error eigen solve" << solver.info() << std::endl;
+*/
     io::SaveMatrix(cache,B);
     return B;
 }
@@ -142,7 +144,7 @@ vecs matToPos(const Mat& M) {
 
 Mat EigenLaplace(const io::GeometryCentralMesh& mesh,std::string label,int k) {
     Mat Eig;
-    std::string cache = UPS_prefix + "cache/eig_"+label+ std::to_string(k) + ".csv";
+    std::string cache = Options::DataPath + "cache/eig_"+label+ std::to_string(k) + ".csv";
     if (io::MatrixCache(cache,Eig))
         return Eig;
 
@@ -185,12 +187,12 @@ vecs spectral_compression(const Mat& eig,const vecs& coefs,int nb) {
 
 Vec LapHeight(){
     Mat LH;
-    std::string cache = UPS_prefix + "cache/lap_height.csv";
+    std::string cache = Options::DataPath + "cache/lap_height.csv";
     if (io::MatrixCache(cache,LH))
         return LH;
-
-
-    io::GeometryCentralMesh mesh(UPS_prefix + "meshes/mountain.obj");
+    
+    
+    io::GeometryCentralMesh mesh(Options::DataPath + "meshes/mountain.obj");
     geometrycentral::surface::ExtrinsicGeometryInterface& geometry = *mesh.position_geometry;
     geometry.requireCotanLaplacian();
     geometry.requireVertexGalerkinMassMatrix();
@@ -300,7 +302,7 @@ Vec clampExtrems(const Vec& X) {
 
 Mat Curvatures(const io::GeometryCentralMesh& mesh) {
     Mat curvature;
-    std::string cache = UPS_prefix + "cache/curvature.csv";
+    std::string cache = Options::DataPath + "cache/curvature.csv";
     if (io::MatrixCache(cache,curvature))
         return curvature;
     geometrycentral::surface::ExtrinsicGeometryInterface& geometry = *mesh.position_geometry;
@@ -360,7 +362,7 @@ vecs generateFaceBasedRandomVectorField(const io::GeometryCentralMesh& mesh) {
             XF2[f.getIndex()] = x/3.;
         }
         for (const auto& f : mesh.mesh->faces())
-            XF[f.getIndex()] += 1e-1*XF2[f.getIndex()];
+            XF[f.getIndex()] += 1e-1*(XF2[f.getIndex()]-XF[f.getIndex()]);
     }
     return XF;
 }
@@ -372,6 +374,17 @@ Vec scalarsToVec(const scalars& S) {
     return X;
 }
 
+std::tuple<int,int,int> getVertices(geometrycentral::surface::Face f) {
+    std::tuple<int,int,int> rslt;
+    auto it = f.adjacentVertices().begin();
+    std::get<0>(rslt) = (*it).getIndex();
+    ++it;
+    std::get<1>(rslt) = (*it).getIndex();
+    ++it;
+    std::get<2>(rslt) = (*it).getIndex();
+    return rslt;
+}
+
 std::pair<vecs,vecs> computeHelmholtzHodge(const io::GeometryCentralMesh& mesh,const vecs& XF,const scalars& div) {
     mesh.position_geometry->requireCotanLaplacian();
     mesh.position_geometry->requireVertexGalerkinMassMatrix();
@@ -379,22 +392,24 @@ std::pair<vecs,vecs> computeHelmholtzHodge(const io::GeometryCentralMesh& mesh,c
     Vec D = scalarsToVec(div);
     SMat I(div.size(),div.size());
     I.setIdentity();
-    SMat L = mesh.position_geometry->cotanLaplacian + 1e-5*I;
+    SMat L = mesh.position_geometry->cotanLaplacian + 1e-6*mesh.position_geometry->vertexGalerkinMassMatrix;
     auto P = geometrycentral::solvePositiveDefinite(L,(Vec)(mesh.position_geometry->vertexGalerkinMassMatrix*D));
     vecs DF(mesh.mesh->nFaces(),vec::Zero());
     vecs CF = DF;
     scalar S = 0;
+    std::cout << D.transpose() << std::endl;
+
+    auto rot = [](const vec& x) {
+        return vec(x(1),-x(0),0);
+    };
     for (const auto& f : mesh.mesh->faces()){
         vec g = vec::Zero();
-        auto N = mesh.position_geometry->faceNormal(f);
-        for (const auto& h : f.adjacentHalfedges()){
-            auto v = h.tailVertex();
-            auto e = (mesh.position_geometry->vertexPositions[h.next().tipVertex()] - mesh.position_geometry->vertexPositions[h.tipVertex()]);
-            g += P(v.getIndex())*Vector3Tovec(geometrycentral::cross(N,e));
-        }
+        auto [i,j,k] = getVertices(f);
+        g = (P(j) - P(i))*rot(mesh.getPos(i) - mesh.getPos(k)) + (P(k) - P(i))*rot(mesh.getPos(j) - mesh.getPos(i));
         g /= mesh.position_geometry->faceArea(f)*2;
         CF[f.getIndex()] = g;
-        DF[f.getIndex()] = XF[f.getIndex()] - g;
+        std::cout << XF[f.getIndex()].norm() << " " << g.norm() << std::endl;
+        DF[f.getIndex()] = vec(XF[f.getIndex()] - g);
         S += g.norm();
     }
     return {CF,DF};
@@ -403,29 +418,31 @@ std::pair<vecs,vecs> computeHelmholtzHodge(const io::GeometryCentralMesh& mesh,c
 io::GeometryCentralMesh maskGC;
 
 void init () {
+    
+    UPS::Options::ProjectName = "../../projects/minimal_surf/";
 
     const auto& SHOW = show;
-    auto CMFONTID = UPS::FontManager::addFont(UPS_prefix + "fonts/ComputerModernSR.ttf",50);
+    auto CMFONTID = UPS::FontManager::addFont(Options::DataPath + "fonts/ComputerModernSR.ttf",50);
     UPS::Style::default_font = CMFONTID;
-
-    auto grid = Mesh::Add(UPS_prefix + "meshes/grid_quad_50.obj");
-    auto disk = Mesh::Add(UPS_prefix + "meshes/disk_coarse.obj",0.5,true);
-    auto bunny = Mesh::Add(UPS_prefix + "meshes/bunny.obj");
-    auto bunny_coarse = Mesh::Add(UPS_prefix + "meshes/bunny_coarse.obj");
-    auto human = Mesh::Add(UPS_prefix + "meshes/human.obj",0.2);
-    auto mountain = Mesh::Add(UPS_prefix + "meshes/mountain.obj",0.1);
-    maskGC.init(UPS_prefix + "meshes/nefertiti.obj");
-    bunnyGC.init(UPS_prefix + "meshes/bunny.obj");
+    
+    auto grid = Mesh::Add(Options::DataPath + "meshes/grid_quad_50.obj");
+    auto disk = Mesh::Add(Options::DataPath + "meshes/disk_coarse.obj",0.5,true);
+    auto bunny = Mesh::Add(Options::DataPath + "meshes/bunny.obj");
+    auto bunny_coarse = Mesh::Add(Options::DataPath + "meshes/bunny_coarse.obj");
+    auto human = Mesh::Add(Options::DataPath + "meshes/human.obj",0.2);
+    auto mountain = Mesh::Add(Options::DataPath + "meshes/mountain.obj",0.1);
+    maskGC.init(Options::DataPath + "meshes/nefertiti.obj");
+    bunnyGC.init(Options::DataPath + "meshes/bunny.obj");
     polyscope::view::resetCameraToHomeView();
 
     auto arrow = Formula::Add("\\longrightarrow");
 
     auto top_cam = CameraView::Add(vec(0,0.6,5),vec(0,0.6,0),vec(0,1,0));
 
-    show << Latex::Add("Les opérateurs différentiels sont vos amis.",TITLE)->at(CENTER);
+    show << Latex::Add("Les opérateurs différentiels sont vos amis.",Options::UPS_TITLE)->at(CENTER);
     show << "Intro";
 
-    if (true)
+    if (false)
     {
         auto title = Title("Calcul différentiel et approximation de Taylor")->at(TOP);
         show << newFrame << title;
@@ -434,7 +451,7 @@ void init () {
         show << inNextFrame << PlaceBelow(Formula::Add("f(x+h) = f(x) + h^t \\nabla f(x) + \\frac{1}{2} h^t H_f(x)h + o(||h||^2)"),0.01);
         auto plot = grid->apply(phi,false);
         show << inNextFrame << plot;//->at(0.5);
-        auto explorer = Point::Add(point_explore,0.1)->apply(phi);
+        auto explorer = Point::Add(Parametrization(point_explore),0.1)->apply(phi);
         show << explorer;
         explorer_id = explorer->pid;
         show << CameraView::Add(vec(0,-3,3.5),vec(0,0,1),vec::UnitZ());
@@ -444,7 +461,7 @@ void init () {
         show << newFrame << title << Latex::Add("Idée générale des approches différentielles :\\\\ Approcher localement un objet complexe par un objet simple (polynomial)")->at(CENTER);
     }
 
-    if (true)
+    if (false)
     {
         show << "manifold";
         auto title = Title(tex::center("Variétés différentielles et paramétrisation"));
@@ -512,7 +529,7 @@ void init () {
                     auto O = sphere(vec(0,0,0));
                     vec rslt = 0.5*(X-O).normalized();
                     return rslt;
-                    });
+            });
             auto dpx = Formula::Add(tex::frac("\\varphi(p+"+tex::Vec("dx","0")+")-\\varphi(p)","dx"));
             show << PlaceLeft(dpx,0.2);
             show << inNextFrame >> dpx;
@@ -523,7 +540,7 @@ void init () {
                     auto O = sphere(vec(0,0,0));
                     vec rslt = 0.5*(X-O).normalized();
                     return rslt;
-                    });
+            });
 
             {
                 using namespace tex;
@@ -536,7 +553,7 @@ void init () {
                 auto po = point_param->apply(offset);
                 auto ps = point_param->apply(sphere_offset);
                 show << PlaceLeft(plane,0.3) << po << ps;
-                auto TM =  grid->applyDynamic([po](const Mesh::Vertex& v,TimeObject){
+                auto TM =  grid->applyDynamic([po](const Vertex& v,TimeObject){
                     auto x = v.pos;
                         vec p = po->getCurrentPos() + vec(1.5,0,0);
                         auto h = 1e-3;
@@ -596,7 +613,7 @@ void init () {
                 };
                 show << Point::Add(gamma,0.02);
             }
-            show << inNextFrame << PlaceRight(Image::Add(UPS_prefix + "images/pavage_penta.png"),0.6,0.01);
+            show << inNextFrame << PlaceRight(Image::Add(Options::DataPath + "images/pavage_penta.png"),0.6,0.01);
             show << newFrame << Title("Récap Géométrie différentielle 1")->at(TOP);
             show << inNextFrame << PlaceLeft(Latex::Add("Approche différentielle : approximation locale par des polynômes"),0.4);
             show << inNextFrame << PlaceRelative(Latex::Add("Paramétrisation : fonction d'exploration de la variété"),ABS_LEFT,REL_BOTTOM,0.1);
@@ -606,7 +623,7 @@ void init () {
     }
 
 
-    if (true)
+    if (false)
     {
         show << newFrame << Title("Représentation discrète des formes et fonctions")->at(CENTER) << inNextFrame << TOP;
         scalar off = 3;
@@ -634,7 +651,7 @@ void init () {
         show << inNextFrame << PlaceRight(Formula::Add(tex::Vec("1.21","0.32", "\\vdots", "5.2","3.24"),0.05),0.6,0.1);
     }
 
-    if (true)
+    if (false)
     {
         show << newFrame << Title("Discrétisation des opérateurs différentiels")->at(TOP);
         show << inNextFrame << PlaceLeft(Latex::Add(tex::center("Opérateurs différentiels classiques")));
@@ -650,7 +667,7 @@ void init () {
         //show << inNextFrame << PlaceRelative(Latex::Add("Tenseur métrique : changement dans le calul des angles et longueur sur la surface"),ABS_LEFT,REL_BOTTOM,0.1);
     }
 
-    if (true)
+    if (false)
     {
         using namespace tex;
         show << newFrame << Title("Exemple : Le laplacien $\\Delta$")->at(TOP);
@@ -660,8 +677,8 @@ void init () {
         auto topolap = Latex::Add(equation("(Lf)_i = \\sum_{n \\in N_i} (f_i - f_n)"),0.06);
         show << inNextFrame >> lapdef << topolap->at(CENTER);
         show << inNextFrame << Vec2(0.5,0.3);
-        show << PlaceLeft(Image::Add(UPS_prefix + "images/simple_graph.png"),0.6,0.2);
-        show << PlaceRelative(Image::Add(UPS_prefix + "images/simple_lap_mat.png"),UPS::REL_RIGHT,SAME_Y);
+        show << PlaceLeft(Image::Add(Options::DataPath + "images/simple_graph.png"),0.6,0.2);
+        show << PlaceRelative(Image::Add(Options::DataPath + "images/simple_lap_mat.png"),UPS::REL_RIGHT,SAME_Y);
 
         {
             show << newFrame << Title("Une discrétisation imparfaite ?")->at(TOP);
@@ -681,7 +698,7 @@ void init () {
             show << newFrame << Title("Discrétisation du laplacien par éléments finis")->at(TOP);
             show << inNextFrame << PlaceBelow(Formula::Add("\\varphi_v(x_i) = " + cases("1","v=i","0",text("sinon")),0.05),0.05);
             show << PlaceRelative(Latex::Add(center("Fonction linéaire \\\\ par morceau telle que")),UPS::REL_LEFT,UPS::SAME_Y);
-            auto diskverycoarse = Mesh::Add(UPS_prefix + "meshes/disk_very_coarse.obj",1.3);
+                auto diskverycoarse = Mesh::Add(Options::DataPath + "meshes/disk_very_coarse.obj",1.3);
             diskverycoarse->pc->setEdgeWidth(1);
             UPS::Vec fem_basis = UPS::Vec::Zero(diskverycoarse->getVertices().size());
             auto i = rand()%diskverycoarse->getVertices().size();
@@ -695,9 +712,9 @@ void init () {
             using namespace tex;
 
             show << inNextFrame << PlaceRight(Formula::Add("A_{ij} = \\int_{\\Omega} \\nabla \\varphi_i(x)\\cdot\\nabla \\varphi_j(x) dx"));
-            show << newFrameSameTitle << PlaceBelow(Image::Add(UPS_prefix + "images/cotan_angles.png"),0.1);
+            show << newFrameSameTitle << PlaceBelow(Image::Add(Options::DataPath + "images/cotan_angles.png"),0.1);
             show << PlaceBelow(Formula::Add("(Lf)_i =" + frac("1","A_i") + "\\sum_{(i,j)\\in E}"+frac("cot(\\alpha_{ij}) + cot(\\beta_{ij})","2")+"(f_i-f_j)"));
-            show << inNextFrame << PlaceRight(Image::Add(UPS_prefix + "images/cot_plot.png"));
+            show << inNextFrame << PlaceRight(Image::Add(Options::DataPath + "images/cot_plot.png"));
         }
 
 
@@ -777,7 +794,7 @@ void init () {
                 show << inNextFrame << PlaceRight(Latex::Add("On peut montrer que $\\nabla E(f) = \\Delta f$",0.05),0.2,0.1);
                 show << inNextFrame << PlaceBelow(Formula::Add("f_{n+1} = f_n - \\tau \\Delta f_n",0.05));
                 auto off = vec(1.5,0,0);
-                auto mask = Mesh::Add(UPS_prefix + "meshes/nefertiti.obj",0.5)->apply(offset(off),false);
+                auto mask = Mesh::Add(Options::DataPath + "meshes/nefertiti.obj",0.5)->apply(offset(off),false);
                 show << mask << top_cam;
                 auto TI = tutte_init(maskGC,-off);
                 Mesh::MeshPtr te_mesh = Mesh::Add(TI,mask->getFaces(),false);
@@ -803,13 +820,13 @@ void init () {
                 show << newFrame << titlelap->at(TOP);
                 show << PlaceBelow(Latex::Add("Fonctions harmoniques",0.05));
                 show << inNextFrame << PlaceBelow(Formula::Add("\\Delta f = 0",0.05),0.05);
-                show << PlaceLeft(Image::Add(UPS_prefix + "images/poisson-g.png"),0.5,0.1);
-                show << inNextFrame << PlaceRelative(Image::Add(UPS_prefix + "images/poisson-u.png"),REL_RIGHT,SAME_Y,0.1);
+                show << PlaceLeft(Image::Add(Options::DataPath + "images/poisson-g.png"),0.5,0.1);
+                show << inNextFrame << PlaceRelative(Image::Add(Options::DataPath + "images/poisson-u.png"),REL_RIGHT,SAME_Y,0.1);
                 show << newFrameSameTitle << PlaceBelow(Latex::Add("Problème de Plateau (ou du film de savon)",0.04));
-                show << PlaceBelow(Image::Add(UPS_prefix + "images/plateau.png"));
+                    show << PlaceBelow(Image::Add(Options::DataPath + "images/plateau.png"));
                 show << newFrameSameTitle << PlaceBelow(Latex::Add("Poisson Surface Reconstruction",0.04));
-                show << PlaceBelow(Image::Add(UPS_prefix + "images/PSR.jpg"));
-                show << inNextFrame << PlaceBelow(Image::Add(UPS_prefix + "images/PSR_algo.png"));
+                    show << PlaceBelow(Image::Add(Options::DataPath + "images/PSR.jpg"));
+                show << inNextFrame << PlaceBelow(Image::Add(Options::DataPath + "images/PSR_algo.png"));
             }
 
             if (false)
@@ -841,8 +858,8 @@ void init () {
                 show << inNextFrame <<PlaceBelow(Formula::Add("\\Delta (e^{ix}) = -e^{ix}",0.05));
                 auto cam2 = CameraView::Add(vec(-0.5,6,15),vec(-0.5,6,0),vec::UnitY());
                 show << inNextFrame << cam2;
-                auto humanGC = io::GeometryCentralMesh(UPS_prefix + "meshes/human.obj");
-                auto BCGC = io::GeometryCentralMesh(UPS_prefix + "meshes/bunny_coarse.obj");
+                auto humanGC = io::GeometryCentralMesh(Options::DataPath + "meshes/human.obj");
+                auto BCGC = io::GeometryCentralMesh(Options::DataPath + "meshes/bunny_coarse.obj");
                 auto eig_h = EigenLaplace(humanGC,"human",10);
                 auto eig_b = EigenLaplace(BCGC,"bunny",300);
                 auto NB_slider = AddIntSliders(1,"NB of coeffs",eig_b.cols(),{1,eig_b.cols()});
@@ -885,9 +902,9 @@ void init () {
 
     }
 
-    if (true)
+    if (false)
     {
-        auto parabola = [] (const Mesh::Vertex& v,const TimeObject& t) {
+        auto parabola = [] (const Vertex& v,const TimeObject& t) {
             const auto& h = v.pos;
             if (t.relative_frame_number == 0)
                 return h;
@@ -904,8 +921,8 @@ void init () {
         show << inNextFrame << TOP << plot << inNextFrame;
         show << inNextFrame << Formula::Add("k_1,k_2",0.06)->at(0.5,0.3);
         show << newFrameSameTitle;
-        auto macaca = Mesh::Add(UPS_prefix + "meshes/david.obj",0.01);
-        io::GeometryCentralMesh mesh(UPS_prefix + "meshes/david.obj");
+        auto macaca = Mesh::Add(Options::DataPath + "meshes/david.obj",0.01);
+        io::GeometryCentralMesh mesh(Options::DataPath + "meshes/david.obj");
         Mat K = Curvatures(mesh);
 
         auto LM = [] (scalar x) {
@@ -927,8 +944,8 @@ void init () {
 
         show << newFrame << Title("Discrétisation courbure de Gauss")->at(TOP);
         auto deflect = PlaceRight(Formula::Add("K = 2\\pi - \\sum_{n \\in N_i} \\theta_n",0.06),0.4,0.1);
-        auto fan = Mesh::Add(UPS_prefix + "meshes/fan.obj");
-        auto curvature = [] (const Mesh::Vertex& v,const TimeObject& t) {
+        auto fan = Mesh::Add(Options::DataPath + "meshes/fan.obj");
+        auto curvature = [] (const Vertex& v,const TimeObject& t) {
             const auto& h = v.pos;
             if (t.relative_frame_number == 0)
                 return h;
@@ -1009,8 +1026,8 @@ void init () {
         auto t = Title("Opérateurs vectoriels");
         show << newFrame << t;
         show << inNextFrame << TOP;
-        auto diskGC = io::GeometryCentralMesh(UPS_prefix + "meshes/disk_coarse.obj");
-        auto disk = Mesh::Add(UPS_prefix + "meshes/disk_coarse.obj",1.,true);
+        auto diskGC = io::GeometryCentralMesh(Options::DataPath + "meshes/disk_coarse.obj");
+        auto disk = Mesh::Add(Options::DataPath + "meshes/disk_coarse.obj",1.,true);
         auto XF = generateFaceBasedRandomVectorField(diskGC);
         auto Q = disk->pc->addFaceVectorQuantity("X",XF);
         auto top_cam2 = CameraView::Add(vec(0,0.6,2.5),vec(0,0.6,0),vec(0,1,0));
@@ -1022,11 +1039,11 @@ void init () {
         auto S = show.getCurrentSlide();
 
         auto cam2 = CameraView::Add(vec(1,0.5,2),vec(1,0.5,0),vec(0,1,0),true);
-        show << S << cam2 << Latex::Add("Divergence",0.05)->at(0.5,0.2) << AddPolyscopeQuantity(Qdiv) << PlaceRight(div_t,0.4,0.05) << PlaceBelow(Image::Add(UPS_prefix + "images/fan_div.png"));
+        show << S << cam2 << Latex::Add("Divergence",0.05)->at(0.5,0.2) << AddPolyscopeQuantity(Qdiv) << PlaceRight(div_t,0.4,0.05) << PlaceBelow(Image::Add(Options::DataPath + "images/fan_div.png"));
         auto Qcurl = disk->pc->addVertexScalarQuantity("curl",curl);
         auto curl_t = Formula::Add("\\text{curl}(V)_i = \\sum_{ijk\\sim i}" + tex::dot("u_{ijk}","e_{jk}"),0.04);
         Qcurl->setColorMap("jet");
-        show << S << cam2 << Latex::Add("Rotationnel",0.05)->at(0.5,0.2) << AddPolyscopeQuantity(Qcurl) << PlaceRight(curl_t,0.4,0.05) << PlaceBelow(Image::Add(UPS_prefix + "images/fan_curl.png"));
+        show << S << cam2 << Latex::Add("Rotationnel",0.05)->at(0.5,0.2) << AddPolyscopeQuantity(Qcurl) << PlaceRight(curl_t,0.4,0.05) << PlaceBelow(Image::Add(Options::DataPath + "images/fan_curl.png"));
         show << newFrameSameTitle << PlaceBelow(Latex::Add("Théorème de Helmotz-Hodge",0.05));
         auto HH = computeHelmholtzHodge(diskGC,XF,div);
         auto disk_orig = disk->apply(offset(vec(-2.1,0,0)));
@@ -1054,7 +1071,7 @@ void init () {
 
 
 int main(int argc,char** argv) {
-    show.init(UPS_prefix + "../../projects/course_MG/script.txt");
+    show.init("course_MG","script.txt");
     //show.init();
     init();
 

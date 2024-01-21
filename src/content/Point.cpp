@@ -1,6 +1,6 @@
 #include "Point.h"
 
-UPS::Point::PointPtr UPS::Point::Add(const param &phi,scalar r)
+UPS::Point::PointPtr UPS::Point::Add(const curve_param &phi,scalar r)
 {
     return NewPrimitive<Point>(phi,r);
 }
@@ -10,7 +10,7 @@ UPS::Point::PointPtr UPS::Point::Add(const vec &x, scalar rad)
     return NewPrimitive<Point>(x,rad);
 }
 
-UPS::Point::VectorQuantity::PCQuantityPtr UPS::Point::addVector(const param &phiX)
+UPS::Point::VectorQuantity::PCQuantityPtr UPS::Point::addVector(const curve_param &phiX)
 {
     vecs X = {phiX(0)};
     auto name = getPolyscopeName() + std::to_string(vectors.size());
@@ -38,9 +38,9 @@ void UPS::Point::updateVectors()
 UPS::Point::PointPtr UPS::Point::apply(const mapping &f) const
 {
     auto Phi = phi;
-    return Point::Add([f,Phi](scalar t){
+    return Point::Add(curve_param([f,Phi](scalar t){
         return f(Phi(t));
-    },radius);
+                      }),radius);
 }
 
 void UPS::Point::initPolyscope()
@@ -52,7 +52,7 @@ void UPS::Point::initPolyscope()
 }
 
 
-UPS::Point::Point(const param &phi, scalar radius) : x(phi(0)),
+UPS::Point::Point(const curve_param &phi, scalar radius) : x(phi(0)),
     phi(phi),
     radius(radius)
 {
