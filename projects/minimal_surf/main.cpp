@@ -166,6 +166,12 @@ void init () {
     }
     if (true)
     {
+        show << newFrame << Title("How to approximate a surface?")->at(TOP);
+        show << inNextFrame << Image::Add("surface_approx.png");
+
+    }
+    if (true)
+    {
         show << newFrame << Title("k-vectors")->at(TOP);
         auto algebra = Formula::Add("\\bigwedge V");
         show << PlaceNextTo(algebra,1,0.1);
@@ -210,15 +216,15 @@ void init () {
     {
         auto title = Title("Differential k-forms");
         show << newFrame << title->at(TOP);
-        auto codim = Image::Add(UPS::Options::ProjectPath + "codim.png");
-        auto ext_d = Image::Add(UPS::Options::ProjectPath + "ext_der.png");
+        auto codim = Image::Add("codim.png");
+        auto ext_d = Image::Add("ext_der.png");
         show << Latex::Add("smooth field of k-forms : $\\mathbb{R}^n \\mapsto \\bigwedge V^*$")->at("diff_forms");
         show << inNextFrame << codim->at(CENTER);
         show << Latex::Add("$x \\mapsto $Ker$(\\omega(x))$")->at("codim");
         show << newFrameSameTitle;
         show << PlaceBelow(Latex::Add("exterior derivative"),title);
         show << inNextFrame << ext_d->at(0.8,0.5);
-        show << Image::Add(UPS::Options::ProjectPath + "d_boundary.png")->at(0.3,0.5);
+        show << Image::Add("d_boundary.png")->at(0.3,0.5);
     }
     if (true) {
         auto title = Title("Example : differential 1-form");
@@ -238,12 +244,21 @@ void init () {
         bco->pc->setSmoothShade(false);
         show << bco;
         show << PointCloud::Add(bunny_coarse->getVertices())->apply(offset(vec(-off,0,0)));
-        auto SDF = grid->eval([](const vec& x) {return -(x.norm()-0.6);});
-        auto implicit = grid->scale(1.5)->translate(vec(off,0.8,0));
+        auto SDF1 = grid->eval([](const vec& x) {return -(x.norm()-0.6);});
         show << Latex::Add("explicit")->at(0.4,0.9);
+
+
+        auto implicit = grid->scale(1.5)->translate(vec(off,0.8,0));
         show << inNextFrame << implicit << Latex::Add("implicit")->at(0.75,0.9);
-        show << inNextFrame <<  Curve3D::Add(P*0.6*1.5 + vec(off,0.8,0),100,true);
-        implicit->pc->addVertexSignedDistanceQuantity("sdf",SDF)->setEnabled(true);
+        auto sdf1 = AddPolyscopeQuantity(implicit->pc->addVertexSignedDistanceQuantity("sdf",SDF1));
+        show << sdf1;
+        auto boundary1 = Curve3D::Add(P*0.6*1.5 + vec(off,0.8,0),100,true);
+        show << inNextFrame << boundary1;
+
+        auto SDF2 = grid->eval([](const vec& x) {return -std::min((x-vec(0,-0.5,0)).norm()-0.3,(x-vec(0,0.5,0)).norm()-0.3);});
+        auto sdf2 = AddPolyscopeQuantity(implicit->pc->addVertexSignedDistanceQuantity("sdf2",SDF2));
+        show << inNextFrame >> sdf1 >> boundary1 << sdf2;
+        show << inNextFrame << Curve3D::Add(P*0.3*1.5 + vec(off,0.8 + 0.75,0),100,true) << Curve3D::Add(P*0.3*1.5 + vec(off,0.8 - 0.75,0),100,true);
     }
 
    auto surface = grid->apply([](const vec& X){
@@ -258,27 +273,31 @@ void init () {
         show << CameraView::Add(UPS::Options::ProjectViewsPath + "currents.json");
         show << inNextFrame << surface;
         show << PlaceRight(Formula::Add("\\langle \\delta_{\\Sigma},\\omega \\rangle = \\int_{\\Sigma} \\omega "));
-        show << inNextFrame << PlaceBelow(Formula::Add("d\\delta_{\\Sigma}"),0.03);
-        show << inNextFrame << PlaceBelow(Formula::Add("\\langle d\\delta_{\\Sigma},\\omega \\rangle"),0.03);
-        auto domega = Formula::Add("=\\langle \\delta_{\\Sigma},d\\omega \\rangle");
-        show << inNextFrame << Replace(domega);
-        show << inNextFrame << domega->at("d_omega");
-        show << PlaceNextTo(Formula::Add("= \\int_{\\Sigma} d\\omega "),1);
-        show << inNextFrame << PlaceBelow(Formula::Add("\\stackrel{\\mathclap{\\tiny\\mbox{Stokes}}}{=} \\int_{\\partial\\Sigma} \\omega"));
-        show << inNextFrame << Replace(Formula::Add("= \\int_{\\Gamma} \\omega "));
-        show << inNextFrame << Replace(Formula::Add("= \\langle \\delta_{\\Gamma},\\omega \\rangle"));
-        show << inNextFrame << Replace(Formula::Add("d\\delta_{\\Sigma}= \\delta_{\\Gamma}"));
     }
     if (true) {
         show << newFrame << Title("Currents")->at(TOP);
-        show << PlaceBelow(Latex::Add("Link with area"));
-        show << Latex::Add("Area$(\\Sigma)$ ")->at(0.4,0.3);
+        show << PlaceBelow(Latex::Add("Why using them theoretically?"));
+        /*
+        show << inNextFrame << domega->at("d_omega");
+        show << PlaceNextTo(Formula::Add("= \\int_{\\Sigma} d\\omega "),1);
+        show << inNextFrame << PlaceBelow(Formula::Add("\\stackrel{\\mathclap{\\tiny\\mbox{Stokes}}}{=} \\int_{\\partial\\Sigma} \\omega"));
+        show << inNextFrame << Replace(Formula::Add("= \\langle \\delta_{\\partial\\Sigma},\\omega \\rangle"));
+        */
+        /*
+        show << inNextFrame << Replace(Formula::Add("d\\delta_{\\Sigma}= \\delta_{\\partial\\Sigma}"));
         show << inNextFrame << PlaceNextTo(Formula::Add("=\\int_{\\Sigma} 1 dS"),1);
         show << inNextFrame << PlaceBelow(Formula::Add("=\\int_{\\Sigma} ||n(x)||^2 dS"));
         show << inNextFrame << PlaceBelow(Formula::Add("= \\max_{v \\text{ s.t.} ||v||_{\\infty} \\leq 1} \\int_{\\Sigma} v(x)\\cdot n(x) dS"));
         show << inNextFrame << PlaceBelow(Formula::Add("= \\max_{v \\text{ s.t.} ||v||_{\\infty} \\leq 1} \\langle \\delta_{\\Sigma} , v\\rangle"));
         show << inNextFrame << PlaceBelow(Formula::Add("= ||\\delta_{\\Sigma}||_{\\text{dual}}"));
-        show << inNextFrame << Replace(Formula::Add("= ||\\delta_{\\Sigma}||_{\\text{mass}}"));
+        */
+        show << inNextFrame << Latex::Add("Direct link with Area")->at("curr_area");
+        show << inNextFrame << PlaceBelow(Formula::Add("||\\delta_\\Sigma||_{\\text{dual}} = \\max_{\\omega \\text{ s.t.} ||v||_{\\infty} \\leq 1} \\langle \\delta_{\\Sigma} , \\omega \\rangle"));
+        show << inNextFrame << PlaceBelow(Formula::Add(" = \\text{Area}(\\Sigma)"));
+
+        show << inNextFrame << Latex::Add("Topology $\\iff$ Derivative")->at("curr_der");
+        show << inNextFrame << PlaceBelow(Formula::Add("\\langle d\\delta_{\\Sigma},\\omega \\rangle=\\langle \\delta_{\\Sigma},d\\omega \\rangle"));
+        show << inNextFrame << PlaceBelow(Formula::Add("\\stackrel{\\mathclap{\\tiny\\mbox{Stokes}}}{=}\\langle \\delta_{\\partial \\Sigma},\\omega \\rangle \\implies d\\delta_{\\Sigma} = \\delta_{\\partial \\Sigma}"));
     }
     if (true)
     {
@@ -287,34 +306,33 @@ void init () {
         show << inNextFrame << PlaceNextTo(Formula::Add(" = \\argmin_{\\Sigma : d \\delta_{\\Sigma} = \\delta_\\Gamma} ||\\delta_\\Sigma||_{\\mass}"),1);
         show << CameraView::Add(UPS::Options::ProjectViewsPath + "currents.json");
         show << surface;
-        show << inNextFrame << PlaceNextTo(Formula::Add("= \\argmin_{\\eta : d \\eta = \\delta_\\Gamma} ||\\eta||_{1} = \\argmin_{X : \\curl(X) = \\delta_\\Gamma} ||X||_{1}"),1);
-        show << inNextFrame << CameraView::Add(UPS::Options::ProjectViewsPath + "field.json");
-        show >> surface;
+        show << inNextFrame >> surface;
+        show << CameraView::Add(UPS::Options::ProjectViewsPath + "field.json");
         int N = 6;
         shape_evolution(N,quad);
-
-        show << inNextFrame;
+        show << inNextFrame << PlaceNextTo(Formula::Add("= \\argmin_{\\eta : d \\eta = \\delta_\\Gamma} ||\\eta||_{1}"),1);
+        show  << PlaceNextTo(Formula::Add("= \\argmin_{X : \\curl(X) = \\delta_\\Gamma} ||X||_{1}"),1);
     }
     {
-        show << newFrame << Title("Quick recap")->at(TOP);
+        show << newFrame << Title("FFT and Topology")->at(TOP);
+        show << inNextFrame << PlaceBelow(Latex::Add("Imposing Curl$(X) = v \\implies$ solving many $\\Delta X = Y$"),0.15);
+        show << inNextFrame << PlaceBelow(Latex::Add("To speed things up : FFT!"));
+        show << inNextFrame << PlaceBelow(Latex::Add(" Solving $\\Delta X = Y$ on a $n \\times n \\times n$ grid :"),0.1);
+        show << PlaceBelow(Latex::Add(" Without FFT : $\\mathcal{O}(n^6)$"));
+        show << PlaceBelow(Latex::Add(" With FFT : $\\mathcal{O}(n^3\\log(n))$"));
+        show << newFrameSameTitle << PlaceBelow(Latex::Add("FFT $\\implies$ periodic domain"),0.1) << inNextFrame << Image::Add("T3.png")->at(CENTER);
     }
     {
         show << newFrame << Title("The Helmholtz-Hodge Decomposition")->at(TOP);
-        show << Image::Add(UPS::Options::ProjectPath + "helmholtz_hodge.png")->at("HH");
+        show << Image::Add("helmholtz_hodge.png")->at("HH");
         show << inNextFrame << Formula::Add("v = \\alpha \\oplus \\beta \\oplus \\gamma")->at("HH_decomp");
         show << PlaceBelow(Formula::Add("\\alpha \\in \\text{Ker}(d^1) \\iff \\text{div}(\\alpha) = 0"));
         show << PlaceBelow(Formula::Add("\\beta \\in \\text{Im}(d^0) \\iff \\text{curl}(\\beta) = 0 \\iff \\beta = d\\varphi"));
         show << PlaceBelow(Formula::Add("\\gamma \\in \\frac{\\text{Ker}(d^1)}{\\text{Im}(d^0)}"));
     }
     {
-        show << newFrame << Title("FFT and Topology")->at(TOP);
-        show << inNextFrame << Latex::Add("Implicit representation $\\implies$ high computational cost")->at("fft");
-        show << inNextFrame << Replace(Latex::Add("Imposing Curl$(X) = v \\implies$ solving many $\\Delta X = Y$"));
-        show << inNextFrame << PlaceBelow(Latex::Add("To speed things up : FFT!"));
-        show << newFrameSameTitle << Image::Add(Options::ProjectPath + "T3.png")->at(CENTER);
-    }
-    {
-        show << newFrame << Title("Vector Area")->at(TOP);
+        show << newFrame << Title("Imposing the harmonic part")->at(TOP);
+        show << PlaceBelow(Latex::Add("Vector Area"));
         show << inNextFrame << Formula::Add("\\int_{\\Sigma} n_{\\Sigma} dS");
         show << inNextFrame << PlaceNextTo(Formula::Add("\\stackrel{\\mathclap{\\tiny\\mbox{Stokes}}}{=} \\int \\gamma \\times d\\gamma"),1);
     }

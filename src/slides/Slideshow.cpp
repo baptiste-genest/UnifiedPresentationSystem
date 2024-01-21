@@ -160,12 +160,12 @@ void UPS::Slideshow::setInnerTime()
 
 void UPS::Slideshow::handleDragAndDrop()
 {
-    if (!ImGui::IsKeyPressed(341)){//CTRL {
+    auto io = ImGui::GetIO();
+    if (!ImGui::IsKeyPressed(341) || io.MouseReleased[0] > 0){//CTRL {
         selected_primitive = -1;
         return;
     }
 
-    auto io = ImGui::GetIO();
     auto S = ImGui::GetWindowSize();
     auto x = double(io.MousePos.x)/S.x;
     auto y = double(io.MousePos.y)/S.y;
