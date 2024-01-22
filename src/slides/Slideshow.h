@@ -95,9 +95,9 @@ public:
     inline Slideshow& operator<<(const RelativePlacement& P) {
         StateInSlide sis;
         if (!P.ptr_other)
-            sis.p = P.computePlacement(last_screen_primitive_inserted);
+            sis.p = P.computePlacement({last_screen_primitive_inserted,slides.back()[last_screen_primitive_inserted]});
         else
-            sis.p = P.computePlacement(P.ptr_other);
+            sis.p = P.computePlacement({P.ptr_other,slides.back()[P.ptr_other]});
         addToLastSlide(P.ptr,sis);
         return *this;
     }

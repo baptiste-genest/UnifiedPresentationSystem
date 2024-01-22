@@ -7,6 +7,7 @@
 namespace UPS {
 class ScreenPrimitive;
 using ScreenPrimitivePtr = std::shared_ptr<ScreenPrimitive>;
+using ScreenPrimitiveInSlide = std::pair<ScreenPrimitivePtr,StateInSlide>;
 
 class ScreenPrimitive : public Primitive
 {
@@ -21,20 +22,19 @@ public:
         return true;
     }
 
-    using InstanceInSlide = std::pair<ScreenPrimitivePtr,StateInSlide>;
 
-    inline InstanceInSlide at(const vec2& p,scalar alpha=1) {
+    inline ScreenPrimitiveInSlide at(const vec2& p,scalar alpha=1) {
         StateInSlide sis; sis.p = std::make_shared<AbsolutePosition>(p);
         sis.alpha = alpha;
         return {get(pid),sis};
     }
 
-    inline InstanceInSlide at(scalar x,scalar y,scalar alpha=1) {
+    inline ScreenPrimitiveInSlide at(scalar x,scalar y,scalar alpha=1) {
         return at(vec2(x,y),alpha);
     }
 
 
-    inline InstanceInSlide at(std::string label) {
+    inline ScreenPrimitiveInSlide at(std::string label) {
         StateInSlide sis;
         sis.p = std::make_shared<PersistantPosition>(label);
         return {get(pid),sis};
@@ -47,7 +47,6 @@ public:
         auto s = getSize();
         return Size(s(0)/S.x,s(1)/S.y);
     }
-
 };
 
 

@@ -21,7 +21,7 @@ struct RelativePlacement {
 
     RelativePlacement(ScreenPrimitivePtr ptr,ScreenPrimitivePtr ptr_other = nullptr) : ptr(ptr),ptr_other(ptr_other) {}
 
-    virtual PositionPtr computePlacement(const ScreenPrimitivePtr& other) const = 0;
+    virtual PositionPtr computePlacement(const ScreenPrimitiveInSlide& other) const = 0;
 
     ScreenPrimitivePtr ptr;
     ScreenPrimitivePtr ptr_other = nullptr;
@@ -75,7 +75,7 @@ struct PlaceRelative : public RelativePlacement {
     }
     PlaceRelative(ScreenPrimitivePtr ptr,ScreenPrimitivePtr ptr_other,placeX X,placeY Y,scalar paddingx = 0.01,scalar paddingy = 0.01) : RelativePlacement(ptr,ptr_other),X(X),Y(Y),paddingx(paddingx),paddingy(paddingy) {}
 
-    PositionPtr computePlacement(const ScreenPrimitivePtr& other) const override;
+    PositionPtr computePlacement(const ScreenPrimitiveInSlide& other) const override;
 
     scalar paddingx,paddingy;
     placeX X;

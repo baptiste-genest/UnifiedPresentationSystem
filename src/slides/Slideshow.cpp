@@ -42,7 +42,7 @@ void UPS::Slideshow::forceNextFrame()
     current_slide++;
     for (auto& s : slides[current_slide]){
         auto p = s.first;
-        p->intro(TimeObject(p->getInnerTime(),1),s.second.capturePos(slides[current_slide]));
+        p->intro(TimeObject(p->getInnerTime(),1),s.second);
     }
     from_action = Time::now();
     backward = false;
@@ -59,9 +59,6 @@ void UPS::Slideshow::play() {
     auto t = TimeFrom(from_action);
 
     auto& CS = slides[current_slide];
-    for (auto& s : CS)
-        s.second.capturePos(CS);
-
 
     setInnerTime();
 
@@ -77,11 +74,7 @@ void UPS::Slideshow::play() {
     }
     else {
         if (current_slide > 0){
-
             auto& PS = slides[current_slide-1];
-            for (auto& s : PS)
-                s.second.capturePos(PS);
-
             auto&& [common,UA,UB] = transitions[current_slide-1];
             if (t < 2*transitionTime){
                 for (auto& c : common) {
@@ -213,7 +206,7 @@ void UPS::Slideshow::handleTransition()
 
 UPS::StateInSlide UPS::Slideshow::transition(parameter t, const StateInSlide &sa, const StateInSlide &sb){
     StateInSlide St;
-    St.captured_pos = lerp(sa.captured_pos,sb.captured_pos,smoothstep(t));
+    St.p = MakePosition(lerp(sa.getPosition(),sb.getPosition(),smoothstep(t)));
     St.alpha = std::lerp(sa.alpha,sb.alpha,smoothstep(t));
     St.angle = std::lerp(sa.angle,sb.angle,smoothstep(t));
     return St;
@@ -328,7 +321,7 @@ UPS::PrimitivePtr UPS::Slideshow::getPrimitiveUnderMouse(scalar x,scalar y) cons
     for (auto& pis : slides[current_slide].getScreenPrimitives()){
         if (!pis.second.p->isPersistant())
             continue;
-        auto p = pis.second.getPosition(slides[current_slide]);
+        auto p = pis.second.getPosition();
         if (std::abs(p(0) - x) < pis.first->getSize()(0)/2/S.x && std::abs(p(1) - y) < pis.first->getSize()(1)/2/S.y)
             return pis.first;
     }

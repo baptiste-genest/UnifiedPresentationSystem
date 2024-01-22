@@ -11,7 +11,6 @@ struct StateInSlide {
     scalar alpha = 1;
     PositionPtr p;
     scalar angle=0;
-    vec2 captured_pos;
 
     StateInSlide() {}
 
@@ -19,15 +18,16 @@ struct StateInSlide {
         p = std::make_shared<AbsolutePosition>(x);
     }
 
-    StateInSlide& capturePos(const Slide& s) {
-        captured_pos = getPosition(s);
-        return *this;
+    vec2 getPosition() const {
+        if (p)
+            return p->getPosition();
+        return vec2(0,0);
     }
 
-    vec2 getPosition(const Slide& s) const {
-        if (p)
-            return p->getPosition(s);
-        return vec2(0,0);
+    ImVec2 getAbsolutePosition() const {
+        vec2 P = getPosition();
+        auto W = ImGui::GetWindowSize();
+        return ImVec2(P(0)*W.x,P(1)*W.y);
     }
 };
 

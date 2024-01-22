@@ -22,7 +22,8 @@ void Text::display(const StateInSlide &sis) const
     style->Colors[ImGuiCol_Text] = RGBA(ImVec4(0,0, 0, alpha));
     auto S = ImGui::GetWindowSize();
 
-    ImGui::SetCursorPos(ImVec2(S.x*sis.captured_pos(0) - size.x*0.5,S.y*sis.captured_pos(1) - size.y*0.5));
+    auto P = sis.getAbsolutePosition();
+    ImGui::SetCursorPos(ImVec2(P.x - size.x*0.5,P.y - size.y*0.5));
     ImGui::Text(content.c_str());
 
     style->Colors[ImGuiCol_Text] = old;

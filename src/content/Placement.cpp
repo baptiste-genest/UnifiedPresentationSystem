@@ -1,17 +1,17 @@
 #include "Placement.h"
 
 
-UPS::PositionPtr UPS::PlaceRelative::computePlacement(const ScreenPrimitivePtr &other) const {
+UPS::PositionPtr UPS::PlaceRelative::computePlacement(const ScreenPrimitiveInSlide &other) const {
 
     ScreenPrimitivePtr ptr = this->ptr;
     auto paddingx = this->paddingx;
     auto paddingy = this->paddingy;
     auto X = this->X;
     auto Y = this->Y;
+    auto S = other.first->getRelativeSize();
 
-    RelativePlacer rp = [X,Y,ptr,paddingy,paddingx,other] (vec2 other_position) {
+    RelativePlacer rp = [S,X,Y,ptr,paddingy,paddingx,other] (vec2 other_position) {
         vec2 P;
-        auto S = other->getRelativeSize();
         switch(X) {
         case REL_LEFT:
             P(0) = other_position(0)
@@ -70,5 +70,5 @@ UPS::PositionPtr UPS::PlaceRelative::computePlacement(const ScreenPrimitivePtr &
         }
         return P;
     };
-    return std::make_shared<RelativePosition>(other,rp);
+    return std::make_shared<RelativePosition>(other.second.p,rp);
 }
