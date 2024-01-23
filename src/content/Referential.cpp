@@ -1,6 +1,7 @@
 #include "Referential.h"
 
 
+/*
 void UPS::PersistantPosition::setLabel(std::string l) {
     label = l;
     writeAtLabel(0.5,0.5,false);
@@ -34,3 +35,5 @@ UPS::vec2 UPS::PersistantPosition::readFromLabel() const
     file >> rslt(0) >> rslt(1);
     return rslt;
 }
+
+*/

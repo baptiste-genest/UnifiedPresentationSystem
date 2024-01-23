@@ -16,6 +16,7 @@
 #include "content/Graphics2D/Curve2D.h"
 #include "content/CameraView.h"
 #include "content/Sliders.h"
+#include "slides/Panel.h"
 #include "extern/svg.hpp"
 
 #endif // UNIFIEDPRESENTATIONSYSTEM_H

@@ -3,25 +3,37 @@
 #include "../UPS.h"
 #include "io.h"
 #include "Options.h"
-#include "Referential.h"
+#include "Anchor.h"
 
 namespace UPS {
 
+using RelativePlacer = std::function<vec2(vec2)>;
+
 struct StateInSlide {
     scalar alpha = 1;
-    PositionPtr p;
+    RelativePlacer placer = [] (const vec2& p) {
+        return p;
+    };
+    AnchorPtr anchor = GlobalAnchor;
     scalar angle=0;
 
-    StateInSlide() {}
+    StateInSlide() {
+    }
+
+    StateInSlide(AnchorPtr p) : anchor(p) {}
 
     StateInSlide(const vec2& x)  {
-        p = std::make_shared<AbsolutePosition>(x);
+        setOffset(x);
+    }
+
+    void setOffset(const vec2& x) {
+        placer = [x] (const vec2& p) {
+            return p + x;
+        };
     }
 
     vec2 getPosition() const {
-        if (p)
-            return p->getPosition();
-        return vec2(0,0);
+        return placer(anchor->getPos());
     }
 
     ImVec2 getAbsolutePosition() const {

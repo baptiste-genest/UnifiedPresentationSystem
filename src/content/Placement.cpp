@@ -1,7 +1,7 @@
 #include "Placement.h"
 
 
-UPS::PositionPtr UPS::PlaceRelative::computePlacement(const ScreenPrimitiveInSlide &other) const {
+UPS::StateInSlide UPS::PlaceRelative::computePlacement(const ScreenPrimitiveInSlide &other) const {
 
     ScreenPrimitivePtr ptr = this->ptr;
     auto paddingx = this->paddingx;
@@ -70,5 +70,8 @@ UPS::PositionPtr UPS::PlaceRelative::computePlacement(const ScreenPrimitiveInSli
         }
         return P;
     };
-    return std::make_shared<RelativePosition>(other.second.p,rp);
+    StateInSlide sis;
+    sis.anchor = other.first->getAnchor();
+    sis.placer = rp;
+    return sis;
 }

@@ -9,6 +9,7 @@ namespace UPS {
 
 class Slide;
 
+/*
 struct Position {
     virtual vec2 getPosition() const = 0;
     virtual void writeAtLabel(scalar,scalar,bool) const {}
@@ -41,6 +42,9 @@ struct RelativePosition : public Position {
     }
 
     RelativePosition(PositionPtr p,RelativePlacer rel) : ref(p),placer(rel) {}
+    RelativePosition(PositionPtr p,vec2 offset) : ref(p) {
+        placer = [offset](vec2 p) { return p+offset; };
+    }
 };
 
 struct PersistantPosition : public Position {
@@ -57,6 +61,7 @@ struct PersistantPosition : public Position {
         return readFromLabel();
     }
 };
+*/
 
 
 }

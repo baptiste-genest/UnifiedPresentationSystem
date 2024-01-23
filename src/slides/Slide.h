@@ -27,6 +27,10 @@ struct Slide : public std::map<PrimitivePtr,StateInSlide> {
         add(p,StateInSlide(pos));
     }
 
+    void add(PrimitiveInSlide pis){
+        add(pis.first,pis.second);
+    }
+
     void remove(PrimitivePtr ptr) {
         this->erase(ptr);
     }

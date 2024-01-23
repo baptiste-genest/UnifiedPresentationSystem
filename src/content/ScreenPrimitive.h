@@ -3,6 +3,7 @@
 
 #include "primitive.h"
 #include "StateInSlide.h"
+#include "Anchor.h"
 
 namespace UPS {
 class ScreenPrimitive;
@@ -11,8 +12,12 @@ using ScreenPrimitiveInSlide = std::pair<ScreenPrimitivePtr,StateInSlide>;
 
 class ScreenPrimitive : public Primitive
 {
+protected:
+    AnchorPtr anchor;
 public:
-    ScreenPrimitive() {}
+    ScreenPrimitive() {
+        anchor = Anchor::Add(vec2(0,0));
+    }
 
     static ScreenPrimitivePtr get(PrimitiveID id) {
         return std::dynamic_pointer_cast<ScreenPrimitive>(Primitive::get(id));
@@ -22,9 +27,15 @@ public:
         return true;
     }
 
+    const AnchorPtr getAnchor() const {return anchor;}
+
+    inline void updateAnchor(const vec2& p){
+        anchor->updatePos(p);
+    }
+
 
     inline ScreenPrimitiveInSlide at(const vec2& p,scalar alpha=1) {
-        StateInSlide sis; sis.p = std::make_shared<AbsolutePosition>(p);
+        StateInSlide sis; sis.setOffset(p);
         sis.alpha = alpha;
         return {get(pid),sis};
     }
@@ -36,16 +47,15 @@ public:
 
     inline ScreenPrimitiveInSlide at(std::string label) {
         StateInSlide sis;
-        sis.p = std::make_shared<PersistantPosition>(label);
+        sis.anchor = Anchor::Add(label);
         return {get(pid),sis};
     }
 
     virtual vec2 getSize() const = 0;
 
     Size getRelativeSize() const {
-        auto S = Vec2(Options::UPS_screen_resolution_x, UPS::Options::UPS_screen_resolution_y);
         auto s = getSize();
-        return Size(s(0)/S.x,s(1)/S.y);
+        return Size(s(0)/Options::UPS_screen_resolution_x,s(1)/Options::UPS_screen_resolution_y);
     }
 };
 

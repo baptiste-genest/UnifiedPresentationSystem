@@ -80,9 +80,8 @@ void UPS::Image::outro(const TimeObject& t, const StateInSlide &sis)
 void UPS::Image::display(const StateInSlide &sis) const
 {
     RGBA color_multiplier = ImColor(1.f,1.f,1.f,sis.alpha);
-    auto P = toVec2(sis.getPosition());
-    P.x *= Options::UPS_screen_resolution_x;
-    P.y *= Options::UPS_screen_resolution_y;
+    anchor->updatePos(sis.getPosition());
+    auto P = sis.getAbsolutePosition();
     if (std::abs(sis.angle) > 0.001 || std::abs(1-scale) > 1e-2)
         ImageRotated((void*)(intptr_t)texture,P,ImVec2(width*scale,height*scale),sis.angle,color_multiplier);
     else {

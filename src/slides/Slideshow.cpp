@@ -177,7 +177,7 @@ void UPS::Slideshow::handleDragAndDrop()
     }
     if (io.MouseDown[0] > 0 && selected_primitive != nullptr) {
         auto& pis = slides[current_slide][selected_primitive];
-        pis.p->writeAtLabel(x,y,true);
+        pis.anchor->writeAtLabel(x,y,true);
     }
 }
 
@@ -204,63 +204,7 @@ void UPS::Slideshow::handleTransition()
         s->forceEnable();
 }
 
-UPS::StateInSlide UPS::Slideshow::transition(parameter t, const StateInSlide &sa, const StateInSlide &sb){
-    StateInSlide St;
-    St.p = MakePosition(lerp(sa.getPosition(),sb.getPosition(),smoothstep(t)));
-    St.alpha = std::lerp(sa.alpha,sb.alpha,smoothstep(t));
-    St.angle = std::lerp(sa.angle,sb.angle,smoothstep(t));
-    return St;
-}
 
-void UPS::Slideshow::precomputeTransitions()
-{
-    transitions_computed = true;
-    if (prompter_ptr != nullptr)
-        prompter_ptr->loadScript();
-    appearing_primitives.resize(slides.size());
-    for (auto& p : slides[0])
-        appearing_primitives[0].insert(p.first);
-    for (int i = 0;i<slides.size()-1;i++){
-        transitions.push_back(
-            computeTransitionsBetween(
-                slides[i],
-                slides[i+1]
-                ));
-        appearing_primitives[i+1] = std::get<2>(transitions.back());
-    }
-    if (debug){
-        current_slide = slides.size()-1;
-        for (auto& s : slides.back()){
-            auto p = s.first;
-            p->forceEnable();
-            p->handleInnerTime();
-            p->intro(TimeObject(p->getInnerTime(),1),s.second);
-        }
-    }
-}
-
-UPS::Slideshow::TransitionSets UPS::Slideshow::computeTransitionsBetween(const Slide &A, const Slide &B)
-{
-    Primitives common,uniqueA,uniqueB;
-    for (auto sb : B)
-        uniqueB.insert(sb.first);
-
-    for (auto sa : A){
-        bool inB = false;
-        for (auto sb : B){
-            if (sa.first == sb.first){
-                common.insert(sa.first);
-                uniqueB.erase(sa.first);
-                inB = true;
-                break;
-            }
-        }
-        if (!inB){
-            uniqueA.insert(sa.first);
-        }
-    }
-    return {common,uniqueA,uniqueB};
-}
 
 void UPS::Slideshow::ImGuiWindowConfig()
 {
@@ -308,18 +252,13 @@ void UPS::Slideshow::init(std::string project_name, std::string script_file, boo
 
 }
 
-void UPS::Slideshow::setScriptFile(std::string file)
-{
-    prompter_ptr = std::make_unique<Prompter>(file);
-
-}
 
 UPS::PrimitivePtr UPS::Slideshow::getPrimitiveUnderMouse(scalar x,scalar y) const
 {
     auto io = ImGui::GetIO();
     auto S = ImGui::GetWindowSize();
     for (auto& pis : slides[current_slide].getScreenPrimitives()){
-        if (!pis.second.p->isPersistant())
+        if (!pis.second.anchor->isPersistant())
             continue;
         auto p = pis.second.getPosition();
         if (std::abs(p(0) - x) < pis.first->getSize()(0)/2/S.x && std::abs(p(1) - y) < pis.first->getSize()(1)/2/S.y)
