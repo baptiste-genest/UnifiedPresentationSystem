@@ -164,7 +164,7 @@ inline SlideManager& operator<<(SlideManager& SM,const StateInSlide& sis) {
 }
 
 inline SlideManager& operator<<(SlideManager& SM,const PrimitiveGroup& G) {
-    for (auto [ptr,sis] : G.buffer.getScreenPrimitives()){
+    for (auto [ptr,sis] : G.buffer){
         SM.addToLastSlide(ptr,sis);
     }
     return SM;

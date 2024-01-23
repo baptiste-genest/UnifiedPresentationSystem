@@ -194,7 +194,7 @@ void init () {
         show << inNextFrame << PlaceRight(anti_comm,0.35);
 
 
-        //show << inNextFrame << Title("k-forms")->at(TOP);
+        show << inNextFrame << Title("k-forms")->at(TOP);
         show << PlaceBelow(Formula::Add("\\omega(u\\land v) = -\\omega(v\\land u) \\rightarrow \\mathbb{R}"),anti_comm,0.05);
         show << Replace(Formula::Add("\\bigwedge V^*"),algebra);
 
@@ -222,7 +222,7 @@ void init () {
         show << inNextFrame << codim->at(CENTER);
         show << Latex::Add("$x \\mapsto $Ker$(\\omega(x))$")->at("codim");
         show << newFrameSameTitle;
-        show << PlaceBelow(Latex::Add("exterior derivative"),title);
+        show << PlaceBelow(Latex::Add("Exterior derivative"),title);
         show << inNextFrame << ext_d->at(0.8,0.5);
         show << Image::Add("d_boundary.png")->at(0.3,0.5);
     }
@@ -333,8 +333,10 @@ void init () {
     {
         show << newFrame << Title("Imposing the harmonic part")->at(TOP);
         show << PlaceBelow(Latex::Add("Vector Area"));
-        show << inNextFrame << Formula::Add("\\int_{\\Sigma} n_{\\Sigma} dS");
-        show << inNextFrame << PlaceNextTo(Formula::Add("\\stackrel{\\mathclap{\\tiny\\mbox{Stokes}}}{=} \\int \\gamma \\times d\\gamma"),1);
+        Panel P(true);
+        P << Formula::Add("\\int_{\\Sigma} n_{\\Sigma} dS");
+        P << PlaceNextTo(Formula::Add("\\stackrel{\\mathclap{\\tiny\\mbox{Stokes}}}{=} \\int \\gamma \\times d\\gamma"),1);
+        show << inNextFrame << P;
     }
     {
         show << newFrame << Title("Going back to our optimization problem")->at(TOP);

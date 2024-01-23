@@ -133,7 +133,7 @@ void init() {
         auto blue_noise = Image::Add("blue_noise.png");
 
         show << newFrame << Title("Sampling problem")->at(UPS::TOP);
-        PrimitiveGroup noises;
+        Panel noises;
         noises << Image::Add("uniform.png");
         noises << PlaceNextTo(Image::Add("blue_noise.png"),1);
         show << inNextFrame << noises;
