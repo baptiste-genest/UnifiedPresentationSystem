@@ -27,7 +27,7 @@ public:
         return true;
     }
 
-    const AnchorPtr getAnchor() const {return anchor;}
+    AnchorPtr getAnchor() const {return anchor;}
 
     inline void updateAnchor(const vec2& p){
         anchor->updatePos(p);
@@ -35,7 +35,8 @@ public:
 
 
     inline ScreenPrimitiveInSlide at(const vec2& p,scalar alpha=1) {
-        StateInSlide sis; sis.setOffset(p);
+        StateInSlide sis(p);
+        anchor->updatePos(p);
         sis.alpha = alpha;
         return {get(pid),sis};
     }

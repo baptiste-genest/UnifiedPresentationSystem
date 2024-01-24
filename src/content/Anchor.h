@@ -29,7 +29,9 @@ class Anchor
     }
 public:
     Anchor(const vec2& p) {pos = p;}
-    Anchor(std::string l) : label(l) {}
+    Anchor(std::string l) : label(l) {
+        writeAtLabel(0.5,0.5,false);
+    }
     static AnchorPtr Add(const vec2& p) {
         return std::make_shared<Anchor>(p);
     }

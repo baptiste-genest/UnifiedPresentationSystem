@@ -93,9 +93,9 @@ inline TexObject del(int i,bool xyz = true) {
 inline TexObject align(const std::vector<TexObject>& texs) {
     TexObject rslt = "\\begin{align*}\n";
     for (int i= 0;i<texs.size()-1;i++)
-        rslt += texs[i] + "\\\\";
+        rslt += texs[i] + "\\\\ \n";
     rslt += texs.back();
-    rslt += "\\end{align*}";
+    rslt += "\n \\end{align*}";
     return rslt;
 }
 
