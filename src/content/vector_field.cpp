@@ -5,11 +5,6 @@ namespace UPS {
 VectorField::VectorField(const vecs &X, const vecs &V,double l) : V(V),
     X(X),length(l)
 {
-    pc = polyscope::registerPointCloud("polyscope_obj" + std::to_string(pid),X);
-    pc->setPointRadius(0);
-    pc->setEnabled(false);
-    pq = pc->addVectorQuantity("V",V);
-    pq->setVectorRadius(l/20,false);
 }
 
 VectorField::VectorFieldPtr VectorField::AddOnGrid(const vecs &V)
@@ -26,6 +21,29 @@ VectorField::VectorFieldPtr VectorField::AddOnGrid(const vecs &V)
             for (int k = 0;k<n;k++)
                 X.push_back(vec(coord(i),coord(j),coord(k)));
     return Add(X,V,std::sqrt(2)/(n-1));
+}
+
+VectorField::VectorFieldPtr VectorField::EvalOnGrid(const std::function<vec (vec)> &vf, int n,scalar l)
+{
+    auto coord = buildRangeMapper(0,n-1,-0.5*l,l*0.5);
+    vecs X,V;
+    for (int i = 0;i<n;i++)
+        for (int j = 0;j<n;j++)
+            for (int k = 0;k<n;k++){
+                V.push_back(vf(vec(coord(i),coord(j),coord(k))));
+                X.push_back(vec(coord(i),coord(j),coord(k)));
+            }
+    return Add(X,V,std::sqrt(2)*l/(n-1));
+
+}
+
+void VectorField::initPolyscope()
+{
+    pc = polyscope::registerPointCloud(getPolyscopeName(),X);
+    pc->setPointRadius(0);
+    pc->setEnabled(false);
+    pq = pc->addVectorQuantity("V",V);
+    pq->setVectorRadius(length/20,false);
 }
 
 }

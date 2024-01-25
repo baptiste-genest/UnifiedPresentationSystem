@@ -114,6 +114,58 @@ void shape_evolution(int N,const UPS::Mesh::MeshPtr& quad) {
                 show << kvec;
             }
 }
+std::vector<vec> nodes,tangents;
+
+vec knot(double t){
+    using namespace std;
+    vec x;
+    /*
+    x << sin(t) + 2*sin(2*t),
+            cos(t) - 2*cos(2*t),
+            -sin(3*t);
+*/
+    x << cos(t), 0, sin(t);
+    return x;
+}
+std::pair<vec,vec> getOrtho(const vec &v)
+{
+    static vec axis1(M_PI,2,3);
+    static vec axis2(M_PI,1,M_PI);
+    auto b1 =v.cross(axis1);
+    if ((b1).squaredNorm() < 1e-6){
+        b1 = v.cross(axis2);
+        std::cout << "CHANGE" << std::endl;
+    }
+    b1 = b1.normalized();
+    return {b1,v.cross(b1)};
+}
+
+
+void sample_curve(int N,const UPS::Parametrization& curve) {
+    double dt = 2*M_PI/N;
+    double t = 0;
+    for (int i = 0;i<N;i++){
+        nodes.push_back(curve(t));
+        tangents.push_back((curve(t+dt)-curve(t)).normalized());
+        t += dt;
+    }
+}
+float a = 0.1;
+vec BS_integrand(const vec& p,const vec& p1,const vec& p2,bool end){
+    vec etap = p2 - p1;
+    vec eta = (end ? p2 : p1);
+    vec diff = eta - p;
+    double denom = (etap.squaredNorm()*a*a + diff.cross(etap).squaredNorm())*sqrt(a*a + diff.squaredNorm());
+    return diff.dot(etap)*diff.cross(etap)/denom;
+}
+
+vec biot_savard_field(const vec& p) {
+    vec u = vec::Zero();
+    for (int i = 0;i<nodes.size();i++)
+        u += (BS_integrand(p,nodes[i],nodes[(i+1)%nodes.size()],true) -BS_integrand(p,nodes[i],nodes[(i+1)%nodes.size()],false))/nodes.size();
+    return u/(4*M_PI);
+}
+
 
 void init () {
 
@@ -137,15 +189,17 @@ void init () {
 
     Parametrization P(circle);
 
-    if (true)
+    bool runall = true;
+    if (runall)
     {
         auto title = Title(tex::center("Computing Minimal Surfaces\\\\ using Differential forms"));
         show << title->at(CENTER);
         show << PlaceBelow(Latex::Add("Albert Chern"));
         show << PlaceBelow(Latex::Add("Stephanie Wang"));
+        show << PlaceBelow(Latex::Add("SIGGRAPH 2021"),0.05);
     }
 
-    if (true)
+    if (runall)
     {
         auto cat_surf = grid->apply(catenoid);
 
@@ -164,7 +218,7 @@ void init () {
         show << PlaceBelow(Formula::Add("\\Sigma \\in \\text{argmin Area}(\\Sigma) "));
         show << PlaceBelow(Formula::Add("\\partial \\Sigma = \\Gamma "));
     }
-    if (true) {
+    if (runall) {
         show << newFrame << Title("How to represent a shape in a computer?")->at(CENTER) << inNextFrame << TOP;
         show << CameraView::Add(UPS::Options::ProjectViewsPath + "shape.json");
         scalar off = 3;
@@ -174,11 +228,11 @@ void init () {
         show << bco;
         show << PointCloud::Add(bunny_coarse->getVertices())->apply(offset(vec(-off,0,0)));
         auto SDF1 = grid->eval([](const vec& x) {return -(x.norm()-0.6);});
-        show << Latex::Add("explicit")->at(0.4,0.9);
+        show << Latex::Add("explicit")->at(0.4,0.8);
 
 
         auto implicit = grid->scale(1.5)->translate(vec(off,0.8,0));
-        show << inNextFrame << implicit << Latex::Add("implicit")->at(0.75,0.9);
+        show << inNextFrame << implicit << Latex::Add("implicit")->at(0.75,0.8);
         auto sdf1 = AddPolyscopeQuantity(implicit->pc->addVertexSignedDistanceQuantity("sdf",SDF1));
         show << sdf1;
         auto boundary1 = Curve3D::Add(P*0.6*1.5 + vec(off,0.8,0),100,true);
@@ -189,14 +243,17 @@ void init () {
         show << inNextFrame >> sdf1 >> boundary1 << sdf2;
         show << inNextFrame << Curve3D::Add(P*0.3*1.5 + vec(off,0.8 + 0.75,0),100,true) << Curve3D::Add(P*0.3*1.5 + vec(off,0.8 - 0.75,0),100,true);
     }
-    if (true)
+    if (runall)
     {
         show << newFrame << Title("How to approximate the area of a surface?")->at(TOP);
         show << inNextFrame << Image::Add("surface_approx.png");
     }
-    show << newFrame << Title("Quick introduction to differential forms");
-    if (true)
+    if (runall)
     {
+        show << newFrame << Title("Quick introduction to differential forms");
+        show << PlaceBelow(Latex::Add("A unified framework to express vector calculus"));
+
+
         show << newFrame << Title("k-vectors")->at(TOP);
         auto algebra = Formula::Add("\\bigwedge V");
         show << PlaceNextTo(algebra,1,0.1);
@@ -236,7 +293,7 @@ void init () {
         show << origin->addVector([w](scalar) {return w;});
         show << PlaceBelow(Formula::Add("\\omega(u\\land v) = \\text{det}(u,v,w)"),uwv);
     }
-    if (true)
+    if (runall)
     {
         auto title = Title("Differential k-forms");
         show << newFrame << title->at(TOP);
@@ -245,7 +302,7 @@ void init () {
         show << inNextFrame << codim->at(CENTER);
         show << Latex::Add("$x \\mapsto $Ker$(\\omega(x))$")->at("codim");
     }
-    if (true) {
+    if (runall) {
         auto title = Title("Example : differential 1-forms");
         show << newFrame << title->at(TOP);
         auto form = Formula::Add("\\omega(x) = f(x)dx + g(x)dy + h(x)dz");
@@ -254,7 +311,7 @@ void init () {
         auto V = randomSmoothVectorField(7,quad);
         show << newFrameSameTitle << VectorField::AddOnGrid(V) << cam << PlaceBelow(form) << PlaceBelow(Formula::Add("\\simeq (f(x),g(x),h(x))^t"));
     }
-    if (true) {
+    if (runall) {
         auto ext_d = Image::Add("ext_der.png");
         show << newFrame << Title("The exterior derivative")->at(TOP);
         show << inNextFrame << ext_d->at(0.8,0.5);
@@ -267,14 +324,14 @@ void init () {
             return vec(x,y,std::exp(x*x+y*y)-1);
         });
 
-    if (true) {
+    if (runall) {
         show << newFrame << Title("Currents")->at(TOP);
         show << PlaceBelow(Latex::Add(tex::center("Currents are to differential forms \\\\ what distributions are to $\\mathcal{C}^{\\infty}_c$ functions")),0.05);
         show << inNextFrame << PlaceBelow(Image::Add("dirac_delta.png"));
         show << inNextFrame << Replace(Image::Add("currents.png"));
         show << PlaceNextTo(Formula::Add("\\langle \\delta_{\\Sigma} ,\\omega \\rangle = \\int_{\\Sigma} \\omega"),1);
     }
-    if (true) {
+    if (runall) {
         show << newFrameSameTitle;
         show << PlaceBelow(Latex::Add("Why using them theoretically \\\\ for minimal surface problems?"));
         show << inNextFrame << Latex::Add("Direct link with Area")->at("curr_area");
@@ -285,20 +342,26 @@ void init () {
         show << inNextFrame << PlaceBelow(Formula::Add("\\langle d\\delta_{\\Sigma},\\omega \\rangle=\\langle \\delta_{\\Sigma},d\\omega \\rangle"));
         show << inNextFrame << PlaceBelow(Formula::Add("\\Stokes\\langle \\delta_{\\partial \\Sigma},\\omega \\rangle \\implies d\\delta_{\\Sigma} = \\delta_{\\partial \\Sigma}"));
     }
-    if (true)
+    if (runall) {
+        show << newFrame << Title("Why so many dual objects???")->at(CENTER);
+        show << inNextFrame << PlaceBelow(Latex::Add(tex::center("It is often easier to handle function \\\\ of objects than the objects themselves.")));
+    }
+    if (runall)
     {
         show << newFrame << Title("The article's approach")->at(TOP);
         show << inNextFrame << Formula::Add("\\argmin_{\\Sigma : \\partial \\Sigma = \\Gamma} \\area(\\Sigma)")->at("opti");
         show << inNextFrame << PlaceNextTo(Formula::Add(" = \\argmin_{\\Sigma : d \\delta_{\\Sigma} = \\delta_\\Gamma} ||\\delta_\\Sigma||_{\\text{dual}}"),1);
-        show << CameraView::Add(UPS::Options::ProjectViewsPath + "currents.json");
+        //show << CameraView::Add(UPS::Options::ProjectViewsPath + "currents.json");
+        show << CameraView::Add(UPS::Options::ProjectViewsPath + "field.json");
         show << surface;
         show << inNextFrame >> surface;
-        show << CameraView::Add(UPS::Options::ProjectViewsPath + "field.json");
         int N = 6;
         shape_evolution(N,quad);
-        show << inNextFrame << PlaceNextTo(Formula::Add("= \\argmin_{\\eta : d \\eta = \\delta_\\Gamma} ||\\eta||_{1}"),1);
-        show << PlaceNextTo(Formula::Add("= \\argmin_{X : \\curl(X) = \\delta_\\Gamma} ||X||_{1}"),1);
+        show << inNextFrame << PlaceNextTo(Formula::Add("= \\argmin_{\\eta : d \\eta = \\delta_\\Gamma} ||\\eta||_{1} ="),1);
+        auto vf_opti = Formula::Add("\\argmin_{X : \\curl(X) = \\delta_\\Gamma} ||X||_{1}");
+        show << PlaceNextTo(vf_opti,1);
         show << Latex::Add(" Implicit representation : extract $\\Sigma$ by considering $X$ as its normal field")->at(0.5,0.9);
+        show << newFrame << Title("An optimization problem")->at(TOP) << vf_opti->at(CENTER);
     }
     {
         show << newFrame << Title("FFT and Topology")->at(TOP);
@@ -316,10 +379,35 @@ void init () {
         show << PlaceBelow(Formula::Add("\\alpha \\in \\text{Ker}(d^1) \\iff \\text{div}(\\alpha) = 0"));
         show << PlaceBelow(Formula::Add("\\beta \\in \\text{Im}(d^0) \\iff \\text{curl}(\\beta) = 0 \\iff \\beta = d\\varphi"));
         show << PlaceBelow(Formula::Add("\\gamma \\in \\frac{\\text{Ker}(d^1)}{\\text{Im}(d^0)}"));
+        show << PlaceBelow(Latex::Add(tex::center("Allows us to decouple\\\\ the constraints !")));
     }
     {
-        show << newFrame << Title("Imposing the harmonic part")->at(TOP);
-        show << PlaceBelow(Latex::Add("Fixing coordinates"));
+        show << newFrame << Title("Imposing the boundary constraint")->at(TOP);
+        show << CameraView::Add(UPS::Options::ProjectViewsPath + "biot_savard.json");
+        show << PlaceBelow(Latex::Add("The \\textit{Biot-Savard Law}"));
+        Parametrization K(knot);
+        int N = 40;
+        sample_curve(N,K);
+        auto curve = Curve3D::Add(nodes,true,0);
+        show << curve;
+        auto T = curve->pc->addNodeVectorQuantity("tangent",tangents);
+        T->setVectorLengthScale(2*M_PI/N,false);
+        T->setVectorRadius(0.04,false);
+        show << AddPolyscopeQuantity(T);
+        //random points
+        vecs samples,V;
+        for (int i = 0;i<1000;i++){
+            samples.push_back(vec::Random()*1.5);
+            V.push_back(biot_savard_field(samples.back()));
+        }
+        show << Latex::Add("Imposing $\\curl(X) = \\delta_{\\partial \\Sigma}$")->at("BS");
+        show << PlaceBelow(Formula::Add("\\implies \\text{curl}^{+}(v) = \\text{curl}(\\Vec{\\Delta}^{-1}v)"));
+
+        show << VectorField::Add(samples,V,0.3);
+    }
+    {
+        show << newFrame << Title("Imposing the non-periodicity constraint")->at(TOP);
+        show << PlaceBelow(Latex::Add("Fixing harmonic coordinates"));
         show << inNextFrame << Image::Add("H1_basis.png")->at("H1_basis") << PlaceBelow(Latex::Add("A basis of the set of harmonic vector fields"));
         show << inNextFrame << Formula::Add("H_i = \\langle X , e_i \\rangle &= \\int X_i d\\Omega \\\\ &=\\langle \\delta_{\\Sigma} , e_i \\rangle")->at("coords");
         show << inNextFrame << PlaceBelow(Formula::Add("\\langle \\delta_{\\Sigma} , e_i \\rangle \\Stokes (\\int_{\\partial \\Sigma} \\gamma \\times d\\gamma)_i"));
