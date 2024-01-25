@@ -4,7 +4,7 @@
 #include "imgui.h"
 using namespace UPS;
 
-#include <gif_lib.h>
+//#include <gif_lib.h>
 
 Slideshow show;
 
@@ -234,6 +234,7 @@ void init () {
         show << uwv->at(0.35,0.75);
         show << inNextFrame << cube->apply(T)->at(0.5);
         show << origin->addVector([w](scalar) {return w;});
+        show << PlaceBelow(Formula::Add("\\omega(u\\land v) = \\text{det}(u,v,w)"),uwv);
     }
     if (true)
     {
@@ -258,6 +259,7 @@ void init () {
         show << newFrame << Title("The exterior derivative")->at(TOP);
         show << inNextFrame << ext_d->at(0.8,0.5);
         show << Image::Add("d_boundary.png")->at(0.3,0.5);
+        show << inNextFrame << Formula::Add("\\int_{\\Sigma} d\\omega = \\int_{\\partial \\Sigma} \\omega")->at("stokes") << PlaceNextTo(Latex::Add("Stokes' Theorem : "),0);
     }
    auto surface = grid->apply([](const vec& X){
             auto x = X(0)*0.5;
@@ -267,14 +269,14 @@ void init () {
 
     if (true) {
         show << newFrame << Title("Currents")->at(TOP);
-        show << PlaceBelow(Latex::Add(tex::center("Currents are to differential forms \\\\ what distributions are to $\\mathcal{C}^{\\infty}_c$ functions")),0.1);
-        show << CameraView::Add(UPS::Options::ProjectViewsPath + "currents.json");
-        show << inNextFrame << surface;
-        show << PlaceRight(Formula::Add("\\langle \\delta_{\\Sigma},\\omega \\rangle = \\int_{\\Sigma} \\omega "));
+        show << PlaceBelow(Latex::Add(tex::center("Currents are to differential forms \\\\ what distributions are to $\\mathcal{C}^{\\infty}_c$ functions")),0.05);
+        show << inNextFrame << PlaceBelow(Image::Add("dirac_delta.png"));
+        show << inNextFrame << Replace(Image::Add("currents.png"));
+        show << PlaceNextTo(Formula::Add("\\langle \\delta_{\\Sigma} ,\\omega \\rangle = \\int_{\\Sigma} \\omega"),1);
     }
     if (true) {
-        show << newFrame << Title("Currents")->at(TOP);
-        show << PlaceBelow(Latex::Add("Why using them theoretically?"));
+        show << newFrameSameTitle;
+        show << PlaceBelow(Latex::Add("Why using them theoretically \\\\ for minimal surface problems?"));
         show << inNextFrame << Latex::Add("Direct link with Area")->at("curr_area");
         show << inNextFrame << PlaceBelow(Formula::Add("||\\delta_\\Sigma||_{\\text{dual}} = \\max_{\\omega \\text{ s.t.} ||\\omega||_{\\infty} \\leq 1} \\langle \\delta_{\\Sigma} , \\omega \\rangle"));
         show << inNextFrame << PlaceBelow(Formula::Add(" = \\text{Area}(\\Sigma)"));
