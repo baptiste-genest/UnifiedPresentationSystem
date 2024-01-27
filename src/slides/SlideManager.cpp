@@ -24,7 +24,7 @@ UPS::SlideManager::TransitionSets UPS::SlideManager::computeTransitionsBetween(c
 }
 
 void UPS::SlideManager::precomputeTransitions(){
-    transitions_computed = true;
+    initialized = true;
     appearing_primitives.resize(slides.size());
     for (auto& p : slides[0])
         appearing_primitives[0].insert(p.first);

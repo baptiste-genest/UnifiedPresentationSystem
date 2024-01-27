@@ -16,11 +16,12 @@ using Transitions = std::vector<Transition>;
 struct Slide : public std::map<PrimitivePtr,StateInSlide> {
 
     void add(PrimitivePtr p,const StateInSlide& sis = {}){
-        if (p->isExclusive()){
-            if (exclusive_prim != nullptr)
-                this->erase(exclusive_prim);
-            exclusive_prim = p;
-        }
+        if (p->isScreenSpace())
+            if (p->isExclusive()){
+                if (title_primitive != nullptr)
+                    this->erase(title_primitive);
+                title_primitive = std::static_pointer_cast<TextualPrimitive>(p);
+            }
         (*this)[p] = sis;
     }
     void add(PrimitivePtr p,const vec2& pos){
@@ -35,7 +36,7 @@ struct Slide : public std::map<PrimitivePtr,StateInSlide> {
         this->erase(ptr);
     }
 
-    PrimitivePtr exclusive_prim = nullptr;
+    TextualPrimitivePtr title_primitive = nullptr;
 
     std::map<ScreenPrimitivePtr,StateInSlide> getScreenPrimitives() const {
         std::map<ScreenPrimitivePtr,StateInSlide> rslt;
@@ -45,6 +46,12 @@ struct Slide : public std::map<PrimitivePtr,StateInSlide> {
             rslt[std::dynamic_pointer_cast<ScreenPrimitive>(ptr)] = sis;
         }
         return rslt;
+    }
+
+    std::string getTitle() const {
+        if (title_primitive == nullptr)
+            return "";
+        return title_primitive->content;
     }
 
 };

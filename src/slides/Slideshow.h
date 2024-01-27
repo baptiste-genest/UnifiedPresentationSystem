@@ -43,7 +43,19 @@ public:
     void init(std::string project_name,std::string script_file ="",bool debug = false);
 
 
+
+    std::string getSlideTitle(int slide_nb);
+    void goToSlide(int slide_nb);
+
 private:
+    void slideMenu();
+    void enableAllSlides();
+    void disableAllSlides();
+
+    void initialize_slides();
+
+    std::map<std::string,bool> enabled_slides;
+    void loadSlides();
 
     PrimitivePtr selected_primitive = nullptr;
     PrimitivePtr getPrimitiveUnderMouse(scalar x,scalar y) const;

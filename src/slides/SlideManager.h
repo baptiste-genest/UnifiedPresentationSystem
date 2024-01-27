@@ -36,7 +36,7 @@ class SlideManager {
 protected:
 
     std::vector<Slide> slides;
-    bool transitions_computed = false;
+    bool initialized = false;
 
     using TransitionSets = std::tuple<Primitives,Primitives,Primitives>;
 
@@ -57,12 +57,14 @@ protected:
     Slide center_buffer;int center_start,center_end;
     bool centering = false;AnchorPtr center_anchor;
 
+
+
 public:
 
     void duplicateLastSlide(){slides.push_back(slides.back());}
 
     void addSlide(const Slide& s) {
-        transitions_computed = false;
+        initialized = false;
         slides.push_back(s);
     }
 
@@ -83,7 +85,7 @@ public:
     }
 
     void addToLastSlide(PrimitivePtr ptr,const StateInSlide& sis) {
-        transitions_computed = false;
+        initialized = false;
         if (slides.empty())
             slides.push_back(Slide());
         if (ptr->isScreenSpace()){
@@ -165,7 +167,7 @@ inline SlideManager& operator<<(SlideManager& SM,SlideManager::new_frame nf) {
     SM.addSlide(Slide());
     if (nf.same_title){
         int i = SM.getNumberSlides()-2;
-        auto ex = SM.getSlide(i).exclusive_prim;
+        auto ex = SM.getSlide(i).title_primitive;
         if (ex != nullptr){
             SM.addToLastSlide(ex,SM.getSlide(i)[ex]);
         }

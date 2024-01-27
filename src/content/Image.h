@@ -8,36 +8,49 @@
 
 namespace UPS {
 
+struct ImageData {
+    GLuint texture = 0;
+    int width      = -1;
+    int height     = -1;
+    size_t assetId = 0;
+};
+
+ImageData loadImage(std::string filename);
+void DisplayImage(const ImageData& data,const StateInSlide& sis,scalar scale = 1);
+void ImageRotated(ImTextureID tex_id, ImVec2 center, ImVec2 size, float angle,const RGBA& color_mult);
+
+
 class Image : public ScreenPrimitive {
 public:
     using ImagePtr = std::shared_ptr<Image>;
 
     Image() {}
-    bool isValid() {return width != -1;}
+    bool isValid() {return data.width != -1;}
     void display(const StateInSlide& sis) const;
 
     static ImagePtr Add(std::string filename,scalar scale = 1);
 
-    static ImVec2 getSize(std::string filename);
 
-private:
-    static std::vector<Image> images;
+    static ImVec2 getSize(std::string filename);
+    ImageData data;
     scalar scale;
 
-    GLuint texture = 0;
-    int width      = -1;
-    int height     = -1;
-    size_t assetId = 0;
+
+private:
+
+
+
+    static std::vector<Image> images;
+
     static size_t count;
 
-    static void ImageRotated(ImTextureID tex_id, ImVec2 center, ImVec2 size, float angle,const RGBA& color_mult);
 
     // Primitive interface
 public:
     void draw(const TimeObject&, const StateInSlide &sis) override;
     void intro(const TimeObject& t, const StateInSlide &sis) override;
     void outro(const TimeObject& t, const StateInSlide &sis) override;
-    Size getSize() const override {return Size(width,height);}
+    Size getSize() const override {return Size(data.width,data.height);}
 };
 
 /*

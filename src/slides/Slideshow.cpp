@@ -53,8 +53,8 @@ void UPS::Slideshow::play() {
     ImGuiWindowConfig();
     ImGui::Begin("Unified Presentation System",NULL,window_flags);
 
-    if (!transitions_computed)
-        precomputeTransitions();
+    if (!initialized)
+        initialize_slides();
 
     auto t = TimeFrom(from_action);
 
@@ -130,6 +130,8 @@ void UPS::Slideshow::play() {
     }else if (ImGui::IsKeyPressed(264)){// DOWN ARROW
         forceNextFrame();
     }
+    if (ImGui::IsKeyDown(258))//TABS
+        slideMenu();
 
     if (ImGui::IsKeyPressed(67)){// C
         std::string file("/tmp/cam.json");
@@ -217,9 +219,6 @@ void UPS::Slideshow::ImGuiWindowConfig()
 
 void UPS::Slideshow::init(std::string project_name, std::string script_file, bool debug)
 {
-    from_action = Time::now();
-    from_begin = Time::now();
-
     UPS::Options::UPSPath = TOSTRING(UPS_SOURCE);
     UPS::Options::DataPath = Options::UPSPath + "/data/";
     UPS::Options::ProjectName = project_name;
@@ -250,6 +249,55 @@ void UPS::Slideshow::init(std::string project_name, std::string script_file, boo
     window_flags |= ImGuiWindowFlags_NoBackground;
     window_flags |= ImGuiWindowFlags_NoScrollbar;
 
+}
+
+void UPS::Slideshow::slideMenu()
+{
+    ImGui::Begin("Slides");
+    std::set<std::string> done;
+    for (int i = 0;i<slides.size();i++){
+        auto title = getSlideTitle(i);
+        if (done.contains(title))
+            continue;
+        done.insert(title);
+        if (ImGui::Button(title.c_str()))
+            goToSlide(i);
+    }
+    ImGui::End();
+}
+
+std::string UPS::Slideshow::getSlideTitle(int i)
+{
+    auto title = slides[i].getTitle();
+    if (title == "")
+        title = std::to_string(i);
+    return title;
+}
+
+void UPS::Slideshow::goToSlide(int slide_nb)
+{
+    if (slide_nb == current_slide)
+        return;
+    for (auto& p : slides[current_slide])
+        p.first->forceDisable();
+    current_slide = slide_nb;
+    for (auto& p : slides[current_slide])
+        p.first->forceEnable();
+    from_action = Time::now();
+    from_action = Time::now();
+}
+
+void UPS::Slideshow::initialize_slides()
+{
+    precomputeTransitions();
+    loadSlides();
+    from_begin = Time::now();
+}
+
+void UPS::Slideshow::loadSlides()
+{
+    for (int i = 0;i<slides.size();i++)
+        enabled_slides[getSlideTitle(i)] = true;
 }
 
 

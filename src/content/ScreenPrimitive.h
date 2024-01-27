@@ -60,6 +60,11 @@ public:
     }
 };
 
+struct TextualPrimitive : public ScreenPrimitive {
+    std::string content;
+};
+using TextualPrimitivePtr = std::shared_ptr<TextualPrimitive>;
+
 
 }
 

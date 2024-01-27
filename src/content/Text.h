@@ -8,7 +8,7 @@
 
 namespace UPS {
 
-class Text : public ScreenPrimitive
+class Text : public TextualPrimitive
 {
 public:
     Text() {}

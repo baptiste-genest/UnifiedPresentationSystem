@@ -13,19 +13,50 @@ namespace UPS {
 using TexObject = std::string;
 
 void generate_latex(const std::string& filename,const TexObject& tex,bool formula,scalar height_ratio);
+struct Latex;
+using LatexPtr = std::shared_ptr<Latex>;
 
-struct Latex {
-    using LatexPtr = std::shared_ptr<Image>;
+struct Latex : public TextualPrimitive {
+
     static LatexPtr Add(const TexObject& tex,scalar height_ratio = Options::UPS_default_height_ratio);
 
     static TexObject context;
     static void Define(const TexObject& tex) {context += tex;}
     static void DeclareMathOperator(const TexObject& name,const TexObject& content);
     static void NewCommand(const TexObject& name,const TexObject& content) {context += "\\newcommand{\\"+name+"}{"+content+"}";}
+
+    ImageData data;
+
+    // Primitive interface
+public:
+    Latex() {}
+    ~Latex() {}
+    void display(const StateInSlide& sis) const{
+        anchor->updatePos(sis.getPosition());
+        DisplayImage(data,sis);
+    }
+    virtual void draw(const TimeObject &time, const StateInSlide &sis) override {
+        display(sis);
+    }
+    virtual void intro(const TimeObject &t, const StateInSlide &sis) override {
+        auto sist = sis;
+        sist.alpha = smoothstep(t.transitionParameter)*sis.alpha;
+        display(sist);
+    }
+    virtual void outro(const TimeObject &t, const StateInSlide &sis) override {
+        auto sist = sis;
+        sist.alpha = smoothstep(1-t.transitionParameter)*sis.alpha;
+        display(sist);
+    }
+
+    // ScreenPrimitive interface
+public:
+    virtual vec2 getSize() const override {
+        return vec2(data.width,data.height);
+    }
 };
 
-struct Formula {
-    using LatexPtr = std::shared_ptr<Image>;
+struct Formula : public Latex {
     static LatexPtr Add(const TexObject& tex,scalar height_ratio = Options::UPS_default_height_ratio);
 };
 
@@ -184,11 +215,13 @@ TexObject Mat(ARGS... arguments) {
 
 }
 
-inline Latex::LatexPtr Title(TexObject s,bool center = true) {
+inline LatexPtr Title(TexObject s,bool center = true) {
+    auto old = s;
     if (center)
         s = tex::center(s);
     auto rslt = Latex::Add(s,Options::UPS_TITLE);
     rslt->exclusive = true;
+    rslt->content = old;
     return rslt;
 }
 
