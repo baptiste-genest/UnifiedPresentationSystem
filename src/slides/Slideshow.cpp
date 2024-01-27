@@ -224,9 +224,21 @@ void UPS::Slideshow::init(std::string project_name, std::string script_file, boo
     UPS::Options::ProjectName = project_name;
     UPS::Options::ProjectPath = UPS::Options::UPSPath+std::string("/projects/")+UPS::Options::ProjectName+std::string("/");
     UPS::Options::ProjectViewsPath = UPS::Options::ProjectPath+std::string("views/");
+
+    std::cout << "			[ UPS PROJECT : " << UPS::Options::ProjectName << " ]" << std::endl;
+
     std::cout << "[ UPS PATH ] " << UPS::Options::UPSPath << std::endl;
     std::cout << "[ PROJECT PATH ] " << UPS::Options::ProjectPath << std::endl;
     std::cout << "[ PROJECT CACHE PATH ] " << UPS::Options::ProjectViewsPath << std::endl;
+
+    std::cout << "[ keys description ] " << std::endl;
+    std::cout << "  - right arrow : next slide" << std::endl;
+    std::cout << "  - left arrow : previous slide" << std::endl;
+    std::cout << "  - down arrow : skip to next slide without transition" << std::endl;
+    std::cout << "  - tab : slide menu" << std::endl;
+    std::cout << "  - c : export current camera view" << std::endl;
+    std::cout << "  - p : take a screenshot" << std::endl;
+    std::cout << "  - ctrl + left click : drag labeled screen primitives" << std::endl;
 
     if (!script_file.empty())
         setScriptFile(UPS::Options::ProjectPath+script_file);
