@@ -141,7 +141,9 @@ void UPS::Slideshow::play() {
     }
     if (ImGui::IsKeyPressed(80)){ // P
         static int screenshot_count = 0;
-        std::string file =  "/tmp/screenshot_" + std::to_string(screenshot_count++) + ".png";
+        constexpr int nb_zeros = 6;
+        auto n = std::to_string(screenshot_count++);
+        std::string file =  "/tmp/screenshot_" + std::string(nb_zeros-n.size(),'0') + n + ".png";
         UPS::screenshot(file);
         std::cout << "screenshot saved at " << file << std::endl;
     }
