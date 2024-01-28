@@ -133,10 +133,7 @@ void init() {
         auto blue_noise = Image::Add("blue_noise.png");
 
         show << newFrame << Title("Sampling problem")->at(UPS::TOP);
-        Panel noises;
-        noises << Image::Add("uniform.png");
-        noises << PlaceNextTo(Image::Add("blue_noise.png"),1);
-        show << inNextFrame << noises;
+        show << beginCenter << Image::Add("uniform.png") << PlaceNextTo(Image::Add("blue_noise.png"),1) << endCenter;
         show << inNextFrame << PlaceRelative(Formula::Add("\\W(\\mu_1,\\U) > \\W(\\mu_2,\\U)"),CENTER_X,placeY::REL_BOTTOM,0,0.1);
 
     }

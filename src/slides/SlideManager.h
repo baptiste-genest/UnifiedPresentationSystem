@@ -125,10 +125,10 @@ public:
         if (!centering)
             return;
         centering = false;
-        auto root_pos = computeOffsetToMean(center_buffer);
+        vec2 root_offset = computeOffsetToMean(center_buffer) - centering_root->getRelativeSize()*0.5f;
         auto old_pos = center_buffer[centering_root].getPosition();
         for (int i = center_start;i<getNumberSlides();++i)
-            slides[i][centering_root].setOffset(-root_pos);
+            slides[i][centering_root].setOffset(-root_offset);
         center_buffer = Slide();
     }
 
