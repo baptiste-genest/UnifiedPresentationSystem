@@ -25,6 +25,13 @@ struct Latex : public TextualPrimitive {
     static void DeclareMathOperator(const TexObject& name,const TexObject& content);
     static void NewCommand(const TexObject& name,const TexObject& content) {context += "\\newcommand{\\"+name+"}{"+content+"}";}
 
+    static void UsePackage(std::string pkg,std::string options = "") {
+        if (options != "")
+            context += "\\usepackage["+options+"]{"+pkg+"}\n";
+        else
+            context += "\\usepackage{"+pkg+"}\n";
+    }
+
     ImageData data;
 
     // Primitive interface
