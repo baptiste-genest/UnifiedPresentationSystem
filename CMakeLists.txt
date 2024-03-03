@@ -26,6 +26,7 @@ set(UPS_PDFLATEX ${PDFLATEX_COMPILER})
 set(UPS_SOURCE ${PROJECT_SOURCE_DIR})
 message(STATUS "pdflatex compiler: ${UPS_PDFLATEX}")
 message(STATUS "convert tool: ${UPS_CONVERT}")
+message(STATUS "UPS source path: ${UPS_SOURCE}")
 configure_file(${PROJECT_SOURCE_DIR}/src/content/Options.cpp.in
                ${PROJECT_SOURCE_DIR}/src/content/Options.cpp)
 
