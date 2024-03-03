@@ -11,11 +11,6 @@ UPS::vec f_scale(UPS::vec x) {
 
 int main(int argc,char** argv)
 {
-  
-  //Setting the paths
-  UPS::Options::UPS_pathCONVERT="/opt/homebrew/bin/";
-  UPS::Options::UPS_pathPDFLATEX="/Library/TeX/texbin/";
-  
   //Init
   show.init("tutorials");
   

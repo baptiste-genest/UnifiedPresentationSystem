@@ -6,11 +6,6 @@ UPS::Slideshow show;
 
 int main(int argc,char** argv)
 {
-  //Setting the paths
-  UPS::Options::UPS_pathCONVERT="/opt/homebrew/bin/";
-  UPS::Options::UPS_pathPDFLATEX="/Library/TeX/texbin/";
-  
-  
   show.init("tutorials");
   
   //Slideshow title

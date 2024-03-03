@@ -15,6 +15,21 @@ include(spdlog)
 
 find_package(OpenGL REQUIRED)
 
+
+## External tools configuration
+find_package(LATEX COMPONENTS PDFLATEX REQUIRED)
+find_program(UPS_CONVERT convert)
+if (NOT UPS_CONVERT)
+  message(ERROR "Could not find the 'convert' tool (imagemagick)")
+endif()
+set(UPS_PDFLATEX ${PDFLATEX_COMPILER})
+set(UPS_SOURCE ${PROJECT_SOURCE_DIR})
+message(STATUS "pdflatex compiler: ${UPS_PDFLATEX}")
+message(STATUS "convert tool: ${UPS_CONVERT}")
+configure_file(${PROJECT_SOURCE_DIR}/src/content/Options.cpp.in
+               ${PROJECT_SOURCE_DIR}/src/content/Options.cpp)
+
+
 file(GLOB SRC_lib
      "src/content/*"
      "src/content/Graphics2D/*"
@@ -26,7 +41,7 @@ file(GLOB SRC_lib
      "src/extern/svg.hpp"
 )
 
-add_compile_definitions("UPS_SOURCE=${PROJECT_SOURCE_DIR}")
+
 
 ## The library
 add_library(UPS ${SRC_lib})

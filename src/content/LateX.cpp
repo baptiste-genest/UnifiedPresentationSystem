@@ -42,18 +42,18 @@ void UPS::generate_latex(const std::string &filename,
         formula_file << "\\end{align*}"<< std::endl;
     formula_file << "\\end{document}"<< std::endl;
 
-    std::string latex_cmd = Options::UPS_pathPDFLATEX+"pdflatex -output-directory=/tmp /tmp/formula.tex  >>/tmp/UPS.log";
+    std::string latex_cmd = Options::UPS_PDFLATEX+" -output-directory=/tmp /tmp/formula.tex  >>/tmp/UPS.log";
     if (std::system(latex_cmd.c_str())) {
         std::cerr << "[error while generating latex] " <<  std::endl;
         exit(1);
     }
-    if (std::system((Options::UPS_pathCONVERT+"convert -density "+std::to_string(Options::UPS_density)+" -quality 100 -trim -border 10 -bordercolor none /tmp/formula.pdf -colorspace RGB " + filename + " >>/tmp/UPS.log").c_str())) {
+    if (std::system((Options::UPS_CONVERT+" -density "+std::to_string(Options::UPS_density)+" -quality 100 -trim -border 10 -bordercolor none /tmp/formula.pdf -colorspace RGB " + filename + " >>/tmp/UPS.log").c_str())) {
         std::cerr << "[error while converting to png]" << std::endl;
         assert(false);
     }
     int h = 1080*height_ratio*Image::getSize(filename).y/99.;
-  spdlog::info((Options::UPS_pathCONVERT+"convert " + filename + " -resize x" + std::to_string(h) + " " + filename + " >>/tmp/UPS.log"));
-    if (std::system((Options::UPS_pathCONVERT+"convert " + filename + " -resize x" + std::to_string(h) + " " + filename + " >>/tmp/UPS.log").c_str())){
+  spdlog::info((Options::UPS_CONVERT+" " + filename + " -resize x" + std::to_string(h) + " " + filename + " >>/tmp/UPS.log"));
+    if (std::system((Options::UPS_CONVERT+" " + filename + " -resize x" + std::to_string(h) + " " + filename + " >>/tmp/UPS.log").c_str())){
         std::cerr << "[error while resizing]" << std::endl;
         assert(false);
     }
