@@ -18,7 +18,7 @@ inline StateInSlide transition(parameter t, const StateInSlide &sa, const StateI
     return St;
 }
 inline vec2 computeOffsetToMean(const Slide& buffer) {
-    double x_min = 100,y_min = 100,x_max = 0,y_max = 0;
+    double x_min = 100,y_min = 100,x_max = -100,y_max = -100;
     for (auto&& [ptr,sis] : buffer) {
         auto pos = sis.getPosition();
         auto size = std::dynamic_pointer_cast<ScreenPrimitive>(ptr)->getRelativeSize();
@@ -90,6 +90,7 @@ public:
             slides.push_back(Slide());
         if (ptr->isScreenSpace()){
             last_screen_primitive_inserted = std::static_pointer_cast<ScreenPrimitive>(ptr);
+            last_screen_primitive_inserted->updateAnchor(sis.getPosition());
             if (centering){
                 if (center_buffer.empty())
                     centering_root = last_screen_primitive_inserted;
@@ -125,8 +126,7 @@ public:
         if (!centering)
             return;
         centering = false;
-        vec2 root_offset = computeOffsetToMean(center_buffer) - centering_root->getRelativeSize()*0.5f;
-        auto old_pos = center_buffer[centering_root].getPosition();
+        vec2 root_offset =  computeOffsetToMean(center_buffer) - centering_root->getRelativeSize()*0.5;
         for (int i = center_start;i<getNumberSlides();++i)
             slides[i][centering_root].setOffset(-root_offset);
         center_buffer = Slide();
