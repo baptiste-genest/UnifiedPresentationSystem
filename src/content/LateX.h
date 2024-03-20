@@ -22,6 +22,7 @@ struct Latex : public TextualPrimitive {
 
     static TexObject context;
     static void Define(const TexObject& tex) {context += tex;}
+    static void AddToPrefix(const TexObject& tex) {context += tex;}
     static void DeclareMathOperator(const TexObject& name,const TexObject& content);
     static void NewCommand(const TexObject& name,const TexObject& content) {context += "\\newcommand{\\"+name+"}{"+content+"}";}
 

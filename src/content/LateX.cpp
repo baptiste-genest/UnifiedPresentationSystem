@@ -4,7 +4,7 @@
 
 UPS::LatexPtr UPS::Latex::Add(const TexObject &tex,scalar height_ratio)
 {
-    auto H = std::hash<std::string>{}(tex+"0"+std::to_string(height_ratio));
+    auto H = std::hash<std::string>{}(Latex::context + tex+"0"+std::to_string(height_ratio));
     std::string filename = Options::DataPath + "formulas/" + std::to_string(H) + ".png";
 
     if (!io::file_exists(filename))
