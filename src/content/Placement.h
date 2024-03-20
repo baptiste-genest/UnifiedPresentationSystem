@@ -104,7 +104,8 @@ inline PlaceRelative PlaceAbove(ScreenPrimitivePtr ptr,ScreenPrimitivePtr other,
 
 inline PrimitiveInSlide PlaceLeft(ScreenPrimitivePtr ptr,scalar y = 0.5,scalar padding = 0.1) {
     vec2 P;
-    P(0) = ptr->getRelativeSize()(0)*0.5+padding;
+    auto S =ptr->getRelativeSize();
+    P(0) = S(0)*0.5+padding;
     P(1) = y;
     return {ptr,StateInSlide(P)};
 }

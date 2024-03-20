@@ -8,9 +8,9 @@ UPS::StateInSlide UPS::PlaceRelative::computePlacement(const ScreenPrimitiveInSl
     auto paddingy = this->paddingy;
     auto X = this->X;
     auto Y = this->Y;
-    auto S = other.first->getRelativeSize();
 
-    RelativePlacer rp = [S,X,Y,ptr,paddingy,paddingx,other] (vec2 other_position) {
+    RelativePlacer rp = [X,Y,ptr,paddingy,paddingx,other] (vec2 other_position) {
+        auto S = other.first->getRelativeSize();
         vec2 P;
         switch(X) {
         case REL_LEFT:

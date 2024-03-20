@@ -59,6 +59,12 @@ public:
     // ScreenPrimitive interface
 public:
     virtual vec2 getSize() const override {
+        bool notfullHD = (Options::UPS_screen_resolution_x != 1920) ||(Options::UPS_screen_resolution_y != 1080);
+        if (notfullHD){
+            double sx =  Options::UPS_screen_resolution_x/1920.;
+            double sy =  Options::UPS_screen_resolution_y/1080.;
+            return vec2(sx*data.width,sy*data.height);
+        }
         return vec2(data.width,data.height);
     }
 };

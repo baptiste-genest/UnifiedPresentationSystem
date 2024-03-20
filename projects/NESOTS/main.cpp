@@ -62,6 +62,9 @@ void init() {
     Latex::NewCommand("Sp","\\mathbb{S}");
     Latex::NewCommand("proj","\\Pi^\\theta");
 
+    Options::UPS_screen_resolution_x = 1280;
+    Options::UPS_screen_resolution_y = 720;
+
     int N = 20;
 
     if (false || runall)

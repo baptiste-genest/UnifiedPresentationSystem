@@ -33,7 +33,7 @@ public:
 
     static ImVec2 getSize(std::string filename);
     ImageData data;
-    scalar scale;
+    scalar scale = 1;
 
 
 private:
@@ -50,7 +50,7 @@ public:
     void draw(const TimeObject&, const StateInSlide &sis) override;
     void intro(const TimeObject& t, const StateInSlide &sis) override;
     void outro(const TimeObject& t, const StateInSlide &sis) override;
-    Size getSize() const override {return Size(data.width,data.height);}
+    Size getSize() const override;
 };
 
 /*

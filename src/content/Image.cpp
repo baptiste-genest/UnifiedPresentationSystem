@@ -83,6 +83,16 @@ void UPS::Image::outro(const TimeObject& t, const StateInSlide &sis)
     display(sist);
 }
 
+UPS::Primitive::Size UPS::Image::getSize() const {
+    double sx = scale,sy = scale;
+    bool notFullHD = (Options::UPS_screen_resolution_x != 1920) ||(Options::UPS_screen_resolution_y != 1080);
+    if (notFullHD){
+        sx *=  Options::UPS_screen_resolution_x/1920.;
+        sy *=  Options::UPS_screen_resolution_y/1080.;
+    }
+    return Size(sx*data.width,sy*data.height);
+}
+
 void UPS::Image::display(const StateInSlide &sis) const
 {
     anchor->updatePos(sis.getPosition());
@@ -117,8 +127,14 @@ void UPS::DisplayImage(const ImageData &data, const StateInSlide &sis, scalar sc
 {
     RGBA color_multiplier = ImColor(1.f,1.f,1.f,sis.alpha);
     auto P = sis.getAbsolutePosition();
-    if (std::abs(sis.angle) > 0.001 || std::abs(1-scale) > 1e-2)
-        ImageRotated((void*)(intptr_t)data.texture,P,ImVec2(data.width*scale,data.height*scale),sis.angle,color_multiplier);
+
+    bool notfullHD = (Options::UPS_screen_resolution_x != 1920) ||(Options::UPS_screen_resolution_y != 1080);
+
+    if (std::abs(sis.angle) > 0.001 || std::abs(1-scale) > 1e-2 || notfullHD){
+        double sx =  Options::UPS_screen_resolution_x/1920.;
+        double sy =  Options::UPS_screen_resolution_y/1080.;
+        ImageRotated((void*)(intptr_t)data.texture,P,ImVec2(sx*data.width*scale,sy*data.height*scale),sis.angle,color_multiplier);
+    }
     else {
         P.x -= data.width*0.5;
         P.y -= data.height*0.5;
