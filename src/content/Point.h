@@ -7,14 +7,17 @@
 
 namespace UPS {
 
+using DynamicParam = std::function<vec(const TimeObject&)>;
+
 class Point : public PolyscopePrimitive
 {
 public:
     using VectorQuantity = PolyscopeQuantity<polyscope::PointCloudVectorQuantity>;
     using VectorQuantityPtr = VectorQuantity::PCQuantityPtr;
-    Point(const curve_param &phi, scalar radius);
+    Point(const DynamicParam &phi, scalar radius);
+
     Point(const vec &x,scalar radius) : x(x),radius(radius) {
-        phi = [x](scalar){return x;};
+        phi = [x](TimeObject){return x;};
         updater = [](const TimeObject&,Primitive* ptr){
             auto p = Primitive::get<Point>(ptr->pid);
             p->updateVectors();
@@ -25,11 +28,13 @@ public:
     using PointPtr = std::shared_ptr<Point>;
     
     static PointPtr Add(const curve_param& phi,scalar rad = 0.05);
+    static PointPtr Add(const DynamicParam& phi,scalar rad = 0.05);
     static PointPtr Add(const vec& x,scalar rad = 0.05);
     
     VectorQuantityPtr addVector(const curve_param& phi);
     polyscope::PointCloud* pc;
 
+    void setPos(const vec& x);
 
     void updateVectors();
     PointPtr apply(const mapping& f) const;
@@ -39,7 +44,7 @@ public:
     virtual void initPolyscope() override;
 private:
     vec x;
-    curve_param phi;
+    DynamicParam phi;
     scalar radius;
     std::vector<std::pair<VectorQuantityPtr,curve_param>> vectors;
 

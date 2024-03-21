@@ -15,6 +15,9 @@ void Text::display(const StateInSlide &sis) const
 {
     pushFont();
 
+    //set imgui font size
+    ImGui::SetWindowFontScale(2);
+
     auto size = ImGui::CalcTextSize(content.c_str());
 
     ImGuiStyle* style = &ImGui::GetStyle();
@@ -28,7 +31,7 @@ void Text::display(const StateInSlide &sis) const
 
     style->Colors[ImGuiCol_Text] = old;
 
-    ImGui::PopFont();
+    //ImGui::PopFont();
 }
 
 void Text::pushFont() const
@@ -37,8 +40,8 @@ void Text::pushFont() const
         ImGui::PushFont(FontManager::getFont(fontID));
     }
     else{
-        auto F = FontManager::getFont(Style::default_font);
-        ImGui::PushFont(F);
+        //auto F = FontManager::getFont(Style::default_font);
+        //ImGui::PushFont(F);
     }
 }
 
@@ -57,9 +60,9 @@ void Text::outro(const TimeObject& t, const StateInSlide &sis)
 
 Primitive::Size Text::getSize() const
 {
-    pushFont();
+    //pushFont();
     auto size = ImGui::CalcTextSize(content.c_str());
-    ImGui::PopFont();
+    //ImGui::PopFont();
     return Size(size.x,size.y);
 }
 

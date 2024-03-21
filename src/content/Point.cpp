@@ -2,12 +2,17 @@
 
 UPS::Point::PointPtr UPS::Point::Add(const curve_param &phi,scalar r)
 {
-    return NewPrimitive<Point>(phi,r);
+    return NewPrimitive<Point>([phi](TimeObject t){return phi(t.inner_time);},r);
 }
 
 UPS::Point::PointPtr UPS::Point::Add(const vec &x, scalar rad)
 {
     return NewPrimitive<Point>(x,rad);
+}
+
+UPS::Point::PointPtr UPS::Point::Add(const DynamicParam &phi, scalar rad)
+{
+    return NewPrimitive<Point>(phi,rad);
 }
 
 UPS::Point::VectorQuantity::PCQuantityPtr UPS::Point::addVector(const curve_param &phiX)
@@ -19,6 +24,13 @@ UPS::Point::VectorQuantity::PCQuantityPtr UPS::Point::addVector(const curve_para
     V->q->setVectorLengthScale(X[0].norm(),false);
     V->q->setVectorRadius(0.02,false);
     return V;
+}
+
+void UPS::Point::setPos(const vec &v)
+{
+    x = v;
+    vecs X = {v};
+    pc->updatePointPositions(X);
 }
 
 void UPS::Point::updateVectors()
@@ -38,7 +50,7 @@ void UPS::Point::updateVectors()
 UPS::Point::PointPtr UPS::Point::apply(const mapping &f) const
 {
     auto Phi = phi;
-    return Point::Add(curve_param([f,Phi](scalar t){
+    return Point::Add(DynamicParam([f,Phi](TimeObject t){
         return f(Phi(t));
                       }),radius);
 }
@@ -52,15 +64,13 @@ void UPS::Point::initPolyscope()
 }
 
 
-UPS::Point::Point(const curve_param &phi, scalar radius) : x(phi(0)),
+UPS::Point::Point(const DynamicParam &phi, scalar radius) :
     phi(phi),
     radius(radius)
 {
     updater = [phi](const TimeObject& t,Primitive* ptr){
         auto p = Primitive::get<Point>(ptr->pid);
-        p->x = phi(t.inner_time);
-        vecs X = {p->x};
-        p->pc->updatePointPositions(X);
+        p->setPos(phi(t));
         p->updateVectors();
     };
 }

@@ -147,6 +147,10 @@ void UPS::Slideshow::play() {
         UPS::screenshot(file);
         std::cout << "screenshot saved at " << file << std::endl;
     }
+
+    if (display_slide_number)
+        displaySlideNumber();
+
     ImGui::End();
 }
 
@@ -319,8 +323,22 @@ void UPS::Slideshow::initialize_slides()
 
 void UPS::Slideshow::loadSlides()
 {
-    for (int i = 0;i<slides.size();i++)
-        enabled_slides[getSlideTitle(i)] = true;
+    slide_numbers.resize(slides.size());
+    std::set<std::string> done;
+
+    for (int i = 0;i<slides.size();i++){
+        done.insert(getSlideTitle(i));
+        slide_numbers[i] = done.size()-1;
+    }
+    nb_distinct_slides = done.size();
+
+    std::cout << "nb distinct slides " << nb_distinct_slides << std::endl;
+
+    slide_number_display.resize(nb_distinct_slides);
+    for (int i = 0;i<nb_distinct_slides;i++){
+        auto display = std::to_string(i+1) + "/" + std::to_string(nb_distinct_slides);
+        slide_number_display[i] = PlaceBottomRight(Text::Add(display),0.01);
+    }
 }
 
 
@@ -336,4 +354,10 @@ UPS::PrimitivePtr UPS::Slideshow::getPrimitiveUnderMouse(scalar x,scalar y) cons
             return pis.first;
     }
     return nullptr;
+}
+
+void UPS::Slideshow::displaySlideNumber()
+{
+    const auto& DSN = slide_number_display[slide_numbers[current_slide]];
+    DSN.first->play(TimeObject(),DSN.second);
 }
