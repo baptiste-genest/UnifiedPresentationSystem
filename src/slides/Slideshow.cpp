@@ -221,7 +221,13 @@ void UPS::Slideshow::ImGuiWindowConfig()
 
 void UPS::Slideshow::init(std::string project_name, std::string script_file, bool debug)
 {
+
+
+    from_action = Time::now();
+    from_begin = Time::now();
+
     UPS::Options::UPSPath = TOSTRING(UPS_SOURCE);
+    //UPS::Options::UPSPath = Options::UPSPath;
     UPS::Options::DataPath = Options::UPSPath + "/data/";
     UPS::Options::ProjectName = project_name;
     UPS::Options::ProjectPath = UPS::Options::UPSPath+std::string("/projects/")+UPS::Options::ProjectName+std::string("/");

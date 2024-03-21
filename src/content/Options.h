@@ -16,11 +16,8 @@ static   std::string ProjectPath;
 static   std::string ProjectViewsPath;
 
 /// Latex paths
-static std::string UPS_pathPDFLATEX;
-static std::string UPS_pathCONVERT;
-static std::string UPS_pathPDFTEX;
-static std::string UPS_pathGS;
-static std::string UPS_pathPDFCROP;
+static std::string UPS_PDFLATEX;
+static std::string UPS_CONVERT;
 
 ///Window size
 static size_t UPS_screen_resolution_x;
