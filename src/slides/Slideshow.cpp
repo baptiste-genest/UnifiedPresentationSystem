@@ -262,6 +262,9 @@ void UPS::Slideshow::init(std::string project_name, std::string script_file, boo
     polyscope::state::boundingBox =
         std::tuple<glm::vec3, glm::vec3>{ {-1., -1., -1.}, {1., 1., 1.} };
     polyscope::view::upDir = polyscope::view::UpDir::ZUp;
+
+    polyscope::options::ssaaFactor = 2;
+
     window_flags = 0;
     window_flags |= ImGuiWindowFlags_NoTitleBar;
     window_flags |= ImGuiWindowFlags_NoMove;

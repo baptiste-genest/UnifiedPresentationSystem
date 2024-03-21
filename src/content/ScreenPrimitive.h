@@ -41,6 +41,11 @@ public:
         return {get(pid),sis};
     }
 
+    inline ScreenPrimitiveInSlide at(StateInSlide sis) {
+        return {get(pid),sis};
+    }
+
+
     inline ScreenPrimitiveInSlide at(scalar x,scalar y,scalar alpha=1) {
         return at(vec2(x,y),alpha);
     }

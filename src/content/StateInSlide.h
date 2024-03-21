@@ -22,6 +22,7 @@ struct StateInSlide {
 
     StateInSlide(AnchorPtr p) : anchor(p) {}
 
+
     StateInSlide(const vec2& x)  {
         anchor = Anchor::Add(x);
     }
