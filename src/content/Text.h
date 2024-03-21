@@ -1,14 +1,14 @@
 #ifndef TEXT_H
 #define TEXT_H
 
-#include "primitive.h"
+#include "ScreenPrimitive.h"
 #include "../math/kernels.h"
 #include "../style/Style.h"
 #include "../style/FontManager.h"
 
 namespace UPS {
 
-class Text : public Primitive
+class Text : public TextualPrimitive
 {
 public:
     Text() {}

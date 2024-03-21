@@ -6,7 +6,7 @@
 
 namespace UPS {
 
-class VectorField : public Primitive
+class VectorField : public PolyscopePrimitive
 {
 private:
     vecs V,X;
@@ -37,16 +37,17 @@ public:
         pq->setEnabled(true);
     }
 
-    virtual bool isScreenSpace() override {
-        return false;
-    }
-
 
     using VectorFieldPtr = std::shared_ptr<VectorField>;
     inline static VectorFieldPtr Add(const vecs& X,const vecs& V,scalar l) {
         return NewPrimitive<VectorField>(X,V,l);
     }
     static VectorFieldPtr AddOnGrid(const vecs& V);
+    static VectorFieldPtr EvalOnGrid(const std::function<vec(vec)>& V,int n = 10,scalar l = 1);
+
+    // Primitive interface
+public:
+    virtual void initPolyscope() override;
 };
 
 }

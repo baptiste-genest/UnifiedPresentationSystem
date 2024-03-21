@@ -13,19 +13,64 @@ namespace UPS {
 using TexObject = std::string;
 
 void generate_latex(const std::string& filename,const TexObject& tex,bool formula,scalar height_ratio);
+struct Latex;
+using LatexPtr = std::shared_ptr<Latex>;
 
-struct Latex {
-    using LatexPtr = std::shared_ptr<Image>;
+struct Latex : public TextualPrimitive {
+
     static LatexPtr Add(const TexObject& tex,scalar height_ratio = Options::UPS_default_height_ratio);
 
     static TexObject context;
     static void Define(const TexObject& tex) {context += tex;}
+    static void AddToPrefix(const TexObject& tex) {context += tex;}
     static void DeclareMathOperator(const TexObject& name,const TexObject& content);
     static void NewCommand(const TexObject& name,const TexObject& content) {context += "\\newcommand{\\"+name+"}{"+content+"}";}
+
+    static void UsePackage(std::string pkg,std::string options = "") {
+        if (options != "")
+            context += "\\usepackage["+options+"]{"+pkg+"}\n";
+        else
+            context += "\\usepackage{"+pkg+"}\n";
+    }
+
+    ImageData data;
+
+    // Primitive interface
+public:
+    Latex() {}
+    ~Latex() {}
+    void display(const StateInSlide& sis) const{
+        anchor->updatePos(sis.getPosition());
+        DisplayImage(data,sis);
+    }
+    virtual void draw(const TimeObject &time, const StateInSlide &sis) override {
+        display(sis);
+    }
+    virtual void intro(const TimeObject &t, const StateInSlide &sis) override {
+        auto sist = sis;
+        sist.alpha = smoothstep(t.transitionParameter)*sis.alpha;
+        display(sist);
+    }
+    virtual void outro(const TimeObject &t, const StateInSlide &sis) override {
+        auto sist = sis;
+        sist.alpha = smoothstep(1-t.transitionParameter)*sis.alpha;
+        display(sist);
+    }
+
+    // ScreenPrimitive interface
+public:
+    virtual vec2 getSize() const override {
+        bool notfullHD = (Options::UPS_screen_resolution_x != 1920) ||(Options::UPS_screen_resolution_y != 1080);
+        if (notfullHD){
+            double sx =  Options::UPS_screen_resolution_x/1920.;
+            double sy =  Options::UPS_screen_resolution_y/1080.;
+            return vec2(sx*data.width,sy*data.height);
+        }
+        return vec2(data.width,data.height);
+    }
 };
 
-struct Formula {
-    using LatexPtr = std::shared_ptr<Image>;
+struct Formula : public Latex {
     static LatexPtr Add(const TexObject& tex,scalar height_ratio = Options::UPS_default_height_ratio);
 };
 
@@ -93,9 +138,9 @@ inline TexObject del(int i,bool xyz = true) {
 inline TexObject align(const std::vector<TexObject>& texs) {
     TexObject rslt = "\\begin{align*}\n";
     for (int i= 0;i<texs.size()-1;i++)
-        rslt += texs[i] + "\\\\";
+        rslt += texs[i] + "\\\\ \n";
     rslt += texs.back();
-    rslt += "\\end{align*}";
+    rslt += "\n \\end{align*}";
     return rslt;
 }
 
@@ -184,11 +229,13 @@ TexObject Mat(ARGS... arguments) {
 
 }
 
-inline Latex::LatexPtr Title(TexObject s,bool center = true) {
+inline LatexPtr Title(TexObject s,bool center = true) {
+    auto old = s;
     if (center)
         s = tex::center(s);
     auto rslt = Latex::Add(s,Options::UPS_TITLE);
     rslt->exclusive = true;
+    rslt->content = old;
     return rslt;
 }
 

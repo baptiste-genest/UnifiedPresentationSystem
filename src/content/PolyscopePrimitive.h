@@ -4,12 +4,67 @@
 #include "primitive.h"
 #include "polyscope/structure.h"
 #include "polyscope/surface_mesh.h"
+#include "StateInSlide.h"
 
 namespace UPS {
+class PolyscopePrimitive;
+using PolyscopePrimitivePtr = std::shared_ptr<PolyscopePrimitive>;
+
+class PolyscopePrimitive : public Primitive
+{
+public:
+    PolyscopePrimitive() {}
+
+    void initPolyscopeData(polyscope::Structure* pcptr) {
+        polyscope_ptr = pcptr;
+        polyscope_ptr->setEnabled(false);
+        count++;
+    }
+
+    inline std::string getPolyscopeName() const {
+        return "polyscope_obj" + std::to_string(pid);
+    }
+
+    inline PrimitiveInSlide at(scalar alpha=1) {
+        StateInSlide sis;
+        sis.alpha = alpha;
+        return {get(pid),sis};
+    }
+
+    // Primitive interface
+public:
+    void draw(const TimeObject&, const StateInSlide &sis) override {
+        polyscope_ptr->setTransparency(sis.alpha);
+    }
+    void intro(const TimeObject& t,const StateInSlide &sis) override {
+        polyscope_ptr->setTransparency(smoothstep(t.transitionParameter)*sis.alpha);
+        updater(t(this),this);
+    }
+    void outro(const TimeObject& t,const StateInSlide &sis) override {
+        polyscope_ptr->setTransparency(smoothstep(1-t.transitionParameter)*sis.alpha);
+        updater(t(this),this);
+    }
 
 
 
+    void forceDisable() override {
+        polyscope_ptr->setEnabled(false);
+        //polyscope_ptr->remove();
+    }
 
+    void forceEnable() override {
+        polyscope_ptr->setEnabled(true);
+        polyscope_ptr->setTransparency(0);
+        //initPolyscope();
+    }
+    bool isScreenSpace() const override {return false;}
+
+
+protected:
+    polyscope::Structure* polyscope_ptr;
+    static size_t count;
+
+};
 template<class T>
 class PolyscopeQuantity : public Primitive
 {
@@ -29,7 +84,7 @@ public:
     void intro(const TimeObject& t, const StateInSlide &sis) override {q->setEnabled(true);}
     void outro(const TimeObject& t, const StateInSlide &sis) override {q->setEnabled(false);}
     void forceDisable() override {q->setEnabled(false);}
-    bool isScreenSpace() override {return false;}
+    bool isScreenSpace() const override {return false;}
 };
 
 template<typename T>
@@ -70,7 +125,7 @@ public:
             q->setEnabled(false);
     }
     void forceDisable() override {q->setEnabled(false);}
-    bool isScreenSpace() override {return false;}
+    bool isScreenSpace() const override {return false;}
 };
 
 template<>
@@ -78,54 +133,6 @@ PolyscopeQuantity<polyscope::SurfaceVertexVectorQuantity>::PCQuantityPtr AddPoly
     return PolyscopeQuantity<polyscope::SurfaceVertexVectorQuantity>::Add(ptr);
 }
 
-
-class PolyscopePrimitive : public Primitive
-{
-public:
-    PolyscopePrimitive() {}
-
-    void initPolyscopeData(polyscope::Structure* pcptr) {
-        polyscope_ptr = pcptr;
-        polyscope_ptr->setEnabled(false);
-        count++;
-    }
-
-    inline std::string getPolyscopeName() const {
-        return "polyscope_obj" + std::to_string(pid);
-    }
-
-    // Primitive interface
-public:
-    void draw(const TimeObject&, const StateInSlide &sis) override {
-        polyscope_ptr->setTransparency(sis.alpha);
-    }
-    void intro(const TimeObject& t,const StateInSlide &sis) override {
-        polyscope_ptr->setTransparency(smoothstep(t.transitionParameter)*sis.alpha);
-        updater(t(this),this);
-    }
-    void outro(const TimeObject& t,const StateInSlide &sis) override {
-        polyscope_ptr->setTransparency(smoothstep(1-t.transitionParameter)*sis.alpha);
-        updater(t(this),this);
-    }
-
-    void forceDisable() override {
-        polyscope_ptr->setEnabled(false);
-        //polyscope_ptr->remove();
-    }
-
-    void forceEnable() override {
-        polyscope_ptr->setEnabled(true);
-        polyscope_ptr->setTransparency(0);
-        //initPolyscope();
-    }
-    bool isScreenSpace() override {return false;}
-
-
-protected:
-    polyscope::Structure* polyscope_ptr;
-    static size_t count;
-
-};
 
 }
 

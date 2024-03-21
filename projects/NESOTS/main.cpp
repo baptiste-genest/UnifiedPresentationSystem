@@ -62,6 +62,9 @@ void init() {
     Latex::NewCommand("Sp","\\mathbb{S}");
     Latex::NewCommand("proj","\\Pi^\\theta");
 
+    Options::UPS_screen_resolution_x = 1280;
+    Options::UPS_screen_resolution_y = 720;
+
     int N = 20;
 
     if (false || runall)
@@ -133,10 +136,7 @@ void init() {
         auto blue_noise = Image::Add("blue_noise.png");
 
         show << newFrame << Title("Sampling problem")->at(UPS::TOP);
-        PrimitiveGroup noises;
-        noises << Image::Add("uniform.png");
-        noises << PlaceNextTo(Image::Add("blue_noise.png"),1);
-        show << inNextFrame << noises;
+        show << beginCenter << Image::Add("uniform.png") << PlaceNextTo(Image::Add("blue_noise.png"),1) << endCenter;
         show << inNextFrame << PlaceRelative(Formula::Add("\\W(\\mu_1,\\U) > \\W(\\mu_2,\\U)"),CENTER_X,placeY::REL_BOTTOM,0,0.1);
 
     }

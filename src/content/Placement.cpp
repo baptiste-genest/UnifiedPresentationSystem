@@ -1,63 +1,77 @@
 #include "Placement.h"
 
 
-UPS::Vec2 UPS::PlaceRelative::computePlacement(const PrimitiveInSlide &other) const {
-    Vec2 P;
-    switch(X) {
-    case REL_LEFT:
-        P.x = other.second.relative_anchor_pos.x
-              - other.first->getRelativeSize().x*0.5
-              - paddingx
-              - ptr->getRelativeSize().x*0.5
-            ;
-        break;
-    case ABS_LEFT:
-        P.x = paddingx + ptr->getRelativeSize().x*0.5;
-        break;
-    case CENTER_X:
-        P.x = CENTER.x;
-        break;
-    case SAME_X:
-        P.x = other.second.relative_anchor_pos.x;
-        break;
-    case REL_RIGHT:
-        P.x = other.second.relative_anchor_pos.x
-              + other.first->getRelativeSize().x*0.5
-              + paddingx
-              + ptr->getRelativeSize().x*0.5
-            ;
-        break;
-    case ABS_RIGHT:
-        P.x = 1-paddingx-ptr->getRelativeSize().x*0.5;
-        break;
-    }
-    switch(Y) {
-    case REL_BOTTOM:
-        P.y = other.second.relative_anchor_pos.y
-              + other.first->getRelativeSize().y*0.5
-              + paddingy
-              + ptr->getRelativeSize().y*0.5
-            ;
-        break;
-    case ABS_TOP:
-        P.y = paddingy-ptr->getRelativeSize().y*0.5;
-        break;
-    case CENTER_Y:
-        P.y = CENTER.y;
-        break;
-    case SAME_Y:
-        P.y = other.second.relative_anchor_pos.y;
-        break;
-    case REL_TOP:
-        P.y = other.second.relative_anchor_pos.y
-              - other.first->getRelativeSize().y*0.5
-              - paddingy
-              - ptr->getRelativeSize().y*0.5
-            ;
-        break;
-    case ABS_BOTTOM:
-        P.y = 1-paddingy - ptr->getRelativeSize().y*0.5;
-        break;
-    }
-    return P;
+UPS::StateInSlide UPS::PlaceRelative::computePlacement(const ScreenPrimitiveInSlide &other) const {
+
+    ScreenPrimitivePtr ptr = this->ptr;
+    auto paddingx = this->paddingx;
+    auto paddingy = this->paddingy;
+    auto X = this->X;
+    auto Y = this->Y;
+
+    RelativePlacer rp = [X,Y,ptr,paddingy,paddingx,other] (vec2 other_position) {
+        auto S = other.first->getRelativeSize();
+        vec2 P;
+        switch(X) {
+        case REL_LEFT:
+            P(0) = other_position(0)
+                   - S(0)*0.5
+                   - paddingx
+                   - ptr->getRelativeSize()(0)*0.5
+                ;
+            break;
+        case ABS_LEFT:
+            P(0) = paddingx + ptr->getRelativeSize()(0)*0.5;
+            break;
+        case CENTER_X:
+            P(0) = CENTER(0);
+            break;
+        case SAME_X:
+            P(0) = other_position(0);
+            break;
+        case REL_RIGHT:
+            P(0) = other_position(0)
+                   + S(0)*0.5
+                   + paddingx
+                   + ptr->getRelativeSize()(0)*0.5
+                ;
+            break;
+        case ABS_RIGHT:
+            P(0) = 1-paddingx-ptr->getRelativeSize()(0)*0.5;
+            break;
+        }
+        switch(Y) {
+        case REL_BOTTOM:
+            P(1) = other_position(1)
+                   + S(1)*0.5
+                   + paddingy
+                   + ptr->getRelativeSize()(1)*0.5
+                ;
+            break;
+        case ABS_TOP:
+            P(1) = paddingy-ptr->getRelativeSize()(1)*0.5;
+            break;
+        case CENTER_Y:
+            P(1) = CENTER(1);
+            break;
+        case SAME_Y:
+            P(1) = other_position(1);
+            break;
+        case REL_TOP:
+            P(1) = other_position(1)
+                   - S(1)*0.5
+                   - paddingy
+                   - ptr->getRelativeSize()(1)*0.5
+                ;
+            break;
+        case ABS_BOTTOM:
+            P(1) = 1-paddingy - ptr->getRelativeSize()(1)*0.5;
+            break;
+        }
+        return P;
+    };
+    StateInSlide sis;
+    sis.anchor = other.first->getAnchor();
+    sis.placer = rp;
+    return sis;
 }

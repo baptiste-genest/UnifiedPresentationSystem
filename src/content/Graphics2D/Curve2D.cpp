@@ -38,7 +38,7 @@ UPS::Figure::FigurePtr UPS::Figure::Add(Figure& F,vec2 rel_size)
         system(("convert -background none -size "+size+ " /tmp/buffer.svg " + filename).c_str());
         }
         else {
-            system(("convert -background none -density 100 /tmp/buffer.svg " + filename).c_str());
+            system(("convert -background none -density 300 /tmp/buffer.svg " + filename).c_str());
         }
     }
     return Image::Add(filename.c_str());

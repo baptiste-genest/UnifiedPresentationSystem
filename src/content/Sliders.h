@@ -1,12 +1,12 @@
 #ifndef SLIDERS_H
 #define SLIDERS_H
 
-#include "primitive.h"
+#include "PolyscopePrimitive.h"
 
 namespace UPS {
 
 
-class Sliders : public Primitive
+class Sliders : public PolyscopePrimitive
 {
 public:
 
