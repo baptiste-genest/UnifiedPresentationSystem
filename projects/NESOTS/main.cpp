@@ -51,6 +51,22 @@ vecs subsample(const vecs& X,int N) {
     return rslt;
 }
 
+scalar angle(const vec& a,const vec& b){
+    return std::acos(a.dot(b));
+}
+
+vec slerp(float t,const vec& a,const vec& b){
+    auto th = angle(a,b);
+    return (std::sin((1-t)*th)*a + std::sin(t*th)*b)/std::sin(th);
+}
+
+vec Log(const vec& x,const vec& y){
+    auto d = angle(x,y);
+    vec delta = y-x;
+    delta -= delta.dot(x)*x;
+    return d*delta.normalized();
+}
+
 using VFPC = std::shared_ptr<PolyscopeQuantity<polyscope::PointCloudVectorQuantity>>;
 bool runall = false;
 void init() {
@@ -62,8 +78,10 @@ void init() {
     Latex::NewCommand("Sp","\\mathbb{S}");
     Latex::NewCommand("proj","\\Pi^\\theta");
 
+    /*
     Options::UPS_screen_resolution_x = 1280;
     Options::UPS_screen_resolution_y = 720;
+*/
 
     int N = 20;
 
@@ -281,9 +299,59 @@ void init() {
             "Use of the geometric median",
             "Intrinsic Mesh sampling",
             "Projective plane sampling")),0.5,0.05);
+    }
+    {
         show << newFrame << Title("NESOTS algorithm")->at(TOP);
         show << Image::Add("nesots_algo.png",0.8)->at("nesots");
-        show << Image::Add("logexp.png",1)->at("logexp");
+        show << CameraView::Add(Options::ProjectViewsPath + "nesots.json");
+        auto slice= Curve3D::Add([] (scalar t) {return vec(cos(t*2*M_PI),sin(t*2*M_PI),0);},100,true,0.005);
+        auto S = Mesh::Add(Options::DataPath + "meshes/ico_sphere_5.obj",vec(1,1,1),true);
+        //S->pc->setEdgeWidth(0);
+        //2530 1914
+        show << inNextFrame;
+        show << slice << S;
+
+        vec mu = S->getVertices()[2530];
+        vec nu = S->getVertices()[1914];
+        auto mupc = Point::Add(mu,0.035);
+        auto nupc = Point::Add(nu,0.035);
+        show << inNextFrame << mupc << nupc;
+        vec pi_mu = vec(mu(0),mu(1),0).normalized();
+        vec pi_nu = vec(nu(0),nu(1),0).normalized();
+        auto th = std::acos(pi_mu.dot(pi_nu));
+        auto pimupc = Point::Add([mu,pi_mu,pi_nu](const TimeObject& t){
+            auto x = t.from_action*0.7;
+            if (t.relative_frame_number == 0){
+                if (x > 1)
+                    return pi_mu;
+                return slerp(x,mu,pi_mu);
+            }
+            if (t.relative_frame_number == 1)
+                return pi_mu;
+            if (x > 1 || t.relative_frame_number >= 3)
+                return pi_nu;
+            return slerp(x,pi_mu,pi_nu);
+        },0.035);
+        auto pinupc = Point::Add([nu,pi_nu](const TimeObject& t){
+            if (t.inner_time*0.4 > 1)
+                return pi_nu;
+            return slerp(t.inner_time*0.4,nu,pi_nu);
+        },0.035);
+        vec R = Eigen::AngleAxis(th,vec(0,0,1))*mu;
+        show << inNextFrame << pimupc << pinupc;
+        auto T = Curve3D::Add([pi_mu,pi_nu](scalar t){return slerp(t,pi_mu,pi_nu);},30,false,0.007);
+        show << inNextFrame << T;
+        auto rot_mu = Point::Add([mu,R](TimeObject t){
+            auto x = t.inner_time*0.7;
+            if (x > 1)
+                return R;
+            return slerp(x,mu,R);
+        },0.035);
+        show << inNextFrame << rot_mu;
+        auto grad = mupc->addVector([mu,R](scalar){return Log(mu,R);});
+        show << inNextFrame << grad;
+        show << inNextFrame >> pimupc >> pinupc >> slice >> T >> rot_mu;
+        //show << Image::Add("logexp.png",1)->at("logexp");
     }
     if (true || runall) {
         show << newFrame << Title("Geometric Median for robust SGD")->at(TOP);
@@ -312,7 +380,7 @@ void init() {
     }
 
     show << newFrame << Title("Thank you for your attention");
-    show << PlaceBelow(Latex::Add("Code Available : Eulerson314 (Github)"));
+    show << PlaceBelow(Latex::Add("Code Available : baptiste-genest (Github)"));
 
 
 }
@@ -327,6 +395,7 @@ int main(int argc,char** argv)
 
     polyscope::state::userCallback = [](){
         show.play();
+        //ImGui::ShowDemoWindow();
     };
     polyscope::show();
     return 0;

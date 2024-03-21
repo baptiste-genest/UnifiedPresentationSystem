@@ -4,6 +4,7 @@
 #include "Slide.h"
 #include "PrompterModule.h"
 #include "screenshot.h"
+#include "../content/Text.h"
 
 namespace UPS {
 
@@ -47,6 +48,8 @@ public:
     std::string getSlideTitle(int slide_nb);
     void goToSlide(int slide_nb);
 
+    bool display_slide_number = true;
+
 private:
     void slideMenu();
     void enableAllSlides();
@@ -54,12 +57,14 @@ private:
 
     void initialize_slides();
 
-    std::map<std::string,bool> enabled_slides;
     void loadSlides();
+    std::vector<int> slide_numbers;
+    std::vector<PrimitiveInSlide> slide_number_display;
 
     PrimitivePtr selected_primitive = nullptr;
     PrimitivePtr getPrimitiveUnderMouse(scalar x,scalar y) const;
 
+    void displaySlideNumber();
 
     bool transition_done = false;
     bool backward = false;
@@ -70,6 +75,7 @@ private:
     static void ImGuiWindowConfig();
 
     int visited_slide = -1;
+    int nb_distinct_slides = 0;
 
     TimeStamp from_action,from_begin;
     size_t current_slide = 0;
