@@ -19,6 +19,8 @@ void Text::display(const StateInSlide &sis) const
     ImGui::SetWindowFontScale(2);
 
     auto size = ImGui::CalcTextSize(content.c_str());
+    size.x *= 2;
+    size.y *= 2;
 
     ImGuiStyle* style = &ImGui::GetStyle();
     auto old = style->Colors[ImGuiCol_Text];

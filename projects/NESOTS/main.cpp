@@ -333,9 +333,10 @@ void init() {
             return slerp(x,pi_mu,pi_nu);
         },0.035);
         auto pinupc = Point::Add([nu,pi_nu](const TimeObject& t){
-            if (t.inner_time*0.4 > 1)
+            auto x = t.inner_time*0.7;
+            if (x > 1)
                 return pi_nu;
-            return slerp(t.inner_time*0.4,nu,pi_nu);
+            return slerp(x,nu,pi_nu);
         },0.035);
         vec R = Eigen::AngleAxis(th,vec(0,0,1))*mu;
         show << inNextFrame << pimupc << pinupc;
