@@ -106,8 +106,6 @@ protected:
             screenPos /= screenPos.w;
             screenPos = (screenPos + glm::vec4(1,1,1,1))/2.f;
             screenPos.y = 1-screenPos.y;
-            std::cout << "track " << p.transpose()  << std::endl;
-            std::cout << "screen pos " << screenPos.x << " " << screenPos.y << std::endl;
             return vec2(screenPos.x,screenPos.y);
         };
     }
