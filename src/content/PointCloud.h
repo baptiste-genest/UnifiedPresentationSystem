@@ -9,11 +9,11 @@ namespace UPS {
 class PointCloud : public PolyscopePrimitive
 {
 public:
-    PointCloud(const vecs& P);
+    PointCloud(const vecs& P,scalar radius);
 
     using PointCloudPtr = std::shared_ptr<PointCloud>;
 
-    static PointCloudPtr Add(const vecs& P);
+    static PointCloudPtr Add(const vecs& P,scalar radius = -1);
     PointCloudPtr apply(const mapping& phi);
     PointCloudPtr applyDynamic(const VertexTimeMap& phi);
 
@@ -25,6 +25,7 @@ public:
     }
 private:
     vecs points,original_points;
+    scalar radius = -1;
 
     // PolyscopePrimitive interface
 public:

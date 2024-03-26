@@ -4,12 +4,19 @@ UPS::Mesh::MeshPtr UPS::Mesh::Add(const std::string &objfile,const vec& scale,bo
 {
     std::vector<std::array<double,3>> V;
     Faces F;
-    polyscope::loadPolygonSoup(objfile,V,F);
+    std::unique_ptr<geometrycentral::surface::ManifoldSurfaceMesh> mesh;
+    std::unique_ptr<geometrycentral::surface::VertexPositionGeometry> geometry;
+    std::tie(mesh, geometry) = geometrycentral::surface::readManifoldSurfaceMesh(objfile);
 
-    vecs verts(V.size());
-    for (int i = 0;i<V.size();i++){
-        const auto& x = V[i];
-        verts[i] = vec(x[0]*scale(0),x[1]*scale(1),x[2]*scale(2));
+    //load faces
+    for (auto f : mesh->getFaceVertexList()){
+        F.push_back({f[0],f[1],f[2]});
+    }
+
+    vecs verts(mesh->nVertices());
+    for (auto v : mesh->vertices()){
+        auto x = geometry->vertexPositions[v];
+        verts[v.getIndex()] = vec(x[0]*scale(0),x[1]*scale(1),x[2]*scale(2));
     }
 
     MeshPtr rslt = NewPrimitive<Mesh>(verts,verts,F,smooth);

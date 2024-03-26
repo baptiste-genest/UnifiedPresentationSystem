@@ -24,6 +24,7 @@
 #endif
 
 #include "polyscope/polyscope.h"
+#include "polyscope/floating_quantity_structure.h"
 
 namespace UPS {
 

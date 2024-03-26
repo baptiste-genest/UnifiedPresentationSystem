@@ -25,7 +25,8 @@ void UPS::Curve3D::initPolyscope()
         pc = polyscope::registerCurveNetworkLoop(getPolyscopeName(),nodes);
     else
         pc = polyscope::registerCurveNetworkLine(getPolyscopeName(),nodes);
-    pc->setRadius(radius,true);
+    if (radius > 0 )
+        pc->setRadius(radius,false);
     initPolyscopeData(pc);
 }
 
@@ -62,5 +63,26 @@ Plot::Curve3DPtr Plot::Add(const scalar_function &f, scalar x0, scalar x1,const 
     }
     return Curve3D::Add(V);
 }
+
+void CurveNetwork::initPolyscope()
+{
+    pc = polyscope::registerCurveNetwork(getPolyscopeName(),nodes,E);
+    if (radius > 0)
+        pc->setRadius(radius,false);
+    initPolyscopeData(pc);
+}
+
+std::shared_ptr<CurveNetwork> CurveNetwork::Add(const vecs &nodes, const edges &E, scalar r)
+{
+    return NewPrimitive<CurveNetwork>(nodes,E,r);
+}
+
+CurveNetwork::CurveNetwork(const vecs &nodes, const edges &E, scalar r) : E(E)
+{
+    Curve3D::nodes = nodes;
+    Curve3D::radius = r;
+
+}
+
 
 }

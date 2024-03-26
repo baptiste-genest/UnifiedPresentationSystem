@@ -1,12 +1,12 @@
 #include "PointCloud.h"
 
-UPS::PointCloud::PointCloud(const vecs &P) : points(P),original_points(P)
+UPS::PointCloud::PointCloud(const vecs &P,scalar r) : points(P),original_points(P),radius(r)
 {
 }
 
-UPS::PointCloud::PointCloudPtr UPS::PointCloud::Add(const vecs &P)
+UPS::PointCloud::PointCloudPtr UPS::PointCloud::Add(const vecs &P,scalar radius)
 {
-    return NewPrimitive<PointCloud>(P);
+    return NewPrimitive<PointCloud>(P,radius);
 }
 
 UPS::PointCloud::PointCloudPtr UPS::PointCloud::apply(const mapping &phi)
@@ -14,12 +14,12 @@ UPS::PointCloud::PointCloudPtr UPS::PointCloud::apply(const mapping &phi)
     auto NP = points;
     for (auto& x : NP)
         x = phi(x);
-    return Add(NP);
+    return Add(NP,radius);
 }
 
 UPS::PointCloud::PointCloudPtr UPS::PointCloud::applyDynamic(const VertexTimeMap &phi)
 {
-    PointCloudPtr rslt = NewPrimitive<PointCloud>(original_points);
+    PointCloudPtr rslt = NewPrimitive<PointCloud>(original_points,radius);
     rslt->updater = [phi] (const TimeObject& t,Primitive* ptr) {
         auto M = Primitive::get<PointCloud>(ptr->pid);
         auto V = M->original_points;
@@ -33,5 +33,7 @@ UPS::PointCloud::PointCloudPtr UPS::PointCloud::applyDynamic(const VertexTimeMap
 void UPS::PointCloud::initPolyscope()
 {
     pc = polyscope::registerPointCloud(getPolyscopeName(),points);
+    if (radius > 0)
+        pc->setPointRadius(radius,false);
     initPolyscopeData(pc);
 }

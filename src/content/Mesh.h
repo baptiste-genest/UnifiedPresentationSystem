@@ -3,7 +3,7 @@
 #include "../UPS.h"
 #include "PolyscopePrimitive.h"
 #include "polyscope/surface_mesh.h"
-#include "polyscope/surface_mesh_io.h"
+#include "geometrycentral/surface/meshio.h"
 #include "../math/geometry.h"
 
 namespace UPS {

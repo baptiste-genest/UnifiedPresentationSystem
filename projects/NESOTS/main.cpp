@@ -1,4 +1,3 @@
-#include "polyscope/polyscope.h"
 #include "../../src/UnifiedPresentationSystem.h"
 
 using namespace UPS;
@@ -12,6 +11,35 @@ vecs randomPointCloud(int N) {
         points[i](1) = 0;
     }
     return points;
+}
+
+vecs random1DPointCloud(int N,double bias = 0) {
+    vecs points(N);
+    for (int i = 0;i<N;++i) {
+        points[i] = vec::Zero();
+        points[i](0) = polyscope::randomReal(-0.5,0.5) + bias;
+    }
+    return points;
+}
+
+vecs readPointCloud(const std::string& path) {
+    std::ifstream file(path);
+    vecs points;
+    while (file){
+        vec point;
+        file >> point(0) >> point(1) >> point(2);
+        points.push_back(point);
+    }
+    return points;
+}
+
+std::vector<int> readPlan(const std::string& path,int N) {
+    std::ifstream file(path);
+    std::vector<int> plan(N);
+    for (int i = 0;i<N;++i) {
+        file >> plan[i];
+    }
+    return plan;
 }
 
 vecs project(vecs X,vec s) {
@@ -79,6 +107,15 @@ std::function<vec2()> trackScreen(const std::function<vec()>& pos) {
     };
 }
 
+std::shared_ptr<CurveNetwork> plotPlan(const vecs& mu,const vecs& nu,const std::vector<int>& T) {
+    vecs X = mu;
+    Curve3D::edges E(mu.size());
+    X.insert(X.end(),nu.begin(),nu.end());
+    for (int i = 0;i<mu.size();i++){
+        E[i] = {i,T[i] + (int)mu.size()};
+    }
+    return CurveNetwork::Add(X,E);
+}
 
 using VFPC = std::shared_ptr<PolyscopeQuantity<polyscope::PointCloudVectorQuantity>>;
 bool runall = false;
@@ -98,25 +135,61 @@ void init() {
 
     int N = 20;
 
-    if (false || runall)
     {
         show << Title("Non Euclidean Sliced \\\\ Optimal Transport Sampling")->at(UPS::CENTER);
         show << PlaceBelow(Latex::Add(tex::center("Baptiste Genest \\\\ David Coeurjolly \\\\ Nicolas Courty"),Options::UPS_default_height_ratio*0.8),0.1);
         show << PlaceBelow(Latex::Add("Eurographics 2024",Options::UPS_default_height_ratio*0.7),0.1);
 
+    }
+
+    {
         show << newFrame << Title("Optimal Transport")->at(UPS::TOP);
         show << PlaceBelow(Latex::Add("Discrete to Discrete"));
-        show << Image::Add("OT_1.png");
-        show << inNextFrame << Replace(Image::Add("OT_2.png"));
+        auto ot = Image::Add("OT_1.png");
+        show << PlaceBottom(Latex::Add(tex::center("Among all bijections $\\gamma$, \\\\ which one minimizes the effort \\\\ to move each $x_i$ to $\\gamma(x_i)$?")),0.5,0.1);
 
+        show << ot;
+        show << inNextFrame << ot << Replace(Image::Add("OT_2.png"));
+
+    }
+    {
+        show << newFrame << Title("Optimal Transport")->at(UPS::TOP);
+        show << PlaceBelow(Latex::Add("The Wasserstein distance"));
+        show << Latex::Add("Given two probability measures $\\mu$ and $\\nu$")->at("wass_def");
+        show << inNextFrame << Formula::Add(R"(\W_p^p(\mu,\nu) = \inf_{\gamma \in \Pi(\mu,\nu)} \int d(x,y)^p d\gamma)");
+        show << inNextFrame << Latex::Add("Very importantly, $\\mu$ and $\\nu$ can be discrete or continuous!")->at("discrete");
+    }
+    {
         show << newFrame << Title("How hard is it?")->at(UPS::TOP);
         show << inNextFrame << PlaceBelow(Latex::Add("Exact discrete to discrete : Linear Programming $\\implies \\mathcal{O}(n^3)$"),0.1);
         show << inNextFrame << PlaceBelow(Latex::Add("Trivial in 1 case : 1D-OT"),0.1);
-        show << inNextFrame << PlaceBelow(Image::Add("OT_1D.png",0.7),0.05);
-        show << inNextFrame << PlaceBelow(Latex::Add("$\\mathcal{O}(n\\log(n))$!",Options::UPS_default_height_ratio*1.7));
+        show << CameraView::Add(UPS::Options::ProjectViewsPath + "1DOT.json");
+        {
+
+            vec theta = vec(1,0,0);
+            auto pct = Curve3D::Add(vecs{-theta*3,theta*3},false,0.005);
+
+            auto mu = random1DPointCloud(8,-0.1);
+            auto mupc = PointCloud::Add(mu);
+            auto nu = random1DPointCloud(8,0.1);
+            auto nupc = PointCloud::Add(nu);
+
+            show << inNextFrame << pct << mupc << nupc;
+
+            auto mup =mu;auto nup = nu;
+            std::sort(mup.begin(),mup.end(),[theta](const vec& x,const vec& y) {return x.dot(theta) < y.dot(theta);});
+            std::sort(nup.begin(),nup.end(),[theta](const vec& x,const vec& y) {return x.dot(theta) < y.dot(theta);});
+
+            PrimitiveGroup Assignments;
+            for (int i = 0;i<N;i++){
+                Assignments << Curve3D::Add(roundArrowParam(proj(mup[i],theta),proj(nup[i],theta)),100,false,0.005);
+            }
+            show << Assignments;
+        }
+        //show << inNextFrame << PlaceBelow(Image::Add("OT_1D.png",0.7),0.05);
+        show << inNextFrame << PlaceBottom(Latex::Add("$\\mathcal{O}(n\\log(n))$!",Options::UPS_default_height_ratio*1.7));
     }
 
-    if (false || runall)
     {
         show << newFrame << Title("Sliced Optimal Transport")->at(UPS::TOP);
 
@@ -160,7 +233,6 @@ void init() {
         }
     }
 
-    if (false || runall)
     {
 
         auto uniform = Image::Add("uniform.png");
@@ -172,7 +244,6 @@ void init() {
 
     }
 
-    if (false || runall)
     {
         show << newFrame << Title("Sliced Optimal Transport Sampling")->at(TOP);
         show << inNextFrame << PlaceBelow(Latex::Add("Stochastic Gradient Descent on $\\mu \\mapsto SW(\\mu,\\nu)$"),0.04);
@@ -182,11 +253,11 @@ void init() {
         {
             auto swgrad = Formula::Add("\\nabla_{x_i} SW^\\theta ?");
             vec theta = vec(1,0,0);
-            auto pct = Curve3D::Add(vecs{-theta*3,theta*3},false,0.002);
+            auto pct = Curve3D::Add(vecs{-theta*3,theta*3},false,0.005);
 
-            auto mu = project(randomPointCloud(8),theta);
+            auto mu = random1DPointCloud(8,-0.1);
             auto mupc = PointCloud::Add(mu);
-            auto nu = project(randomPointCloud(8),theta);
+            auto nu = random1DPointCloud(8,0.1);
             auto nupc = PointCloud::Add(nu);
 
             show << inNextFrame << PlaceBelow(swgrad) <<  pct << mupc << nupc;
@@ -197,7 +268,7 @@ void init() {
 
             PrimitiveGroup Assignments;
             for (int i = 0;i<N;i++){
-                Assignments << Curve3D::Add(roundArrowParam(proj(mup[i],theta),proj(nup[i],theta)),100,false,0.002);
+                Assignments << Curve3D::Add(roundArrowParam(proj(mup[i],theta),proj(nup[i],theta)),100,false,0.005);
             }
             show << Assignments;
             show << inNextFrame << Replace(Formula::Add("\\nabla_{x_i} SW^{\\theta} = T^{\\theta}(x_i) - x_i"),swgrad);
@@ -290,7 +361,6 @@ void init() {
     }
     auto grid = Mesh::Add(Options::DataPath+"meshes/tri_grid_50.obj");
 
-    if (true || runall)
     {
         auto offset = 1.5;
         show << newFrame << Title("Non-Euclidean Sliced \\\\ Optimal Transport Sampling")->at(TOP);
@@ -317,7 +387,7 @@ void init() {
         show << newFrame << Title("NESOTS algorithm")->at(TOP);
         show << Image::Add("nesots_algo.png",0.8)->at("nesots");
         show << CameraView::Add(Options::ProjectViewsPath + "nesots.json");
-        auto slice= Curve3D::Add([] (scalar t) {return vec(cos(t*2*M_PI),sin(t*2*M_PI),0);},100,true,0.005);
+        auto slice= Curve3D::Add([] (scalar t) {return vec(cos(t*2*M_PI),sin(t*2*M_PI),0);},100,true,0.01);
         auto S = Mesh::Add(Options::DataPath + "meshes/ico_sphere_5.obj",vec(1,1,1),true);
         //S->pc->setEdgeWidth(0);
         //2530 1914
@@ -355,8 +425,10 @@ void init() {
             return slerp(x,nu,pi_nu);
         },0.035);
         vec R = Eigen::AngleAxis(th,vec(0,0,1))*mu;
-        show << inNextFrame << pimupc << pinupc << Formula::Add("\\Pi_{\\#}\\mu")->track([pimupc](){return pimupc->getCurrentPos();},vec2(0.01,0.01));
-        auto T = Curve3D::Add([pi_mu,pi_nu](scalar t){return slerp(t,pi_mu,pi_nu);},30,false,0.007);
+        show << inNextFrame << pimupc << pinupc;
+        auto projlabel = Formula::Add("\\Pi_{\\#}\\mu");
+        show << projlabel->track([pimupc](){return pimupc->getCurrentPos();},vec2(0.01,0.01));
+        auto T = Curve3D::Add([pi_mu,pi_nu](scalar t){return slerp(t,pi_mu,pi_nu);},30,false,0.013);
         show << inNextFrame << T;
         auto rot_mu = Point::Add([mu,R](TimeObject t){
             auto x = t.inner_time*0.7;
@@ -367,10 +439,10 @@ void init() {
         show << inNextFrame << rot_mu;
         auto grad = mupc->addVector([mu,R](scalar){return Log(mu,R);});
         show << inNextFrame << grad;
-        show << inNextFrame >> pimupc >> pinupc >> slice >> T >> rot_mu;
+        show << inNextFrame >> pimupc >> pinupc >> slice >> T >> rot_mu >> projlabel;
         //show << Image::Add("logexp.png",1)->at("logexp");
     }
-    if (true || runall) {
+    {
         show << newFrame << Title("Geometric Median for robust SGD")->at(TOP);
         show << Latex::Add("Classic SGD:")->at("SGD");
         show << PlaceBelow(Formula::Add("\\nabla_{x_i} \\mathcal{SW}(\\sum_i \\delta_{x_i},\\nu) \\leftarrow \\frac{1}{L}\\sum_{l = 1}^{L} \\left( T(x_i) - x_i\\right) "));
@@ -380,12 +452,12 @@ void init() {
         show << inNextFrame;
         show << Image::Add("geomed_gain.png")->at("geomed2");
     }
-    if (true || runall) {
+    {
         show << newFrame << Title("Intrinsic Mesh Sampling")->at(TOP);
         show << Image::Add("mesh_sampling.png");
         show << inNextFrame << Replace(Image::Add("mesh_sampling_cmp.png"));
     }
-    if (true || runall) {
+    {
         show << newFrame << Title("Projective Plane Sampling")->at(TOP);
         show << PlaceLeft(Latex::Add("Rotation sampling $\\rightarrow$ sampling unit Quaternions $\\subset \\mathbb{S}^3$"),0.25);
         show << inNextFrame << Formula::Add("q^{-1}\\Vec{x}q")->at("quat");
@@ -399,14 +471,11 @@ void init() {
     show << newFrame << Title("Thank you for your attention");
     show << PlaceBelow(Latex::Add("Code Available : baptiste-genest (Github)"));
 
-
 }
 
 int main(int argc,char** argv)
 {
     show.init("NESOTS");
-    if (argc > 1)
-        runall = true;
 
     init();
 

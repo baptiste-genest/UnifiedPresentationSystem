@@ -121,7 +121,7 @@ inline PrimitiveInSlide PlaceRight(ScreenPrimitivePtr ptr,scalar y = 0.5,scalar 
 inline PrimitiveInSlide PlaceBottom(ScreenPrimitivePtr ptr,scalar x = 0.5,scalar padding = 0.1) {
     vec2 P;
     P(0) = x;
-    P(1) = 1. - ptr->getRelativeSize()(1)*0.5+padding;
+    P(1) = 1. - ptr->getRelativeSize()(1)*0.5-padding;
     return {ptr,StateInSlide(P)};
 }
 
