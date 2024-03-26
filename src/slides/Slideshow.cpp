@@ -185,7 +185,8 @@ void UPS::Slideshow::handleDragAndDrop()
     }
     if (io.MouseDown[0] > 0 && selected_primitive != nullptr) {
         auto& pis = slides[current_slide][selected_primitive];
-        pis.anchor->writeAtLabel(x,y,true);
+        LabelAnchorPtr lab = std::dynamic_pointer_cast<LabelAnchor>(pis.anchor);
+        lab->writeAtLabel(x,y,true);
     }
 }
 

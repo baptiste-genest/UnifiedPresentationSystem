@@ -16,7 +16,7 @@ protected:
     AnchorPtr anchor;
 public:
     ScreenPrimitive() {
-        anchor = Anchor::Add(vec2(0,0));
+        anchor = AbsoluteAnchor::Add(vec2(0,0));
     }
 
     static ScreenPrimitivePtr get(PrimitiveID id) {
@@ -53,9 +53,29 @@ public:
 
     inline ScreenPrimitiveInSlide at(std::string label) {
         StateInSlide sis;
-        sis.anchor = Anchor::Add(label);
+        sis.anchor = LabelAnchor::Add(label);
         return {get(pid),sis};
     }
+
+    inline ScreenPrimitiveInSlide at(const std::function<vec2()>& placer) {
+        StateInSlide sis;
+        sis.anchor = DynamicAnchor::Add(placer);
+        return {get(pid),sis};
+    }
+    inline ScreenPrimitiveInSlide track(const std::function<vec()>& toTrack,vec2 offset = vec2::Zero()) {
+        StateInSlide sis;
+        sis.anchor = DynamicAnchor::AddTracker(toTrack);
+        offset(1) *= -1;
+        sis.placer = [offset](vec2 p) { return vec2(p+offset); };
+        return {get(pid),sis};
+    }
+    inline ScreenPrimitiveInSlide at(const vec& worldPos,const vec2& offset = vec2::Zero()) {
+        StateInSlide sis;
+        sis.anchor = DynamicAnchor::Add(worldPos);
+        sis.placer = [offset](vec2 p) { return vec2(p+offset); };
+        return {get(pid),sis};
+    }
+
 
     virtual vec2 getSize() const = 0;
 

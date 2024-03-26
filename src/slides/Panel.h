@@ -23,7 +23,7 @@ class Panel {
 
 public:
     Panel(bool reveal = false,vec2 p = CENTER) : reveal(reveal) {
-        anchor = Anchor::Add(p);
+        anchor = AbsoluteAnchor::Add(p);
     }
 
     AnchorPtr getAnchor() const {return anchor;}

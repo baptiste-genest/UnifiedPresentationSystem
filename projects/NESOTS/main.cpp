@@ -67,6 +67,19 @@ vec Log(const vec& x,const vec& y){
     return d*delta.normalized();
 }
 
+std::function<vec2()> trackScreen(const std::function<vec()>& pos) {
+    return [pos] () {
+        auto p = pos();
+        glm::vec4 pos = glm::vec4(p(0),p(1),p(2),1);
+        glm::vec4 screenPos = polyscope::view::getCameraPerspectiveMatrix()*polyscope::view::viewMat * pos;
+        screenPos /= screenPos.w;
+        screenPos = (screenPos + glm::vec4(1,1,1,1))/2.f;
+        screenPos.y = 1-screenPos.y;
+        return vec2(screenPos.x,screenPos.y);
+    };
+}
+
+
 using VFPC = std::shared_ptr<PolyscopeQuantity<polyscope::PointCloudVectorQuantity>>;
 bool runall = false;
 void init() {
@@ -108,7 +121,7 @@ void init() {
         show << newFrame << Title("Sliced Optimal Transport")->at(UPS::TOP);
 
         show << inNextFrame << Formula::Add("\\W(\\mu,\\nu)")->at("W2");
-        show << inNextFrame << PlaceNextTo(Formula::Add("\\approx SW(\\mu,\\nu) = \\int_{\\Sp} \\W(\\proj_\\# \\mu ,\\proj_\\# \\nu) d\\theta"),1);
+        show << inNextFrame << PlaceNextTo(Formula::Add(R"(\approx SW(\mu,\nu) = \int_{\Sp} \W(\proj_\# \mu ,\proj_\# \nu) d\theta)"),1);
 
         auto mu = randomPointCloud(N);
         auto mupc = PointCloud::Add(mu);
@@ -315,7 +328,10 @@ void init() {
         vec nu = S->getVertices()[1914];
         auto mupc = Point::Add(mu,0.035);
         auto nupc = Point::Add(nu,0.035);
-        show << inNextFrame << mupc << nupc;
+
+
+
+        show << inNextFrame << mupc << nupc << Formula::Add("\\mu")->track([mupc](){return mupc->getCurrentPos();},vec2(0.01,0.01));
         vec pi_mu = vec(mu(0),mu(1),0).normalized();
         vec pi_nu = vec(nu(0),nu(1),0).normalized();
         auto th = std::acos(pi_mu.dot(pi_nu));
@@ -339,7 +355,7 @@ void init() {
             return slerp(x,nu,pi_nu);
         },0.035);
         vec R = Eigen::AngleAxis(th,vec(0,0,1))*mu;
-        show << inNextFrame << pimupc << pinupc;
+        show << inNextFrame << pimupc << pinupc << Formula::Add("\\Pi_{\\#}\\mu")->track([pimupc](){return pimupc->getCurrentPos();},vec2(0.01,0.01));
         auto T = Curve3D::Add([pi_mu,pi_nu](scalar t){return slerp(t,pi_mu,pi_nu);},30,false,0.007);
         show << inNextFrame << T;
         auto rot_mu = Point::Add([mu,R](TimeObject t){

@@ -2,6 +2,6 @@
 
 namespace UPS {
 
-AnchorPtr GlobalAnchor = Anchor::Add(vec2(0,0));
+AnchorPtr GlobalAnchor = AbsoluteAnchor::Add(vec2(0,0));
 
 }

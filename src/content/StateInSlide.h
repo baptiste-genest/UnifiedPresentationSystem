@@ -24,7 +24,7 @@ struct StateInSlide {
 
 
     StateInSlide(const vec2& x)  {
-        anchor = Anchor::Add(x);
+        anchor = AbsoluteAnchor::Add(x);
     }
 
     void setOffset(const vec2& x) {
