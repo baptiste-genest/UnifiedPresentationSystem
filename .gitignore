@@ -3,6 +3,8 @@ b2/**
 .DS_Store
 
 
+src/content/Options.cpp
+
 .cache/**
 compile_commands.json
 
