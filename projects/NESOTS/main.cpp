@@ -137,7 +137,7 @@ void init() {
 
     {
         show << Title("Non Euclidean Sliced \\\\ Optimal Transport Sampling")->at(UPS::CENTER);
-        show << PlaceBelow(Latex::Add(tex::center("Baptiste Genest \\\\ David Coeurjolly \\\\ Nicolas Courty"),Options::UPS_default_height_ratio*0.8),0.1);
+        show << PlaceBelow(Latex::Add(tex::center("Baptiste Genest \\\\  Nicolas Courty \\\\ David Coeurjolly"),Options::UPS_default_height_ratio*0.8),0.1);
         show << PlaceBelow(Latex::Add("Eurographics 2024",Options::UPS_default_height_ratio*0.7),0.1);
 
     }
@@ -462,7 +462,7 @@ void init() {
     {
         show << newFrame << Title("Geometric Median for robust SGD")->at(TOP);
         show << Latex::Add("Classic SGD:")->at("SGD");
-        show << PlaceBelow(Formula::Add("\\nabla_{x_i} \\mathcal{SW}(\\sum_i \\delta_{x_i},\\nu) \\leftarrow \\frac{1}{L}\\sum_{l = 1}^{L} \\left( T(x_i) - x_i\\right) "));
+        show << PlaceBelow(Formula::Add("\\nabla_{x_i} \\mathcal{SW}\\left(\\sum_i \\delta_{x_i},\\nu\\right) \\leftarrow \\frac{1}{L}\\sum_{l = 1}^{L} \\left( T(x_i) - x_i\\right) "));
         show << inNextFrame;
         show << Latex::Add("GeoMed Descent:")->at("GMD");
         show << PlaceBelow(Formula::Add("\\text{GeoMed}(\\{ T(x_i) - x_i\\}_i)"));
