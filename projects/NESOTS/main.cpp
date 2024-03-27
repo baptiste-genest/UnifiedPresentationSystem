@@ -392,7 +392,7 @@ void init() {
         //S->pc->setEdgeWidth(0);
         //2530 1914
         show << inNextFrame;
-        show << slice << S;
+        show << S;
 
         vec mu = S->getVertices()[2530];
         vec nu = S->getVertices()[1914];
@@ -400,8 +400,13 @@ void init() {
         auto nupc = Point::Add(nu,0.035);
 
 
+        show << Formula::Add("\\mu = \\delta_x, \\nu = \\delta_y")->at("measures");
+        show <<  mupc << nupc << Formula::Add("x")->track([mupc](){return mupc->getCurrentPos();},vec2(0.02,0.02));
 
-        show << inNextFrame << mupc << nupc << Formula::Add("\\mu")->track([mupc](){return mupc->getCurrentPos();},vec2(0.01,0.01));
+        show << Formula::Add("y")->track([nupc](){return nupc->getCurrentPos();},vec2(0.02,0.02));
+        auto slice_label =  Formula::Add("\\theta");
+        show << inNextFrame << slice << slice_label->at("slice");
+
         vec pi_mu = vec(mu(0),mu(1),0).normalized();
         vec pi_nu = vec(nu(0),nu(1),0).normalized();
         auto th = std::acos(pi_mu.dot(pi_nu));
@@ -426,10 +431,18 @@ void init() {
         },0.035);
         vec R = Eigen::AngleAxis(th,vec(0,0,1))*mu;
         show << inNextFrame << pimupc << pinupc;
-        auto projlabel = Formula::Add("\\Pi_{\\#}\\mu");
-        show << projlabel->track([pimupc](){return pimupc->getCurrentPos();},vec2(0.01,0.01));
+        auto projlabel = Formula::Add("P^\\theta(x)");
+        show << projlabel->track([pimupc](){return pimupc->getCurrentPos();},vec2(0.02,0.02));
         auto T = Curve3D::Add([pi_mu,pi_nu](scalar t){return slerp(t,pi_mu,pi_nu);},30,false,0.013);
+        auto projlabel_nu = Formula::Add("P^\\theta(y)");
+        show << projlabel_nu->track([pinupc](){return pinupc->getCurrentPos();},vec2(0.02,-0.04));
         show << inNextFrame << T;
+        auto Tlabel = Formula::Add("\\text{here, } T(P^\\theta(x)) = P^\\theta(y)");
+        show << Tlabel->at("plan");
+        auto group_label = Latex::Add(tex::center("$R \\in SO(3)$ \\\\ s.t. $RP^\\theta(x) = P^\\theta(y)$"));
+
+
+
         auto rot_mu = Point::Add([mu,R](TimeObject t){
             auto x = t.inner_time*0.7;
             if (x > 1)
@@ -437,9 +450,13 @@ void init() {
             return slerp(x,mu,R);
         },0.035);
         show << inNextFrame << rot_mu;
+        auto rotlabel = Formula::Add("Rx");
+        show << rotlabel->track([rot_mu](){return rot_mu->getCurrentPos();},vec2(0.02,0.02));
+        show << group_label->at("group_action");
         auto grad = mupc->addVector([mu,R](scalar){return Log(mu,R);});
         show << inNextFrame << grad;
-        show << inNextFrame >> pimupc >> pinupc >> slice >> T >> rot_mu >> projlabel;
+        show << inNextFrame >> pimupc >> pinupc >> slice >> T >> rot_mu >> projlabel>> projlabel_nu >> rotlabel >> Tlabel >> group_label >> slice_label;
+        show << Formula::Add("\\nabla_x \\text{SW}^\\theta(\\mu,\\nu) = \\text{Log}_x(R(x))")->at("grad");
         //show << Image::Add("logexp.png",1)->at("logexp");
     }
     {
