@@ -1,11 +1,11 @@
 #include "CameraView.h"
 
-UPS::CameraView::CameraViewPtr UPS::CameraView::Add(const vec& f,const vec& t, const vec &up,bool flyTo)
+UPS::CameraViewPtr UPS::CameraView::Add(const vec& f,const vec& t, const vec &up,bool flyTo)
 {
-    return NewPrimitive<CameraView>(toVec3(f),toVec3(t),toVec3(up),flyTo);
+    return std::make_shared<CameraView>(toVec3(f),toVec3(t),toVec3(up),flyTo);
 }
 
-UPS::CameraView::CameraViewPtr UPS::CameraView::Add(std::string file, bool flyTo)
+UPS::CameraViewPtr UPS::CameraView::Add(std::string file, bool flyTo)
 {
     std::ifstream camfile(file);
     if (!camfile.is_open()){
@@ -14,5 +14,5 @@ UPS::CameraView::CameraViewPtr UPS::CameraView::Add(std::string file, bool flyTo
     }
     std::string str((std::istreambuf_iterator<char>(camfile)),
                     std::istreambuf_iterator<char>());
-    return NewPrimitive<CameraView>(str,flyTo);
+    return std::make_shared<CameraView>(str,flyTo);
 }

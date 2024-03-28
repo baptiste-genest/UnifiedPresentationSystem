@@ -128,8 +128,8 @@ void init() {
     Latex::NewCommand("Sp","\\mathbb{S}");
     Latex::NewCommand("proj","\\Pi^\\theta");
 
-    Options::UPS_screen_resolution_x = 1280;
-    Options::UPS_screen_resolution_y = 720;
+    Options::UPS_screen_resolution_x = 1920;
+    Options::UPS_screen_resolution_y = 1080;
 
     int N = 20;
 
@@ -182,7 +182,7 @@ void init() {
             for (int i = 0;i<N;i++){
                 Assignments << Curve3D::Add(roundArrowParam(proj(mup[i],theta),proj(nup[i],theta)),100,false,0.005);
             }
-            show << Assignments;
+            show << inNextFrame << Assignments;
         }
         //show << inNextFrame << PlaceBelow(Image::Add("OT_1D.png",0.7),0.05);
         show << inNextFrame << PlaceBottom(Latex::Add("$\\mathcal{O}(n\\log(n))$!",Options::UPS_default_height_ratio*1.7));
@@ -249,23 +249,26 @@ void init() {
         show << CameraView::Add(Options::ProjectViewsPath + "planar_close.json");
 
         {
-            auto swgrad = Formula::Add("\\nabla_{x_i} SW^\\theta ?");
+            auto swgrad = Formula::Add(R"(SW^\theta(\delta_x,\delta_y) = \frac{1}{2}(x-y)^2 \implies \nabla_{x} SW^\theta = ?)");
             vec theta = vec(1,0,0);
             auto pct = Curve3D::Add(vecs{-theta*3,theta*3},false,0.005);
 
-            auto mu = random1DPointCloud(8,-0.1);
+            vec x = vec(-0.2,0,0);
+            vec y = -x;
+            auto mu = vecs({x});//random1DPointCloud(8,-0.1);
             auto mupc = PointCloud::Add(mu);
-            auto nu = random1DPointCloud(8,0.1);
+            auto nu = vecs({y});//random1DPointCloud(8,0.1);
             auto nupc = PointCloud::Add(nu);
 
             show << inNextFrame << PlaceBelow(swgrad) <<  pct << mupc << nupc;
+            show << Formula::Add("x")->track([x](){return x;},vec2(0.02,0.02)) << Formula::Add("y")->track([y](){return y;},vec2(0.02,0.02));
 
             auto mup =mu;auto nup = nu;
             std::sort(mup.begin(),mup.end(),[theta](const vec& x,const vec& y) {return x.dot(theta) < y.dot(theta);});
             std::sort(nup.begin(),nup.end(),[theta](const vec& x,const vec& y) {return x.dot(theta) < y.dot(theta);});
 
             PrimitiveGroup Assignments;
-            for (int i = 0;i<N;i++){
+            for (int i = 0;i<1;i++){
                 Assignments << Curve3D::Add(roundArrowParam(proj(mup[i],theta),proj(nup[i],theta)),100,false,0.005);
             }
             show << Assignments;
@@ -341,6 +344,8 @@ void init() {
 
         show << PlaceLeft(Formula::Add("\\nabla_{x_i} SW\\leftarrow  \\frac{1}{\\Theta}\\sum_{\\theta}\\nabla_{x_i} SW^\\theta"),0.5,0.03);
 
+        show << CameraView::Add(Options::ProjectViewsPath + "close_grad.json",true);
+
         vecs combined_gradients(N,vec::Zero());
         show << inNextFrame;
         for (int j = 0;j<K;j++){
@@ -355,7 +360,7 @@ void init() {
 
         auto gradpc = mupc->pc->addVectorQuantity("combined gradient",combined_gradients);
         show << AddPolyscopeQuantity<polyscope::PointCloudVectorQuantity>(gradpc);
-        show << inNextFrame << PointCloud::Add(mu) >> mupc;
+        show << inNextFrame << Formula::Add("x_i^{n+1} = x_i^n - \\tau \\nabla_{x_i^n} SW^\\theta")->at("advect") << inNextFrame << PointCloud::Add(mu) >> mupc;
     }
     auto grid = Mesh::Add(Options::DataPath+"meshes/tri_grid_50.obj");
 

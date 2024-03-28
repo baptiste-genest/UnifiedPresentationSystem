@@ -11,6 +11,7 @@ void UPS::Slideshow::nextFrame()
     backward = false;
     locked = true;
     transition_done = false;
+    slides[current_slide].setCam();
 }
 
 void UPS::Slideshow::previousFrame()
@@ -26,6 +27,9 @@ void UPS::Slideshow::previousFrame()
         auto p = s.first;
         p->intro(TimeObject(p->getInnerTime(),1),s.second);
     }
+
+    slides[current_slide].setCam();
+
     from_action = Time::now();
     backward = true;
     locked = true;
@@ -44,6 +48,9 @@ void UPS::Slideshow::forceNextFrame()
         auto p = s.first;
         p->intro(TimeObject(p->getInnerTime(),1),s.second);
     }
+
+    slides[current_slide].setCam();
+
     from_action = Time::now();
     backward = false;
     locked = false;
@@ -211,6 +218,10 @@ void UPS::Slideshow::handleTransition()
         s->forceDisable();
     for (auto& s : uniqueNext(transitions[current_slide-1]))
         s->forceEnable();
+
+    if (!slides[current_slide-1].sameCamera(slides[current_slide])){
+        slides[current_slide].setCam();
+    }
 }
 
 

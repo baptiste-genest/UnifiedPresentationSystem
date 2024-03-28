@@ -3,6 +3,7 @@
 
 #include "../content/primitive.h"
 #include "../content/ScreenPrimitive.h"
+#include "../content/CameraView.h"
 
 namespace UPS {
 
@@ -37,6 +38,7 @@ struct Slide : public std::map<PrimitivePtr,StateInSlide> {
     }
 
     TextualPrimitivePtr title_primitive = nullptr;
+    CameraViewPtr camera = nullptr;
 
     std::map<ScreenPrimitivePtr,StateInSlide> getScreenPrimitives() const {
         std::map<ScreenPrimitivePtr,StateInSlide> rslt;
@@ -53,6 +55,22 @@ struct Slide : public std::map<PrimitivePtr,StateInSlide> {
             return "";
         return title_primitive->content;
     }
+
+    void setCam() const {
+        if (camera)
+            camera->enable();
+    }
+
+    bool sameCamera(const Slide& other) const {
+        if (camera && !other.camera)
+            return false;
+        if (!camera && other.camera)
+            return false;
+        if (!camera && !other.camera)
+            return true;
+        return camera == other.camera;
+    }
+
 
 };
 

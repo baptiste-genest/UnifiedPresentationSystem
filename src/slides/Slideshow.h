@@ -52,8 +52,6 @@ public:
 
 private:
     void slideMenu();
-    void enableAllSlides();
-    void disableAllSlides();
 
     void initialize_slides();
 

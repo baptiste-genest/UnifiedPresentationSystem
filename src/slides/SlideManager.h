@@ -220,6 +220,12 @@ inline SlideManager& operator<<(SlideManager& SM,const PrimitiveGroup& G) {
     return SM;
 }
 
+inline SlideManager& operator<<(SlideManager& SM,CameraViewPtr cam) {
+    SM.getLastSlide().camera = cam;
+    return SM;
+}
+
+
 
 inline SlideManager& operator>>(SlideManager& SM,PrimitivePtr ptr) {
     SM.removeFromCurrentSlide(ptr);
