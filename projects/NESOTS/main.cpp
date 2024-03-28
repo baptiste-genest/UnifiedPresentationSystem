@@ -117,6 +117,14 @@ std::shared_ptr<CurveNetwork> plotPlan(const vecs& mu,const vecs& nu,const std::
     return CurveNetwork::Add(X,E);
 }
 
+void GramSchmidt(const vec& x,vec& a,vec& b) {
+    a -= x.dot(a)*x;
+    a.normalize();
+    b -= x.dot(b)*x;
+    b -= a.dot(b)*a;
+    b.normalize();
+}
+
 using VFPC = std::shared_ptr<PolyscopeQuantity<polyscope::PointCloudVectorQuantity>>;
 bool runall = false;
 void init() {
@@ -143,11 +151,10 @@ void init() {
     {
         show << newFrame << Title("Optimal Transport")->at(UPS::TOP);
         show << PlaceBelow(Latex::Add("Discrete to Discrete"));
-        auto ot = Image::Add("OT_1.png");
         show << PlaceBottom(Latex::Add(tex::center("Among all bijections $\\gamma$, \\\\ which one minimizes the effort \\\\ to move each $x_i$ to $\\gamma(x_i)$?")),0.5,0.1);
 
-        show << ot;
-        show << inNextFrame << ot << Replace(Image::Add("OT_2.png"));
+        show << Image::Add("OT_1.png");
+        show << inNextFrame << Replace(Image::Add("OT_2.png"));
 
     }
     {
@@ -161,7 +168,7 @@ void init() {
         show << newFrame << Title("How hard is it?")->at(UPS::TOP);
         show << inNextFrame << PlaceBelow(Latex::Add("Exact discrete to discrete : Linear Programming $\\implies \\mathcal{O}(n^3)$"),0.1);
         show << inNextFrame << PlaceBelow(Latex::Add("Trivial in 1 case : 1D-OT"),0.1);
-        show << CameraView::Add(UPS::Options::ProjectViewsPath + "1DOT.json");
+        show << CameraView::Add("1DOT");
         {
 
             vec theta = vec(1,0,0);
@@ -200,7 +207,7 @@ void init() {
         auto nupc = PointCloud::Add(nu);
 
         show << inNextFrame << mupc << nupc;
-        show << CameraView::Add(Options::ProjectViewsPath + "planar.json");
+        show << CameraView::Add("planar");
 
         show << inNextFrame;
         for (int i = 0;i<2;i++) {
@@ -239,14 +246,16 @@ void init() {
         show << newFrame << Title("Sampling problem")->at(UPS::TOP);
         show << beginCenter << Image::Add("uniform.png") << PlaceNextTo(Image::Add("blue_noise.png"),1) << endCenter;
         show << inNextFrame << PlaceRelative(Formula::Add("\\W(\\mu_1,\\U) > \\W(\\mu_2,\\U)"),CENTER_X,placeY::REL_BOTTOM,0,0.1);
-
     }
+
+    auto grad = Formula::Add("\\nabla_{x_i} SW^{\\theta} = T^{\\theta}(x_i) - x_i");
+    auto descent = Formula::Add("x_i^{n+1} = x_i^n - \\tau \\nabla_{x_i^n} SW^\\theta");
 
     {
         show << newFrame << Title("Sliced Optimal Transport Sampling")->at(TOP);
         show << inNextFrame << PlaceBelow(Latex::Add("Stochastic Gradient Descent on $\\mu \\mapsto SW(\\mu,\\nu)$"),0.04);
         auto back = show.getCurrentSlide();
-        show << CameraView::Add(Options::ProjectViewsPath + "planar_close.json");
+        show << CameraView::Add("planar_close");
 
         {
             auto swgrad = Formula::Add(R"(SW^\theta(\delta_x,\delta_y) = \frac{1}{2}(x-y)^2 \implies \nabla_{x} SW^\theta = ?)");
@@ -272,10 +281,10 @@ void init() {
                 Assignments << Curve3D::Add(roundArrowParam(proj(mup[i],theta),proj(nup[i],theta)),100,false,0.005);
             }
             show << Assignments;
-            show << inNextFrame << Replace(Formula::Add("\\nabla_{x_i} SW^{\\theta} = T^{\\theta}(x_i) - x_i"),swgrad);
+            show << inNextFrame << Replace(grad,swgrad);
         }
 
-        show << back << CameraView::Add(Options::ProjectViewsPath + "planar.json");
+        show << back << CameraView::Add("planar");
         auto mu = randomPointCloud(N);
         auto mupc = PointCloud::Add(mu);
         auto NU = randomPointCloud(N*20);
@@ -344,7 +353,7 @@ void init() {
 
         show << PlaceLeft(Formula::Add("\\nabla_{x_i} SW\\leftarrow  \\frac{1}{\\Theta}\\sum_{\\theta}\\nabla_{x_i} SW^\\theta"),0.5,0.03);
 
-        show << CameraView::Add(Options::ProjectViewsPath + "close_grad.json",true);
+        show << CameraView::Add("close_grad",true);
 
         vecs combined_gradients(N,vec::Zero());
         show << inNextFrame;
@@ -360,15 +369,57 @@ void init() {
 
         auto gradpc = mupc->pc->addVectorQuantity("combined gradient",combined_gradients);
         show << AddPolyscopeQuantity<polyscope::PointCloudVectorQuantity>(gradpc);
-        show << inNextFrame << Formula::Add("x_i^{n+1} = x_i^n - \\tau \\nabla_{x_i^n} SW^\\theta")->at("advect") << inNextFrame << PointCloud::Add(mu) >> mupc;
+        show << inNextFrame << descent->at("advect") << inNextFrame << PointCloud::Add(mu) >> mupc;
     }
     auto grid = Mesh::Add(Options::DataPath+"meshes/tri_grid_50.obj");
+    {
+        auto T = Title("Optimization on Manifolds");
+        show << newFrame << T << inNextFrame << T->at(TOP);
+        show << CameraView::Add("mani_opti");
+        auto S = Mesh::Add(Options::DataPath + "meshes/ico_sphere_5.obj",vec(1,1,1),true);
+        show << S;
+
+        show << Formula::Add("f : \\mathbb{S}^d \\rightarrow \\mathbb{R}")->at("f_def");
+        auto fs = S->eval([](vec x){return x(2);});
+        auto func = AddPolyscopeQuantity(S->pc->addVertexScalarQuantity("f",fs));
+        show << func;
+        show << inNextFrame << PlaceBelow(Formula::Add("\\nabla f(x) \\in TM_x"));
+
+        vec mu = S->getVertices()[2447];
+        auto mupc = Point::Add(mu,0.035);
+        auto gradf = vec(0,0,0.3);
+        gradf -= mu.dot(gradf)*mu;
+
+        vec t1 = vec::Random(),t2 = vec::Random();
+        GramSchmidt(mu,t1,t2);
+        auto Tp = grid->apply([mu,t1,t2](const vec& x){return vec(mu + t1*x(0)*0.4 + t2*x(2)*0.4);});
+        show << Tp->at(0.5);
+        show << mupc << mupc->addVector([gradf](scalar){return gradf;}) << Formula::Add("x")->track([mupc](){return mupc->getCurrentPos();},vec2(-0.02,0.02));
+        show << inNextFrame;
+
+        show << Latex::Add("Riemannian Gradient Descent:")->at("RGD");
+        show << PlaceBelow(Formula::Add("x_{n+1} = \\text{Exp}_{x_n}(-\\tau \\nabla f (x_n))"));
+
+
+        vec nu = S->getVertices()[1489];
+        auto nupc = Point::Add(nu,0.035);
+
+        show << inNextFrame;
+        show << nupc <<  Formula::Add("y")->track([nupc](){return nupc->getCurrentPos();},vec2(0.02,0.02));
+        show << inNextFrame;
+        show << grad->at("grad_optim");
+        show << PlaceBelow(descent);
+        show << inNextFrame << PlaceBelow(Formula::Add("\\downarrow"));
+        show << PlaceBelow(Formula::Add((R"( \nabla_{x_i} SW^\theta = \text{Log}_{x_i}(T^\theta (x_i)))")));
+        show << PlaceBelow(Formula::Add((R"( x^{n+1}_i = \text{Exp}_{x^n_i}(\nabla_{x^n_i} SW))")));
+    }
+
 
     {
         auto offset = 1.5;
         show << newFrame << Title("Non-Euclidean Sliced \\\\ Optimal Transport Sampling")->at(TOP);
         show << inNextFrame << Mesh::Add(Options::DataPath + "meshes/ico_sphere_5.obj")->translate(vec(-offset,0,0));
-        show << CameraView::Add(Options::ProjectViewsPath + "models.json");
+        show << CameraView::Add("models");
         show << grid->apply([offset](const vec& x) {
             auto u = x(0)*1.5,v = 2*M_PI*x(2);
             return vec(sinh(u)*cos(v) + offset,sinh(u)*sin(v),cosh(u)-1.);
@@ -386,10 +437,11 @@ void init() {
             "Intrinsic Mesh sampling",
             "Projective plane sampling")),0.5,0.05);
     }
+
     {
         show << newFrame << Title("NESOTS algorithm")->at(TOP);
         show << Image::Add("nesots_algo.png",0.8)->at("nesots");
-        show << CameraView::Add(Options::ProjectViewsPath + "nesots.json");
+        show << CameraView::Add("nesots");
         auto slice= Curve3D::Add([] (scalar t) {return vec(cos(t*2*M_PI),sin(t*2*M_PI),0);},100,true,0.01);
         auto S = Mesh::Add(Options::DataPath + "meshes/ico_sphere_5.obj",vec(1,1,1),true);
         //S->pc->setEdgeWidth(0);

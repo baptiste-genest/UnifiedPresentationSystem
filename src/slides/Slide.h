@@ -59,6 +59,10 @@ struct Slide : public std::map<PrimitivePtr,StateInSlide> {
     void setCam() const {
         if (camera)
             camera->enable();
+        /*
+        else
+            polyscope::view::resetCameraToHomeView();
+        */
     }
 
     bool sameCamera(const Slide& other) const {

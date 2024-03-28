@@ -7,6 +7,9 @@
 
 namespace UPS {
 
+
+std::string formatCameraFilename(std::string file);
+
 class CameraView;
 using CameraViewPtr = std::shared_ptr<CameraView>;
 class CameraView

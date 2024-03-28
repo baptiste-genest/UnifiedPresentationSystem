@@ -141,12 +141,16 @@ void UPS::Slideshow::play() {
         slideMenu();
 
     if (ImGui::IsKeyPressed(67)){// C
-        std::string file("/tmp/cam.json");
-        std::ofstream camfile(file);
-        camfile << polyscope::view::getCameraJson();
-        std::cout << "current camera view exported at " << file << std::endl;
+        camera_popup = true;
     }
-    if (ImGui::IsKeyPressed(80)){ // P
+
+    if (ImGui::IsKeyPressed(68) && !camera_popup){// D
+        polyscope::options::buildGui = !polyscope::options::buildGui;
+    }
+
+    displayPopUps();
+
+    if (ImGui::IsKeyPressed(80) && !camera_popup){ // P
         static int screenshot_count = 0;
         constexpr int nb_zeros = 6;
         auto n = std::to_string(screenshot_count++);
@@ -326,6 +330,13 @@ void UPS::Slideshow::goToSlide(int slide_nb)
     from_action = Time::now();
 }
 
+void UPS::Slideshow::saveCamera(std::string file)
+{
+    std::ofstream camfile(file);
+    camfile << polyscope::view::getCameraJson();
+    std::cout << "current camera view exported at " << file << std::endl;
+}
+
 void UPS::Slideshow::initialize_slides()
 {
     precomputeTransitions();
@@ -372,4 +383,38 @@ void UPS::Slideshow::displaySlideNumber()
 {
     const auto& DSN = slide_number_display[slide_numbers[current_slide]];
     DSN.first->play(TimeObject(),DSN.second);
+}
+
+void UPS::Slideshow::displayPopUps()
+{
+    std::string file;
+
+    if (camera_popup){
+        ImGui::OpenPopup("Save current camera");
+        // adapt text to the size of the window
+        if (ImGui::BeginPopupModal("Save current camera",NULL,
+                                   ImGuiWindowFlags_AlwaysAutoResize)){
+            static char buffer[256];
+            ImGui::SetWindowFontScale(0.5);
+            ImGui::InputText("filename",buffer,256);
+            if (ImGui::Button("cancel")){
+                camera_popup = false;
+                ImGui::CloseCurrentPopup();
+            }
+            ImGui::SameLine();
+            if (ImGui::Button("save")){
+                file = formatCameraFilename(std::string(buffer));
+                if (io::file_exists(file) && false){
+                    std::cerr << "FILE ALREADY EXISTS " << buffer << std::endl;
+                    return;
+                }
+                camera_popup = false;
+                saveCamera(file);
+                ImGui::CloseCurrentPopup();
+            }
+            ImGui::EndPopup();
+        }
+    }
+
+
 }

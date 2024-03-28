@@ -51,6 +51,9 @@ public:
     bool display_slide_number = true;
 
 private:
+
+    void saveCamera(std::string file);
+
     void slideMenu();
 
     void initialize_slides();
@@ -67,6 +70,10 @@ private:
     bool transition_done = false;
     bool backward = false;
     bool locked = true;
+    bool camera_popup = false;
+
+    void displayPopUps();
+
 
     bool debug;
 
