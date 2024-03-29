@@ -383,7 +383,8 @@ void init() {
     {
         auto offset = 1.5;
         auto T = Title("Non-Euclidean Sliced \\\\ Optimal Transport Sampling");
-        show << newFrame << T << inNextFrame;
+        show << newFrame << T;
+        /*
         show << T->at(UPS::TOP);
         show << inNextFrame << Mesh::Add(Options::DataPath + "meshes/ico_sphere_5.obj")->translate(vec(-offset,0,0));
         show << CameraView::Add("models");
@@ -393,6 +394,7 @@ void init() {
         });
         show << Formula::Add("\\mathbb{S}^2")->at("S2");
         show << Formula::Add("\\mathbb{H}^2")->at("H2");
+        */
         show << newFrame << Title("Contributions")->at(TOP);
         show << Image::Add("sphere_sampling.png",0.6)->at("sphere_sampling");
         show << Image::Add("geomed_gain.png",0.6)->at("geomed");
@@ -553,11 +555,13 @@ void init() {
         show << newFrame << Title("Geometric Median for robust SGD")->at(TOP);
         show << Latex::Add("Classic SGD:")->at("SGD");
         show << PlaceBelow(Formula::Add("\\nabla_{x_i} \\mathcal{SW}\\left(\\sum_i \\delta_{x_i},\\nu\\right) \\leftarrow \\frac{1}{L}\\sum_{l = 1}^{L} \\left( T(x_i) - x_i\\right) "));
+        auto meangd = Image::Add("mean_GD.png");
+        show << meangd->at("meangd");
         show << inNextFrame;
         show << Latex::Add("GeoMed Descent:")->at("GMD");
         show << PlaceBelow(Formula::Add("\\text{GeoMed}(\\{ T(x_i) - x_i\\}_i)"));
         show << inNextFrame;
-        show << Image::Add("geomed_gain.png")->at("geomed2");
+        show << Image::Add("geomed_GD.png")->at("geomed2");
     }
     {
         show << newFrame << Title("Intrinsic Mesh Sampling")->at(TOP);
