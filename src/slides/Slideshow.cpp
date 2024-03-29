@@ -11,7 +11,6 @@ void UPS::Slideshow::nextFrame()
     backward = false;
     locked = true;
     transition_done = false;
-    slides[current_slide].setCam();
 }
 
 void UPS::Slideshow::previousFrame()
@@ -127,37 +126,10 @@ void UPS::Slideshow::play() {
 
     prompt();
 
-    handleDragAndDrop();
 
-    if (ImGui::IsKeyPressed(262) && !locked){ // RIGHT ARROW
-        nextFrame();
-    }
-    else if (ImGui::IsKeyPressed(263)){// LEFT ARROW
-        previousFrame();
-    }else if (ImGui::IsKeyPressed(264)){// DOWN ARROW
-        forceNextFrame();
-    }
-    if (ImGui::IsKeyDown(258))//TABS
-        slideMenu();
-
-    if (ImGui::IsKeyPressed(67)){// C
-        camera_popup = true;
-    }
-
-    if (ImGui::IsKeyPressed(68) && !camera_popup){// D
-        polyscope::options::buildGui = !polyscope::options::buildGui;
-    }
+    handleInputs();
 
     displayPopUps();
-
-    if (ImGui::IsKeyPressed(80) && !camera_popup){ // P
-        static int screenshot_count = 0;
-        constexpr int nb_zeros = 6;
-        auto n = std::to_string(screenshot_count++);
-        std::string file =  "/tmp/screenshot_" + std::string(nb_zeros-n.size(),'0') + n + ".png";
-        UPS::screenshot(file);
-        std::cout << "screenshot saved at " << file << std::endl;
-    }
 
     if (display_slide_number)
         displaySlideNumber();
@@ -383,6 +355,40 @@ void UPS::Slideshow::displaySlideNumber()
 {
     const auto& DSN = slide_number_display[slide_numbers[current_slide]];
     DSN.first->play(TimeObject(),DSN.second);
+}
+
+void UPS::Slideshow::handleInputs()
+{
+    handleDragAndDrop();
+
+    if (!keyboardOpen())
+        return;
+
+    if (ImGui::IsKeyPressed(262) && !locked){ // RIGHT ARROW
+        nextFrame();
+    }
+    else if (ImGui::IsKeyPressed(263)){// LEFT ARROW
+        previousFrame();
+    }else if (ImGui::IsKeyPressed(264)){// DOWN ARROW
+        forceNextFrame();
+    }
+    if (ImGui::IsKeyDown(258))//TABS
+        slideMenu();
+    if (ImGui::IsKeyPressed(67)){// C
+        camera_popup = true;
+    }
+    if (ImGui::IsKeyPressed(68)){// D
+        polyscope::options::buildGui = !polyscope::options::buildGui;
+    }
+    if (ImGui::IsKeyPressed(80)){ // P
+        static int screenshot_count = 0;
+        constexpr int nb_zeros = 6;
+        auto n = std::to_string(screenshot_count++);
+        std::string file =  "/tmp/screenshot_" + std::string(nb_zeros-n.size(),'0') + n + ".png";
+        UPS::screenshot(file);
+        std::cout << "screenshot saved at " << file << std::endl;
+    }
+
 }
 
 void UPS::Slideshow::displayPopUps()

@@ -31,6 +31,7 @@ public:
     static PointPtr Add(const DynamicParam& phi,scalar rad = 0.05);
     static PointPtr Add(const vec& x,scalar rad = 0.05);
     
+    VectorQuantityPtr addVector(const vec& v);
     VectorQuantityPtr addVector(const curve_param& phi);
     polyscope::PointCloud* pc;
 

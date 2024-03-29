@@ -43,9 +43,8 @@ public:
 
     void init(std::string project_name,std::string script_file ="",bool debug = false);
 
-
-
     std::string getSlideTitle(int slide_nb);
+
     void goToSlide(int slide_nb);
 
     bool display_slide_number = true;
@@ -71,6 +70,12 @@ private:
     bool backward = false;
     bool locked = true;
     bool camera_popup = false;
+
+    void handleInputs();
+
+    bool keyboardOpen() const {
+        return !camera_popup;
+    }
 
     void displayPopUps();
 

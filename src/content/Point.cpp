@@ -15,6 +15,11 @@ UPS::Point::PointPtr UPS::Point::Add(const DynamicParam &phi, scalar rad)
     return NewPrimitive<Point>(phi,rad);
 }
 
+UPS::Point::VectorQuantityPtr UPS::Point::addVector(const vec &v)
+{
+    return addVector([v](scalar){return v;});
+}
+
 UPS::Point::VectorQuantity::PCQuantityPtr UPS::Point::addVector(const curve_param &phiX)
 {
     vecs X = {phiX(0)};

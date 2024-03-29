@@ -117,6 +117,11 @@ std::shared_ptr<CurveNetwork> plotPlan(const vecs& mu,const vecs& nu,const std::
     return CurveNetwork::Add(X,E);
 }
 
+vec orthoproj(vec a,const vec& n) {
+    a -= a.dot(n)*n;
+    return a;
+}
+
 void GramSchmidt(const vec& x,vec& a,vec& b) {
     a -= x.dot(a)*x;
     a.normalize();
@@ -372,6 +377,33 @@ void init() {
         show << inNextFrame << descent->at("advect") << inNextFrame << PointCloud::Add(mu) >> mupc;
     }
     auto grid = Mesh::Add(Options::DataPath+"meshes/tri_grid_50.obj");
+
+
+
+    {
+        auto offset = 1.5;
+        auto T = Title("Non-Euclidean Sliced \\\\ Optimal Transport Sampling");
+        show << newFrame << T << inNextFrame;
+        show << T->at(UPS::TOP);
+        show << inNextFrame << Mesh::Add(Options::DataPath + "meshes/ico_sphere_5.obj")->translate(vec(-offset,0,0));
+        show << CameraView::Add("models");
+        show << grid->apply([offset](const vec& x) {
+            auto u = x(0)*1.5,v = 2*M_PI*x(2);
+            return vec(sinh(u)*cos(v) + offset,sinh(u)*sin(v),cosh(u)-1.);
+        });
+        show << Formula::Add("\\mathbb{S}^2")->at("S2");
+        show << Formula::Add("\\mathbb{H}^2")->at("H2");
+        show << newFrame << Title("Contributions")->at(TOP);
+        show << Image::Add("sphere_sampling.png",0.6)->at("sphere_sampling");
+        show << Image::Add("geomed_gain.png",0.6)->at("geomed");
+        show << Image::Add("duck.png")->at("duck");
+        show << Image::Add("rot_sampling.png",0.6)->at("rot");
+        show << PlaceLeft(Latex::Add(tex::enumerate(
+            "Extension to non-euclidean cases",
+            "Use of the geometric median",
+            "Intrinsic Mesh sampling",
+            "Projective plane sampling")),0.5,0.05);
+    }
     {
         auto T = Title("Optimization on Manifolds");
         show << newFrame << T << inNextFrame << T->at(TOP);
@@ -394,48 +426,51 @@ void init() {
         GramSchmidt(mu,t1,t2);
         auto Tp = grid->apply([mu,t1,t2](const vec& x){return vec(mu + t1*x(0)*0.4 + t2*x(2)*0.4);});
         show << Tp->at(0.5);
-        show << mupc << mupc->addVector([gradf](scalar){return gradf;}) << Formula::Add("x")->track([mupc](){return mupc->getCurrentPos();},vec2(-0.02,0.02));
+        auto gradfpc = mupc->addVector(gradf);
+        show << mupc << gradfpc << Formula::Add("x")->track([mupc](){return mupc->getCurrentPos();},vec2(-0.02,0.02));
         show << inNextFrame;
 
-        show << Latex::Add("Riemannian Gradient Descent:")->at("RGD");
-        show << PlaceBelow(Formula::Add("x_{n+1} = \\text{Exp}_{x_n}(-\\tau \\nabla f (x_n))"));
+        show << descent->at("grad_optim");
+        auto question = Latex::Add("?");
+        show << inNextFrame << PlaceAbove(question) << inNextFrame;
 
+        auto RGD =  Latex::Add("Riemannian Gradient Descent:\\\\ $x_{n+1} = \\text{Exp}_{x_n}(-\\tau \\nabla f (x_n))$");
+        show << RGD->at("RGD");
+
+        auto Exp = Point::Add([mu](TimeObject t){
+            auto x = t.inner_time*0.1;
+            if (x > 1)
+                return vec(0,0,-1);
+            return slerp(x,mu,vec(0,0,-1));
+        },0.035);
+
+        show << inNextFrame << Exp << inNextFrame >> Exp;
 
         vec nu = S->getVertices()[1489];
         auto nupc = Point::Add(nu,0.035);
 
+        show << Replace(Formula::Add((R"( x^{n+1}_i = \text{Exp}_{x^n_i}(-\tau\nabla_{x^n_i} SW))")),descent);
+        show >> RGD >> question >> gradfpc;
         show << inNextFrame;
-        show << nupc <<  Formula::Add("y")->track([nupc](){return nupc->getCurrentPos();},vec2(0.02,0.02));
+        show << PlaceBelow(grad) << inNextFrame;
+        show << PlaceBelow(question);
         show << inNextFrame;
-        show << grad->at("grad_optim");
-        show << PlaceBelow(descent);
-        show << inNextFrame << PlaceBelow(Formula::Add("\\downarrow"));
-        show << PlaceBelow(Formula::Add((R"( \nabla_{x_i} SW^\theta = \text{Log}_{x_i}(T^\theta (x_i)))")));
-        show << PlaceBelow(Formula::Add((R"( x^{n+1}_i = \text{Exp}_{x^n_i}(\nabla_{x^n_i} SW))")));
-    }
+        show << nupc << Formula::Add("y")->track([nupc](){return nupc->getCurrentPos();},vec2(0.02,0.02));
+        show << Formula::Add("\\text{Exp}^{-1} ?")->at("Log");
+        show << inNextFrame;
+        auto Log = Formula::Add("\\text{Log}_x(y)");
+        show << Replace(Log);
+        vec logy = orthoproj(nu-mu,mu)*0.5;
+        show << mupc->addVector(logy);
+        auto ExpLog = Point::Add([mu,nu](TimeObject t){
+            auto x = t.inner_time*0.3;
+            if (x > 1)
+                return vec(0,0,-1);
+            return slerp(x,mu,nu);
+        },0.035);
 
-
-    {
-        auto offset = 1.5;
-        show << newFrame << Title("Non-Euclidean Sliced \\\\ Optimal Transport Sampling")->at(TOP);
-        show << inNextFrame << Mesh::Add(Options::DataPath + "meshes/ico_sphere_5.obj")->translate(vec(-offset,0,0));
-        show << CameraView::Add("models");
-        show << grid->apply([offset](const vec& x) {
-            auto u = x(0)*1.5,v = 2*M_PI*x(2);
-            return vec(sinh(u)*cos(v) + offset,sinh(u)*sin(v),cosh(u)-1.);
-        });
-        show << Formula::Add("\\mathbb{S}^2")->at("S2");
-        show << Formula::Add("\\mathbb{H}^2")->at("H2");
-        show << newFrame << Title("Contributions")->at(TOP);
-        show << Image::Add("sphere_sampling.png",0.6)->at("sphere_sampling");
-        show << Image::Add("geomed_gain.png",0.6)->at("geomed");
-        show << Image::Add("duck.png")->at("duck");
-        show << Image::Add("rot_sampling.png",0.6)->at("rot");
-        show << PlaceLeft(Latex::Add(tex::enumerate(
-            "Extension to non-euclidean cases",
-            "Use of the geometric median",
-            "Intrinsic Mesh sampling",
-            "Projective plane sampling")),0.5,0.05);
+        show << inNextFrame << ExpLog;
+        show << inNextFrame >> Log << Replace(Formula::Add((R"( \nabla_{x_i} SW^\theta = \text{Log}_{x_i}(T^\theta (x_i)))")),grad) >> question;
     }
 
     {
