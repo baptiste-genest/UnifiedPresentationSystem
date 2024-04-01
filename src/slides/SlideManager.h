@@ -53,6 +53,7 @@ protected:
     void precomputeTransitions();
 
     ScreenPrimitivePtr last_screen_primitive_inserted,centering_root;
+    PrimitivePtr last_primitive_inserted;
 
     Slide center_buffer;int center_start,center_end;
     bool centering = false;AnchorPtr center_anchor;
@@ -97,6 +98,7 @@ public:
                 center_buffer.add(ptr,sis);
             }
         }
+        last_primitive_inserted = ptr;
         slides.back().add(ptr,sis);
     }
 
@@ -117,6 +119,10 @@ public:
     ScreenPrimitivePtr getLastScreenPrimitive() {
         return last_screen_primitive_inserted;
     }
+    PrimitivePtr getLastPrimitive() {
+        return last_primitive_inserted;
+    }
+    struct remove_last{};
     struct in_next_frame{};
     struct new_frame{
         bool same_title = false;
@@ -144,6 +150,7 @@ public:
     }
 };
 
+constexpr SlideManager::remove_last removeLast;
 constexpr SlideManager::in_next_frame inNextFrame;
 constexpr SlideManager::new_frame newFrame{false};
 constexpr SlideManager::new_frame newFrameSameTitle{true};
@@ -161,6 +168,12 @@ inline SlideManager& operator<<(SlideManager& SM,SlideManager::in_next_frame) {
     SM.duplicateLastSlide();
     return SM;
 }
+
+inline SlideManager& operator<<(SlideManager& SM,SlideManager::remove_last) {
+    SM.removeFromCurrentSlide(SM.getLastPrimitive());
+    return SM;
+}
+
 
 inline SlideManager& operator<<(SlideManager& SM,SlideManager::new_frame nf) {
     SM.handleCenter();

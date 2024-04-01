@@ -95,6 +95,12 @@ vec Log(const vec& x,const vec& y){
     return d*delta.normalized();
 }
 
+vecs opposite(vecs X){
+    for (auto& x : X)
+        x *= -1.;
+    return X;
+}
+
 std::function<vec2()> trackScreen(const std::function<vec()>& pos) {
     return [pos] () {
         auto p = pos();
@@ -130,6 +136,17 @@ void GramSchmidt(const vec& x,vec& a,vec& b) {
     b.normalize();
 }
 
+std::shared_ptr<UPS::CurveNetwork> plotLines(const vecs& p,scalar l = 2) {
+    std::vector<vec> L(p.size()*2);
+    UPS::Curve3D::edges E(p.size());
+    for (int i = 0;i<p.size();i++){
+        L[2*i] = p[i]*2;
+        L[2*i+1] = -p[i]*2;
+        E[i] = {2*i,2*i+1};
+    }
+    return UPS::CurveNetwork::Add(L,E);
+}
+
 using VFPC = std::shared_ptr<PolyscopeQuantity<polyscope::PointCloudVectorQuantity>>;
 bool runall = false;
 void init() {
@@ -139,6 +156,7 @@ void init() {
     Latex::NewCommand("W","\\mathcal{W}");
     Latex::NewCommand("U","\\mathcal{U}");
     Latex::NewCommand("Sp","\\mathbb{S}");
+    Latex::NewCommand("Hy","\\mathbb{H}");
     Latex::NewCommand("proj","\\Pi^\\theta");
 
     Options::UPS_screen_resolution_x = 1920;
@@ -203,8 +221,6 @@ void init() {
     {
         show << newFrame << Title("Sliced Optimal Transport")->at(UPS::TOP);
 
-        show << inNextFrame << Formula::Add("\\W(\\mu,\\nu)")->at("W2");
-        show << inNextFrame << PlaceNextTo(Formula::Add(R"(\approx SW(\mu,\nu) = \int_{\Sp} \W(\proj_\# \mu ,\proj_\# \nu) d\theta)"),1);
 
         auto mu = randomPointCloud(N);
         auto mupc = PointCloud::Add(mu);
@@ -215,8 +231,19 @@ void init() {
         show << CameraView::Add("planar");
 
         show << inNextFrame;
-        for (int i = 0;i<2;i++) {
-            vec theta = vec::Random();theta(1) = 0;theta.normalize();
+
+        int L = 2;
+        vecs Theta(L);
+        for (auto& x : Theta){
+            x = vec::Random();
+            x(1) = 0;x.normalize();
+        }
+
+        Theta[1] -= Theta[1].dot(Theta[0])*Theta[0];
+        Theta[1].normalize();
+
+        for (int i = 0;i<L;i++) {
+            vec theta = Theta[i];
             auto pct = Curve3D::Add(vecs{-theta*3,theta*3},false,0.002);
             auto slicing = [theta] (Vertex v,const TimeObject t) {
                 if (t.relative_frame_number)
@@ -241,6 +268,8 @@ void init() {
             show <<inNextFrame << Assigments;
             show << inNextFrame >> pct >> m >> n >> Assigments;
         }
+        show << Formula::Add(R"(\frac{1}{L} \sum_i^L\W(\Pi^{\theta_i}_\# \mu ,\Pi^{\theta_i}_\# \nu) \rightarrow )")->at("W2") << inNextFrame << PlaceNextTo(Formula::Add(R"(\int_{\Sp} \W(\proj_\# \mu ,\proj_\# \nu) d\theta = SW(\mu,\nu))"),1);
+        show << inNextFrame << PlaceNextTo(Formula::Add("\\approx \\W(\\mu,\\nu)"),1);
     }
 
     {
@@ -258,7 +287,7 @@ void init() {
 
     {
         show << newFrame << Title("Sliced Optimal Transport Sampling")->at(TOP);
-        show << inNextFrame << PlaceBelow(Latex::Add("Stochastic Gradient Descent on $\\mu \\mapsto SW(\\mu,\\nu)$"),0.04);
+        show << inNextFrame << PlaceBelow(Latex::Add("Stochastic Gradient Descent on $\\mu \\mapsto SW(\\mu,\\U)$"),0.04);
         auto back = show.getCurrentSlide();
         show << CameraView::Add("planar_close");
 
@@ -291,13 +320,19 @@ void init() {
 
         show << back << CameraView::Add("planar");
         auto mu = randomPointCloud(N);
+
+        mu[0] = vec(-0.4,0,0.4);
+
         auto mupc = PointCloud::Add(mu);
         auto NU = randomPointCloud(N*20);
         auto NUpc = PointCloud::Add(NU);
 
         show << inNextFrame << mupc << NUpc;
 
-        show << inNextFrame << NUpc->at(0.5) << inNextFrame;
+        show << inNextFrame << Formula::Add("\\U \\approx \\sum_i^N \\delta_{y_i} \\\\ y_i \\sim \\U")->at("U");
+
+
+        show << inNextFrame << removeLast << NUpc->at(0.5) << inNextFrame;
 
         int K = 8;
 
@@ -356,7 +391,7 @@ void init() {
             show << inNextFrame >> pct >> m >> n >> nupc;
         }
 
-        show << PlaceLeft(Formula::Add("\\nabla_{x_i} SW\\leftarrow  \\frac{1}{\\Theta}\\sum_{\\theta}\\nabla_{x_i} SW^\\theta"),0.5,0.03);
+        show << PlaceLeft(Formula::Add("\\nabla_{x_i} SW\\leftarrow  \\frac{1}{L}\\sum_{\\theta}\\nabla_{x_i} SW^\\theta"),0.5,0.03);
 
         show << CameraView::Add("close_grad",true);
 
@@ -383,7 +418,6 @@ void init() {
     {
         auto offset = 1.5;
         auto T = Title("Non-Euclidean Sliced \\\\ Optimal Transport Sampling");
-        show << newFrame << T;
         /*
         show << T->at(UPS::TOP);
         show << inNextFrame << Mesh::Add(Options::DataPath + "meshes/ico_sphere_5.obj")->translate(vec(-offset,0,0));
@@ -395,7 +429,9 @@ void init() {
         show << Formula::Add("\\mathbb{S}^2")->at("S2");
         show << Formula::Add("\\mathbb{H}^2")->at("H2");
         */
-        show << newFrame << Title("Contributions")->at(TOP);
+        show << newFrame << Title("Contributions");
+        show << newFrame << T;
+        /*
         show << Image::Add("sphere_sampling.png",0.6)->at("sphere_sampling");
         show << Image::Add("geomed_gain.png",0.6)->at("geomed");
         show << Image::Add("duck.png")->at("duck");
@@ -405,6 +441,7 @@ void init() {
             "Use of the geometric median",
             "Intrinsic Mesh sampling",
             "Projective plane sampling")),0.5,0.05);
+        */
     }
     {
         auto T = Title("Optimization on Manifolds");
@@ -474,13 +511,13 @@ void init() {
         show << inNextFrame << ExpLog;
         show << inNextFrame >> Log << Replace(Formula::Add((R"( \nabla_{x_i} SW^\theta = \text{Log}_{x_i}(T^\theta (x_i)))")),grad) >> question;
     }
+    auto S = Mesh::Add(Options::DataPath + "meshes/ico_sphere_5.obj",vec(1,1,1),true);
 
     {
         show << newFrame << Title("NESOTS algorithm")->at(TOP);
         show << Image::Add("nesots_algo.png",0.8)->at("nesots");
         show << CameraView::Add("nesots");
         auto slice= Curve3D::Add([] (scalar t) {return vec(cos(t*2*M_PI),sin(t*2*M_PI),0);},100,true,0.01);
-        auto S = Mesh::Add(Options::DataPath + "meshes/ico_sphere_5.obj",vec(1,1,1),true);
         //S->pc->setEdgeWidth(0);
         //2530 1914
         show << inNextFrame;
@@ -524,8 +561,8 @@ void init() {
         vec R = Eigen::AngleAxis(th,vec(0,0,1))*mu;
         show << inNextFrame << pimupc << pinupc;
         auto projlabel = Formula::Add("P^\\theta(x)");
-        show << projlabel->track([pimupc](){return pimupc->getCurrentPos();},vec2(0.02,0.02));
-        auto T = Curve3D::Add([pi_mu,pi_nu](scalar t){return slerp(t,pi_mu,pi_nu);},30,false,0.013);
+        show << projlabel->track([pimupc](){return pimupc->getCurrentPos();},vec2(0.02,0.04));
+        auto T = Curve3D::Add([pi_mu,pi_nu](scalar t){return slerp(t,pi_mu,pi_nu);},30,false,0.018);
         auto projlabel_nu = Formula::Add("P^\\theta(y)");
         show << projlabel_nu->track([pinupc](){return pinupc->getCurrentPos();},vec2(0.02,-0.04));
         show << inNextFrame << T;
@@ -565,18 +602,41 @@ void init() {
     }
     {
         show << newFrame << Title("Intrinsic Mesh Sampling")->at(TOP);
-        show << Image::Add("mesh_sampling.png");
+        show << PlaceBelow(Formula::Add(R"(\text{Mesh} \rightarrow \Sp\text{ or }\Hy \rightarrow \text{NESOTS} \rightarrow \text{Mesh})"),0.05);
+        show << Image::Add("mesh_sampling.png")->at("mesh_samp");
         show << inNextFrame << Replace(Image::Add("mesh_sampling_cmp.png"));
     }
     {
-        show << newFrame << Title("Projective Plane Sampling")->at(TOP);
-        show << PlaceLeft(Latex::Add("Rotation sampling $\\rightarrow$ sampling unit Quaternions $\\subset \\mathbb{S}^3$"),0.25);
+        show << newFrame << Title("Projective Plane Sampling");
+        show << CameraView::Add("line_sampling");
+        show << inNextFrame << UPS::TOP;
+        show << PlaceBelow(Latex::Add("How to sample lines ?"));
+        show << S;
+        auto fibo = readPointCloud(UPS::Options::ProjectPath+"fibo.pts");
+        auto fibopc = PointCloud::Add(fibo,0.05);
+        show << inNextFrame;
+        show << fibopc;
+        show << inNextFrame;
+        auto fibo_lines = plotLines(fibo);
+        show << fibo_lines;
+        auto mfibo = PointCloud::Add(opposite(fibo),0.05);
+        show << inNextFrame >> fibo_lines << mfibo;
+        show << inNextFrame;
+
+        auto good = readPointCloud(UPS::Options::ProjectPath+"good.pts");
+        auto goodpc = PointCloud::Add(good,0.05);
+        auto mgood = PointCloud::Add(opposite(good),0.05);
+        show >> fibopc >> mfibo << goodpc << mgood;
+        show << inNextFrame << plotLines(good);
+
+        show << newFrameSameTitle;
+        show << PlaceBelow(Latex::Add("Rotation sampling"));
+        show << inNextFrame << Latex::Add("$\\rightarrow$ sampling unit Quaternions $\\subset \\mathbb{S}^3$")->at("unit_quat");
         show << inNextFrame << Formula::Add("q^{-1}\\Vec{x}q")->at("quat");
         show << inNextFrame << PlaceNextTo(Formula::Add("=(-q)^{-1}\\Vec{x}(-q)"),1);
         show << inNextFrame << Image::Add("rot_sampling.png")->at("rot2");
-        show << PlaceLeft(Latex::Add("Direction Sampling \\& more"),0.5);
-        show << inNextFrame << Image::Add("dir_sampling.png",0.8)->at("dir");
-        show << inNextFrame << Image::Add("line_sampling.png",0.8)->at("line");
+        show << newFrameSameTitle << PlaceBelow(Latex::Add("And much more !"));
+        show << inNextFrame << Image::Add("line_sampling.png")->at("line");
     }
 
     show << newFrame << Title("Thank you for your attention");
