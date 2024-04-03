@@ -418,7 +418,7 @@ void init() {
     {
         auto offset = 1.5;
         auto T = Title("Non-Euclidean Sliced \\\\ Optimal Transport Sampling");
-        /*
+        show << newFrame << Title("Contributions");
         show << T->at(UPS::TOP);
         show << inNextFrame << Mesh::Add(Options::DataPath + "meshes/ico_sphere_5.obj")->translate(vec(-offset,0,0));
         show << CameraView::Add("models");
@@ -426,11 +426,8 @@ void init() {
             auto u = x(0)*1.5,v = 2*M_PI*x(2);
             return vec(sinh(u)*cos(v) + offset,sinh(u)*sin(v),cosh(u)-1.);
         });
-        show << Formula::Add("\\mathbb{S}^2")->at("S2");
-        show << Formula::Add("\\mathbb{H}^2")->at("H2");
-        */
-        show << newFrame << Title("Contributions");
-        show << newFrame << T;
+        show << Formula::Add("\\mathbb{S}^d")->at("S2");
+        show << Formula::Add("\\mathbb{H}^d")->at("H2");
         /*
         show << Image::Add("sphere_sampling.png",0.6)->at("sphere_sampling");
         show << Image::Add("geomed_gain.png",0.6)->at("geomed");
