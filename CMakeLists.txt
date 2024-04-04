@@ -41,10 +41,25 @@ file(GLOB SRC_lib
      "src/UPS.h"
      "src/extern/svg.hpp"
 )
+file(GLOB HEADER_LIST CONFIGURE_DEPENDS "src/*.h*")
 
 ## The library
-add_library(UPS ${SRC_lib})
+add_library(UPS STATIC ${SRC_lib})
 target_link_libraries(UPS PUBLIC polyscope Eigen3::Eigen spdlog  OpenGL::GL geometry-central)
+target_compile_features(UPS PUBLIC cxx_std_20)
+target_include_directories(UPS PUBLIC src/)
+set_target_properties(UPS PROPERTIES PUBLIC_HEADER "${HEADER_LIST}")
+
+##INSTALL
+install(TARGETS UPS
+        EXPORT UPS
+        LIBRARY DESTINATION lib
+        ARCHIVE DESTINATION lib
+        RUNTIME DESTINATION bin
+        INCLUDES DESTINATION include
+        PUBLIC_HEADER DESTINATION include/UPS
+        )
+
 
 option(BUILD_UPS_EXAMPLES "Build the UPS examples" ON)
 
@@ -69,3 +84,4 @@ target_link_libraries(tuto_mesh UPS)
 add_executable(NESOTS projects/NESOTS/main.cpp)
 target_link_libraries(NESOTS UPS)
 endif()
+
