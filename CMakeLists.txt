@@ -42,12 +42,13 @@ file(GLOB SRC_lib
      "src/extern/svg.hpp"
 )
 
-
-
 ## The library
 add_library(UPS ${SRC_lib})
 target_link_libraries(UPS PUBLIC polyscope Eigen3::Eigen spdlog  OpenGL::GL geometry-central)
 
+option(BUILD_UPS_EXAMPLES "Build the UPS examples" ON)
+
+if (BUILD_UPS_EXAMPLES)
 ## Slideshows
 add_executable(dev projects/dev/main.cpp)
 target_link_libraries(dev UPS)
@@ -67,3 +68,4 @@ target_link_libraries(tuto_mesh UPS)
 
 add_executable(NESOTS projects/NESOTS/main.cpp)
 target_link_libraries(NESOTS UPS)
+endif()
