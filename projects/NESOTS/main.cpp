@@ -147,6 +147,14 @@ std::shared_ptr<UPS::CurveNetwork> plotLines(const vecs& p,scalar l = 2) {
     return UPS::CurveNetwork::Add(L,E);
 }
 
+std::vector<scalar> readLayoutBelong(std::string path,int N) {
+    std::vector<scalar> V(N);
+    std::ifstream file(path);
+    for (int i = 0;i<N;i++)
+        file >> V[i];
+    return V;
+}
+
 using VFPC = std::shared_ptr<PolyscopeQuantity<polyscope::PointCloudVectorQuantity>>;
 bool runall = false;
 void init() {
@@ -600,8 +608,28 @@ void init() {
     {
         show << newFrame << Title("Intrinsic Mesh Sampling")->at(TOP);
         show << PlaceBelow(Formula::Add(R"(\text{Mesh} \rightarrow \Sp\text{ or }\Hy \rightarrow \text{NESOTS} \rightarrow \text{Mesh})"),0.05);
-        show << Image::Add("mesh_sampling.png")->at("mesh_samp");
-        show << inNextFrame << Replace(Image::Add("mesh_sampling_cmp.png"));
+        show << Image::Add("mesh_sampling.png");
+        show << PlaceBelow(Formula::Add("g=0"));
+        show << newFrameSameTitle << PlaceBelow(Formula::Add("g > 1"));
+        show << CameraView::Add("macaca");
+        mapping N = [] (vec x) {
+            return vec(0.5*x);
+        };
+        auto M = Mesh::Add(Options::ProjectPath + "macaca.obj")->apply(N);
+        show << M;
+        show << inNextFrame;
+        for (int i = 1;i<=3;i++) {
+            PrimitiveGroup L;
+            L << PointCloud::Add(readPointCloud(Options::ProjectPath + "mu_"+std::to_string(i) + ".pts"))->apply(N);
+            L << Mesh::Add(Options::ProjectPath + "layout_"+std::to_string(i) + ".obj");
+            L << PointCloud::Add(readPointCloud(Options::ProjectPath + "mu_layout_"+std::to_string(i) + ".pts"));
+            auto pc_quantity = AddPolyscopeQuantity<polyscope::SurfaceFaceScalarQuantity>(M->pc->addFaceScalarQuantity(std::to_string(i),readLayoutBelong(Options::ProjectPath + "onlayout_"+std::to_string(i) + ".dat",M->getFaces().size())));
+            L << pc_quantity;
+            show << L;
+            if (i < 3)
+                show << inNextFrame >> L;
+        }
+        show << newFrameSameTitle << Image::Add("mesh_sampling_cmp.png");
     }
     {
         show << newFrame << Title("Projective Plane Sampling");
