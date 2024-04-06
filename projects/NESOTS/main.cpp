@@ -639,19 +639,33 @@ void init() {
         show << S;
         auto fibo = readPointCloud(UPS::Options::ProjectPath+"fibo.pts");
         auto fibopc = PointCloud::Add(fibo,0.05);
+
+        auto hearth_eyes = Image::Add("hearth_eyes.png",0.5);
+        auto pts = Formula::Add("\\left \\{x_i\\right\\}_i");
+        auto puke = Image::Add("sick.png",0.5);
+        auto proj_pts = Formula::Add("\\left \\{x_i\\right\\}_i \\cup \\left \\{-x_i\\right\\}_i");
+
+        auto sample_sphere = Latex::Add("Sampling $\\Sp^2$");
+        show << sample_sphere->at("space");
+
         show << inNextFrame;
         show << fibopc;
+        show << pts->at("fibo") << PlaceNextTo(hearth_eyes,1);
         show << inNextFrame;
         auto fibo_lines = plotLines(fibo);
         show << fibo_lines;
         auto mfibo = PointCloud::Add(opposite(fibo),0.05);
         show << inNextFrame >> fibo_lines << mfibo;
+        show << PlaceBelow(puke,hearth_eyes) << PlaceNextTo(proj_pts,0);
         show << inNextFrame;
+
 
         auto good = readPointCloud(UPS::Options::ProjectPath+"good.pts");
         auto goodpc = PointCloud::Add(good,0.05);
         auto mgood = PointCloud::Add(opposite(good),0.05);
-        show >> fibopc >> mfibo << goodpc << mgood;
+        show >> fibopc >> mfibo << goodpc << mgood >> pts >> proj_pts >> hearth_eyes >> puke;
+        show << pts->at("fibo") << PlaceNextTo(puke,1) <<  PlaceBelow(hearth_eyes,puke) << PlaceNextTo(proj_pts,0);
+        show << Replace(Latex::Add("Sampling $\\mathbb{P}^2$"),sample_sphere);
         show << inNextFrame << plotLines(good);
 
         show << newFrameSameTitle;
@@ -661,7 +675,7 @@ void init() {
         show << inNextFrame << PlaceNextTo(Formula::Add("=(-q)^{-1}\\Vec{x}(-q)"),1);
         show << inNextFrame << Image::Add("rot_sampling.png")->at("rot2");
         show << newFrameSameTitle << PlaceBelow(Latex::Add("And much more !"));
-        show << inNextFrame << Image::Add("line_sampling.png")->at("line");
+        show << inNextFrame << Image::Add("line_sampling.png",1.2)->at("line");
     }
 
     show << newFrame << Title("Thank you for your attention");
