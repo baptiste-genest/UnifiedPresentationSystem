@@ -6,6 +6,7 @@
 #include <iostream>
 #include <Eigen/Dense>
 #include <fstream>
+#include <filesystem>
 
 #include <fstream>
 
@@ -14,7 +15,10 @@ namespace UPS {
 namespace io {
 
 inline bool file_exists(std::string filename) {
-    return std::ifstream(filename).good();
+    return std::filesystem::exists(filename);
+}
+inline bool folder_exists(std::string filename) {
+    return std::filesystem::exists(filename);
 }
 
 
@@ -55,6 +59,16 @@ struct GeometryCentralMesh {
         return vec(x[0],x[1],x[2]);
     }
 };
+
+inline std::vector<std::string> list_directory(std::string folder,bool sorted = true) {
+    std::vector<std::string> ls;
+    namespace fs = std::filesystem;
+    for (const auto & entry : fs::directory_iterator(folder))
+        ls.push_back(entry.path().string());
+    if (sorted)
+        std::sort(ls.begin(),ls.end());
+    return ls;
+}
 
 }
 

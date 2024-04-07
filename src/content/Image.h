@@ -19,6 +19,8 @@ ImageData loadImage(std::string filename);
 void DisplayImage(const ImageData& data,const StateInSlide& sis,scalar scale = 1);
 void ImageRotated(ImTextureID tex_id, ImVec2 center, ImVec2 size, float angle,const RGBA& color_mult);
 
+std::vector<ImageData> loadGif(std::string filename);
+
 
 class Image : public ScreenPrimitive {
 public:
@@ -32,16 +34,13 @@ public:
 
 
     static ImVec2 getSize(std::string filename);
+    static Size getScaledSize(const ImageData& data,scalar scale);
     ImageData data;
     scalar scale = 1;
 
 
 private:
-
-
-
     static std::vector<Image> images;
-
     static size_t count;
 
 
@@ -53,40 +52,45 @@ public:
     Size getSize() const override;
 };
 
-/*
-class Gif : public Primitive {
+
+class Gif : public ScreenPrimitive {
 public:
     using GifPtr = std::shared_ptr<Gif>;
 
-    Gif() {}
-    bool isValid() {return width != -1;}
-    void display(const StateInSlide& sis) const;
+    Gif(const std::vector<ImageData>& images,int fps,scalar scale) : images(images),fps(fps),scale(scale) {}
+    bool isValid() {return images[0].width != -1;}
 
-    static GifPtr Add(std::string filename);
+    void display(const StateInSlide& sis) const {
+        anchor->updatePos(sis.getPosition());
+        DisplayImage(images[current_img],sis,scale);
+    }
 
-    static ImVec2 getSize(std::string filename);
+    static GifPtr Add(std::string filename,int fps = 10,scalar scale = 1.);
+
+    void draw(const TimeObject& t, const StateInSlide &sis) override;
+
+    void intro(const TimeObject& t, const StateInSlide &sis) override {
+        auto sist = sis;
+        sist.alpha = smoothstep(t.transitionParameter)*sis.alpha;
+        display(sist);
+    }
+
+    void outro(const TimeObject& t, const StateInSlide &sis) override
+    {
+        auto sist = sis;
+        sist.alpha = smoothstep(1-t.transitionParameter)*sis.alpha;
+        display(sist);
+    }
+
+    Size getSize() const override {
+        return Image::getScaledSize(images[current_img],scale);
+    }
 
 private:
-    static std::vector<Gif> images;
-
-    GLuint texture = 0;
-    int width      = -1;
-    int height     = -1;
-    size_t assetId = 0;
-    static size_t count;
-
-
-static void ImageRotated(ImTextureID tex_id, ImVec2 center, ImVec2 size, float angle,const RGBA& color_mult);
-
-    // Primitive interface
-public:
-    void draw(const TimeObject&, const StateInSlide &sis) override;
-    void intro(const TimeObject& t, const StateInSlide &sis) override;
-    void outro(const TimeObject& t, const StateInSlide &sis) override;
-    Size getSize() const override {return Size(width,height);}
-    bool isScreenSpace() override {return true;}
+    int current_img = 0,fps = 24;
+    std::vector<ImageData> images;
+    scalar scale = 1;
 };
-*/
 
 
 }

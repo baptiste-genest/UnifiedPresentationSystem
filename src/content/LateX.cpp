@@ -54,7 +54,7 @@ void UPS::generate_latex(const std::string &filename,
         assert(false);
     }
     int h = 1080*height_ratio*Image::getSize(filename).y/99.;
-  spdlog::info((Options::UPS_CONVERT+" " + filename + " -resize x" + std::to_string(h) + " " + filename + " >>/tmp/UPS.log"));
+    spdlog::info((Options::UPS_CONVERT+" " + filename + " -resize x" + std::to_string(h) + " " + filename + " >>/tmp/UPS.log"));
     if (std::system((Options::UPS_CONVERT+" " + filename + " -resize x" + std::to_string(h) + " " + filename + " >>/tmp/UPS.log").c_str())){
         std::cerr << "[error while resizing]" << std::endl;
         assert(false);

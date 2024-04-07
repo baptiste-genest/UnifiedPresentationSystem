@@ -24,6 +24,17 @@ ImVec2 UPS::Image::getSize(std::string filename)
     return ImVec2(w,h);
 }
 
+UPS::Primitive::Size UPS::Image::getScaledSize(const ImageData &data, scalar scale)
+{
+    double sx = scale,sy = scale;
+    bool notFullHD = (Options::UPS_screen_resolution_x != 1920) ||(Options::UPS_screen_resolution_y != 1080);
+    if (notFullHD){
+        sx *=  Options::UPS_screen_resolution_x/1920.;
+        sy *=  Options::UPS_screen_resolution_y/1080.;
+    }
+    return Size(sx*data.width,sy*data.height);
+}
+
 UPS::ImageData UPS::loadImage(std::string file)
 {
     if (file[0] != '/'){
@@ -84,13 +95,7 @@ void UPS::Image::outro(const TimeObject& t, const StateInSlide &sis)
 }
 
 UPS::Primitive::Size UPS::Image::getSize() const {
-    double sx = scale,sy = scale;
-    bool notFullHD = (Options::UPS_screen_resolution_x != 1920) ||(Options::UPS_screen_resolution_y != 1080);
-    if (notFullHD){
-        sx *=  Options::UPS_screen_resolution_x/1920.;
-        sy *=  Options::UPS_screen_resolution_y/1080.;
-    }
-    return Size(sx*data.width,sy*data.height);
+    return getScaledSize(data,scale);
 }
 
 void UPS::Image::display(const StateInSlide &sis) const
@@ -142,4 +147,34 @@ void UPS::DisplayImage(const ImageData &data, const StateInSlide &sis, scalar sc
         ImGui::Image((void*)(intptr_t)data.texture, ImVec2(data.width,data.height), ImVec2(0.0f, 0.0f), ImVec2(1.0f, 1.0f), color_multiplier);
     }
 
+}
+
+UPS::Gif::GifPtr UPS::Gif::Add(std::string filename,int fps,scalar scale)
+{
+    auto data = loadGif(filename);
+    GifPtr rslt = NewPrimitive<Gif>(data,fps,scale);
+    return rslt;
+}
+
+void UPS::Gif::draw(const TimeObject &t, const StateInSlide &sis)
+{
+    current_img = (int)std::floor(t.inner_time*fps) % int(images.size());
+    display(sis);
+}
+
+std::vector<UPS::ImageData> UPS::loadGif(std::string filename)
+{
+    auto H = std::to_string(std::hash<std::string>{}(filename));
+    std::vector<UPS::ImageData> data;
+    std::string folder = UPS::Options::DataPath + "cache/" + H;
+    if (!io::folder_exists(folder)){
+        spdlog::info("Decomposing gif " + filename);
+        system(("mkdir " + folder).data());
+        system(("convert "+filename+" -coalesce " + folder + "/gif_%05d.png").data());
+    }
+    auto images = io::list_directory(folder);
+    for (auto& f : images){
+        data.push_back(loadImage(f));
+    }
+    return data;
 }
