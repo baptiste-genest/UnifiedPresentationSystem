@@ -191,9 +191,9 @@ void init() {
     {
         show << newFrame << Title("Optimal Transport")->at(UPS::TOP);
         show << PlaceBelow(Latex::Add("The Wasserstein distance"));
-        show << Latex::Add("Given two probability measures $\\mu$ and $\\nu$")->at("wass_def");
-        show << inNextFrame << Formula::Add(R"(\W_p^p(\mu,\nu) = \inf_{\gamma \in \Pi(\mu,\nu)} \int d(x,y)^p d\gamma)");
-        show << inNextFrame << Latex::Add("Very importantly, $\\mu$ and $\\nu$ can be discrete or continuous!")->at("discrete");
+        show << Latex::Add("Given two probability measures $A$ and $B$")->at("wass_def");
+        show << inNextFrame << Formula::Add(R"(\W_p^p(A,B) = \inf_{\gamma \in \Pi(A,B)} \int d(x,y)^p d\gamma)");
+        show << inNextFrame << Latex::Add("Very importantly, $A$ and $B$ can be discrete or continuous!")->at("discrete");
     }
     {
         show << newFrame << Title("How hard is it?")->at(UPS::TOP);
@@ -287,7 +287,8 @@ void init() {
 
         show << newFrame << Title("Sampling problem")->at(UPS::TOP);
         show << beginCenter << Image::Add("uniform.png") << PlaceNextTo(Image::Add("blue_noise.png"),1) << endCenter;
-        show << inNextFrame << PlaceRelative(Formula::Add("\\W(\\mu_1,\\U) > \\W(\\mu_2,\\U)"),CENTER_X,placeY::REL_BOTTOM,0,0.1);
+        show << inNextFrame << PlaceRelative(Formula::Add("\\W(\\mu_1,\\U) > \\W(\\mu_2,\\U)"),CENTER_X,placeY::REL_BOTTOM,0,0.05);
+        show << inNextFrame << PlaceBelow(Latex::Add("Idea : go from $\\mu_1$ to $\\mu_2$ by gradient descent !",UPS::Options::UPS_default_height_ratio*1.4),0.05);
     }
 
     auto grad = Formula::Add("\\nabla_{x_i} SW^{\\theta} = T^{\\theta}(x_i) - x_i");
@@ -300,7 +301,7 @@ void init() {
         show << CameraView::Add("planar_close");
 
         {
-            auto swgrad = Formula::Add(R"(SW^\theta(\delta_x,\delta_y) = \frac{1}{2}(x-y)^2 \implies \nabla_{x} SW^\theta = ?)");
+            auto swgrad = Formula::Add(R"(SW^\theta(\delta_x,\delta_y) = \frac{1}{2}(x-y)^2 \implies -\nabla_{x} SW^\theta = ?)");
             vec theta = vec(1,0,0);
             auto pct = Curve3D::Add(vecs{-theta*3,theta*3},false,0.005);
 
@@ -591,6 +592,8 @@ void init() {
         show << inNextFrame << grad;
         show << inNextFrame >> pimupc >> pinupc >> slice >> T >> rot_mu >> projlabel>> projlabel_nu >> rotlabel >> Tlabel >> group_label >> slice_label;
         show << Formula::Add("\\nabla_x \\text{SW}^\\theta(\\mu,\\nu) = \\text{Log}_x(R(x))")->at("grad");
+        show << newFrame;
+        show << Title("Results")->at(TOP) << Gif::Add("sphere_sampling.gif",20,1.3,false);
         //show << Image::Add("logexp.png",1)->at("logexp");
     }
     {
@@ -605,6 +608,14 @@ void init() {
         show << inNextFrame;
         show << Image::Add("geomed_GD.png")->at("geomed2");
     }
+
+    {
+        show << newFrame << Title("Applications")->at(TOP);
+        show << Latex::Add("NESOTS is a very generic tool:")->at("generic");
+        show << inNextFrame << PlaceBelow(Latex::Add("Sample any probability on $\\Sp^d$, $\\Hy^d$ and $\\mathbb{P}^d$"),0.1);
+        show << inNextFrame << PlaceBelow(Latex::Add("Our hope : sampling curved domains $\\implies$ easier to apply to Geometry ! "),0.1);
+    }
+
     {
         show << newFrame << Title("Intrinsic Mesh Sampling")->at(TOP);
         show << PlaceBelow(Formula::Add(R"(\text{Mesh} \rightarrow \Sp\text{ or }\Hy \rightarrow \text{NESOTS} \rightarrow \text{Mesh})"),0.05);

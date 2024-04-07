@@ -21,6 +21,10 @@ void ImageRotated(ImTextureID tex_id, ImVec2 center, ImVec2 size, float angle,co
 
 std::vector<ImageData> loadGif(std::string filename);
 
+inline std::string formatPath(std::string path) {
+    if (path[0] == '/') return path;
+    return Options::ProjectPath + path;
+}
 
 class Image : public ScreenPrimitive {
 public:
@@ -57,7 +61,7 @@ class Gif : public ScreenPrimitive {
 public:
     using GifPtr = std::shared_ptr<Gif>;
 
-    Gif(const std::vector<ImageData>& images,int fps,scalar scale) : images(images),fps(fps),scale(scale) {}
+    Gif(const std::vector<ImageData>& images,int fps,scalar scale,bool loop) : images(images),fps(fps),scale(scale),loop(loop) {}
     bool isValid() {return images[0].width != -1;}
 
     void display(const StateInSlide& sis) const {
@@ -65,7 +69,7 @@ public:
         DisplayImage(images[current_img],sis,scale);
     }
 
-    static GifPtr Add(std::string filename,int fps = 10,scalar scale = 1.);
+    static GifPtr Add(std::string filename,int fps = 10,scalar scale = 1.,bool loop = true);
 
     void draw(const TimeObject& t, const StateInSlide &sis) override;
 
@@ -87,6 +91,7 @@ public:
     }
 
 private:
+    bool loop;
     int current_img = 0,fps = 24;
     std::vector<ImageData> images;
     scalar scale = 1;

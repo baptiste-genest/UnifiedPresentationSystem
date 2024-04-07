@@ -11,7 +11,7 @@ std::vector<UPS::Image> UPS::Image::images;
 UPS::Image::ImagePtr UPS::Image::Add(std::string file,scalar scale)
 {
     ImagePtr rslt = NewPrimitive<Image>();
-    rslt->data = loadImage(file);
+    rslt->data = loadImage(formatPath(file));
     rslt->scale = scale;
     return rslt;
 }
@@ -37,10 +37,6 @@ UPS::Primitive::Size UPS::Image::getScaledSize(const ImageData &data, scalar sca
 
 UPS::ImageData UPS::loadImage(std::string file)
 {
-    if (file[0] != '/'){
-        //spdlog::info("relative path given, assumes project folder");
-        file = UPS::Options::ProjectPath + file;
-    }
     auto filename = file.c_str();
     int w,h;
     // Load from file
@@ -149,16 +145,19 @@ void UPS::DisplayImage(const ImageData &data, const StateInSlide &sis, scalar sc
 
 }
 
-UPS::Gif::GifPtr UPS::Gif::Add(std::string filename,int fps,scalar scale)
+UPS::Gif::GifPtr UPS::Gif::Add(std::string filename,int fps,scalar scale,bool loop)
 {
-    auto data = loadGif(filename);
-    GifPtr rslt = NewPrimitive<Gif>(data,fps,scale);
+    auto data = loadGif(formatPath(filename));
+    GifPtr rslt = NewPrimitive<Gif>(data,fps,scale,loop);
     return rslt;
 }
 
 void UPS::Gif::draw(const TimeObject &t, const StateInSlide &sis)
 {
-    current_img = (int)std::floor(t.inner_time*fps) % int(images.size());
+    if (loop)
+        current_img = (int)std::floor(t.inner_time*fps) % int(images.size());
+    else
+        current_img = std::min((int)std::floor(t.inner_time*fps),int(images.size())-1);
     display(sis);
 }
 
