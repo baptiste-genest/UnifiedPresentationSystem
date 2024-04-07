@@ -210,10 +210,9 @@ void UPS::Slideshow::ImGuiWindowConfig()
     ImGui::SetNextWindowSize(ImVec2(io.DisplaySize.x,io.DisplaySize.y));
 }
 
-void UPS::Slideshow::init(std::string project_name, std::string script_file, bool debug)
+void UPS::Slideshow::init(std::string project_name,int argc,char** argv)
 {
-
-
+    parseCLI(argc,argv);
     from_action = Time::now();
     from_begin = Time::now();
 
@@ -230,17 +229,16 @@ void UPS::Slideshow::init(std::string project_name, std::string script_file, boo
     std::cout << "[ PROJECT PATH ] " << UPS::Options::ProjectPath << std::endl;
     std::cout << "[ PROJECT CACHE PATH ] " << UPS::Options::ProjectViewsPath << std::endl;
 
-    std::cout << "[ keys description ] " << std::endl;
+    std::cout << "[ KEY GUIDE ] " << std::endl;
     std::cout << "  - right arrow : next slide" << std::endl;
     std::cout << "  - left arrow : previous slide" << std::endl;
     std::cout << "  - down arrow : skip to next slide without transition" << std::endl;
     std::cout << "  - tab : slide menu" << std::endl;
     std::cout << "  - c : export current camera view" << std::endl;
     std::cout << "  - p : take a screenshot" << std::endl;
+    std::cout << "  - d : show polyscope interface" << std::endl;
     std::cout << "  - ctrl + left click : drag labeled screen primitives" << std::endl;
 
-    if (!script_file.empty())
-        setScriptFile(UPS::Options::ProjectPath+script_file);
     polyscope::init();
     polyscope::options::buildGui = false;
     polyscope::options::autocenterStructures = false;
@@ -421,43 +419,4 @@ void UPS::Slideshow::displayPopUps()
         }
     }
 }
-
-#if 0
-#include "extern/CLI11.hpp"
-int UPS::Slideshow::parseCLI(int argc, char **argv)
-{
-    CLI::App app("Unified Presentation System");
-    bool clear_cache = false;
-
-    argv = app.ensure_utf8(argv);
-    app.add_flag("--clear_cache",clear_cache,"cache will be cleared and every resources of all projects will have to be regenerated");
-    app.add_flag("--ignore_cache",Options::ignore_cache,"cache will be ignored and every requested resource will be regenerated");
-
-    std::string resolution = "1920x1080";
-    app.add_option("--resolution",resolution,"screen resolution (default 1920x1080)");
-
-
-    CLI11_PARSE(app,argc,argv);
-
-    if (clear_cache){
-        //spdlog::info("clearing cache");
-    }
-
-    auto pos = resolution.find('x');
-    if (pos == std::string::npos){
-        std::cerr << "invalid resolution format" << std::endl;
-        assert(false);
-    }
-    Options::UPS_screen_resolution_x = std::stoi(resolution.substr(0,pos));
-    Options::UPS_screen_resolution_y = std::stoi(resolution.substr(pos+1));
-
-    return 0; //ok
-}
-#else
-int UPS::Slideshow::parseCLI(int argc, char **argv)
-{
-    std::cerr << "CLI NOT IMPLMENTED YET" << std::endl;
-    return 0;
-}
-#endif
 

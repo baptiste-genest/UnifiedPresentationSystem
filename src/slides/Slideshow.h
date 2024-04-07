@@ -5,6 +5,7 @@
 #include "PrompterModule.h"
 #include "screenshot.h"
 #include "../content/Text.h"
+#include "CLI.h"
 
 namespace UPS {
 
@@ -41,8 +42,7 @@ public:
 
     void handleTransition();
 
-    void init(std::string project_name,std::string script_file ="",bool debug = false);
-    int parseCLI(int argc,char** argv);
+    void init(std::string project_name,int argc,char** argv);
 
     std::string getSlideTitle(int slide_nb);
 
@@ -80,11 +80,7 @@ private:
 
     void displayPopUps();
 
-
-    bool debug;
-
     static void ImGuiWindowConfig();
-
 
     int visited_slide = -1;
     int nb_distinct_slides = 0;

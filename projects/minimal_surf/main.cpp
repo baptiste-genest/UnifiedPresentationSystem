@@ -189,8 +189,6 @@ void init () {
 
     Parametrization P(circle);
 
-    bool runall = true;
-    if (runall)
     {
         auto title = Title(tex::center("Computing Minimal Surfaces\\\\ using Differential forms"));
         show << title->at(CENTER);
@@ -199,7 +197,6 @@ void init () {
         show << PlaceBelow(Latex::Add("SIGGRAPH 2021"),0.05);
     }
 
-    if (runall)
     {
         auto cat_surf = grid->apply(catenoid);
 
@@ -218,7 +215,7 @@ void init () {
         show << PlaceBelow(Formula::Add("\\Sigma \\in \\text{argmin Area}(\\Sigma) "));
         show << PlaceBelow(Formula::Add("\\partial \\Sigma = \\Gamma "));
     }
-    if (runall) {
+    {
         show << newFrame << Title("How to represent a shape in a computer?")->at(CENTER) << inNextFrame << TOP;
         show << CameraView::Add(UPS::Options::ProjectViewsPath + "shape.json");
         scalar off = 3;
@@ -243,12 +240,10 @@ void init () {
         show << inNextFrame >> sdf1 >> boundary1 << sdf2;
         show << inNextFrame << Curve3D::Add(P*0.3*1.5 + vec(off,0.8 + 0.75,0),100,true) << Curve3D::Add(P*0.3*1.5 + vec(off,0.8 - 0.75,0),100,true);
     }
-    if (runall)
     {
         show << newFrame << Title("How to approximate the area of a surface?")->at(TOP);
         show << inNextFrame << Image::Add("surface_approx.png");
     }
-    if (runall)
     {
         show << newFrame << Title("Quick introduction to differential forms");
         show << PlaceBelow(Latex::Add("A unified framework to express vector calculus"));
@@ -293,7 +288,6 @@ void init () {
         show << origin->addVector([w](scalar) {return w;});
         show << PlaceBelow(Formula::Add("\\omega(u\\land v) = \\text{det}(u,v,w)"),uwv);
     }
-    if (runall)
     {
         auto title = Title("Differential k-forms");
         show << newFrame << title->at(TOP);
@@ -302,7 +296,7 @@ void init () {
         show << inNextFrame << codim->at(CENTER);
         show << Latex::Add("$x \\mapsto $Ker$(\\omega(x))$")->at("codim");
     }
-    if (runall) {
+    {
         auto title = Title("Example : differential 1-forms");
         show << newFrame << title->at(TOP);
         auto form = Formula::Add("\\omega(x) = f(x)dx + g(x)dy + h(x)dz");
@@ -311,7 +305,7 @@ void init () {
         auto V = randomSmoothVectorField(7,quad);
         show << newFrameSameTitle << VectorField::AddOnGrid(V) << cam << PlaceBelow(form) << PlaceBelow(Formula::Add("\\simeq (f(x),g(x),h(x))^t"));
     }
-    if (runall) {
+    {
         auto ext_d = Image::Add("ext_der.png");
         show << newFrame << Title("The exterior derivative")->at(TOP);
         show << inNextFrame << ext_d->at(0.8,0.5);
@@ -324,14 +318,14 @@ void init () {
             return vec(x,y,std::exp(x*x+y*y)-1);
         });
 
-    if (runall) {
+    {
         show << newFrame << Title("Currents")->at(TOP);
         show << PlaceBelow(Latex::Add(tex::center("Currents are to differential forms \\\\ what distributions are to $\\mathcal{C}^{\\infty}_c$ functions")),0.05);
         show << inNextFrame << PlaceBelow(Image::Add("dirac_delta.png"));
         show << inNextFrame << Replace(Image::Add("currents.png"));
         show << PlaceNextTo(Formula::Add("\\langle \\delta_{\\Sigma} ,\\omega \\rangle = \\int_{\\Sigma} \\omega"),1);
     }
-    if (runall) {
+    {
         show << newFrameSameTitle;
         show << PlaceBelow(Latex::Add("Why using them theoretically \\\\ for minimal surface problems?"));
         show << inNextFrame << Latex::Add("Direct link with Area")->at("curr_area");
@@ -342,11 +336,10 @@ void init () {
         show << inNextFrame << PlaceBelow(Formula::Add("\\langle d\\delta_{\\Sigma},\\omega \\rangle=\\langle \\delta_{\\Sigma},d\\omega \\rangle"));
         show << inNextFrame << PlaceBelow(Formula::Add("\\Stokes\\langle \\delta_{\\partial \\Sigma},\\omega \\rangle \\implies d\\delta_{\\Sigma} = \\delta_{\\partial \\Sigma}"));
     }
-    if (runall) {
+    {
         show << newFrame << Title("Why so many dual objects???")->at(CENTER);
         show << inNextFrame << PlaceBelow(Latex::Add(tex::center("It is often easier to handle function \\\\ of objects than the objects themselves.")));
     }
-    if (runall)
     {
         show << newFrame << Title("The article's approach")->at(TOP);
         show << inNextFrame << Formula::Add("\\argmin_{\\Sigma : \\partial \\Sigma = \\Gamma} \\area(\\Sigma)")->at("opti");
@@ -434,7 +427,7 @@ void init () {
 
 
 int main(int argc,char** argv) {
-    show.init("minimal_surf","",false);
+    show.init("minimal_surf",argc,argv);
     init();
 
     polyscope::state::userCallback = [](){

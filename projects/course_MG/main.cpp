@@ -442,7 +442,7 @@ void init () {
     show << Latex::Add("Les opérateurs différentiels sont vos amis.",Options::UPS_TITLE)->at(CENTER);
     show << "Intro";
 
-    if (false)
+    if (true)
     {
         auto title = Title("Calcul différentiel et approximation de Taylor")->at(TOP);
         show << newFrame << title;
@@ -461,7 +461,7 @@ void init () {
         show << newFrame << title << Latex::Add("Idée générale des approches différentielles :\\\\ Approcher localement un objet complexe par un objet simple (polynomial)")->at(CENTER);
     }
 
-    if (false)
+    if (true)
     {
         show << "manifold";
         auto title = Title(tex::center("Variétés différentielles et paramétrisation"));
@@ -487,8 +487,7 @@ void init () {
 
         auto circle = [](scalar t){return vec(0.3*cos(TAU*t) + 0.2,0.3*sin(TAU*t),0);};
 
-        auto curveParam = Curve3D::Add(circle,100,true);
-        curveParam->setRadius(0.008);
+        auto curveParam = Curve3D::Add(circle,100,true,0.008);
         auto circle_slow = [](scalar t){return vec(0.3*cos(t) + 0.2,0.3*sin(t),0);};
         auto point_param = UPS::Point::Add(circle_slow);
 
@@ -584,11 +583,11 @@ void init () {
             std::string J = "J_{\\varphi}(p)";
             show << newFrame;// << Title("Tenseur métrique");
             show << "metric";
-            auto dot = Formula::Add("u \\cdot v = u^t v")->at(0.5,0.4);
-            show << dot;
+            auto dot = Formula::Add("u \\cdot v = u^t v");
+            show << dot->at(0.5,0.4);
             auto Jdot = Formula::Add(J + "u \\cdot " + J + " v = ("+ J + "u)^t" + J + "v");
             auto arrowp = PlaceLeft(arrow);
-            show << inNextFrame << arrowp << PlaceAbove(varphi) << PlaceABelowB(Formula::Add("p"),arrowp) << PlaceABelowB(Jdot,dot,0.05);
+            show << inNextFrame << arrowp << PlaceAbove(varphi) << PlaceBelow(Formula::Add("p"),arrow) << PlaceBelow(Jdot,dot,0.05);
             auto g = Formula::Add("= u^t" + tex::transpose(J) + J + "v");
             auto title = Title("Tenseur métrique")->at(TOP);
             show << inNextFrame << PlaceBelow(g,0.05);
@@ -623,7 +622,7 @@ void init () {
     }
 
 
-    if (false)
+    if (true)
     {
         show << newFrame << Title("Représentation discrète des formes et fonctions")->at(CENTER) << inNextFrame << TOP;
         scalar off = 3;
@@ -651,7 +650,7 @@ void init () {
         show << inNextFrame << PlaceRight(Formula::Add(tex::Vec("1.21","0.32", "\\vdots", "5.2","3.24"),0.05),0.6,0.1);
     }
 
-    if (false)
+    if (true)
     {
         show << newFrame << Title("Discrétisation des opérateurs différentiels")->at(TOP);
         show << inNextFrame << PlaceLeft(Latex::Add(tex::center("Opérateurs différentiels classiques")));
@@ -667,7 +666,7 @@ void init () {
         //show << inNextFrame << PlaceRelative(Latex::Add("Tenseur métrique : changement dans le calul des angles et longueur sur la surface"),ABS_LEFT,REL_BOTTOM,0.1);
     }
 
-    if (false)
+    if (true)
     {
         using namespace tex;
         show << newFrame << Title("Exemple : Le laplacien $\\Delta$")->at(TOP);
@@ -676,7 +675,7 @@ void init () {
         show << inNextFrame << lapdef->at(CENTER);
         auto topolap = Latex::Add(equation("(Lf)_i = \\sum_{n \\in N_i} (f_i - f_n)"),0.06);
         show << inNextFrame >> lapdef << topolap->at(CENTER);
-        show << inNextFrame << Vec2(0.5,0.3);
+        //show << inNextFrame << Vec2(0.5,0.3);
         show << PlaceLeft(Image::Add(Options::DataPath + "images/simple_graph.png"),0.6,0.2);
         show << PlaceRelative(Image::Add(Options::DataPath + "images/simple_lap_mat.png"),UPS::REL_RIGHT,SAME_Y);
 
@@ -783,8 +782,9 @@ void init () {
                 vecs GD(N);GD[0] = vec(1,1,0);
                 for (int i = 1;i<N;i++)
                     GD[i] = GD[i-1] - 0.1*gradf(GD[i-1]);
-                show << inNextFrame << PointCloud::Add(GD);
-                Primitive::get<PointCloud>(show.lastPrimitiveInserted().first->pid)->pc->setPointRadius(0.02,false);
+                auto gd_pc = PointCloud::Add(GD);
+                show << inNextFrame << gd_pc;
+                gd_pc->pc->setPointRadius(0.02,false);
                 show >> grad << Title("Descente de gradient")->at(TOP) << PlaceBelow(Formula::Add("x_{n+1} = x_{n} - \\tau \\nabla f(x_n)"));
             }
 
@@ -902,7 +902,7 @@ void init () {
 
     }
 
-    if (false)
+    if (true)
     {
         auto parabola = [] (const Vertex& v,const TimeObject& t) {
             const auto& h = v.pos;

@@ -167,9 +167,6 @@ void init() {
     Latex::NewCommand("Hy","\\mathbb{H}");
     Latex::NewCommand("proj","\\Pi^\\theta");
 
-    Options::UPS_screen_resolution_x = 1920;
-    Options::UPS_screen_resolution_y = 1080;
-
     int N = 20;
 
     {
@@ -178,6 +175,7 @@ void init() {
         show << PlaceBelow(Latex::Add("Eurographics 2024",Options::UPS_default_height_ratio*0.7),0.1);
 
     }
+
 
     {
         show << newFrame << Title("Optimal Transport")->at(UPS::TOP);
@@ -696,8 +694,7 @@ void init() {
 
 int main(int argc,char** argv)
 {
-    show.init("NESOTS");
-    show.parseCLI(argc,argv);
+    show.init("NESOTS",argc,argv);
 
     init();
 
