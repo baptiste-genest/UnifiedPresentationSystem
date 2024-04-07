@@ -421,6 +421,23 @@ void UPS::Slideshow::displayPopUps()
             ImGui::EndPopup();
         }
     }
+}
 
+#include "../extern/CLI11.hpp"
+int UPS::Slideshow::parseCLI(int argc, char **argv)
+{
+    CLI::App app("Unified Presentation System");
+    bool clear_cache = false;
 
+    argv = app.ensure_utf8(argv);
+    app.add_flag("--clear_cache",clear_cache,"cache will be cleared and every resources of all projects will have to be regenerated");
+    app.add_flag("--ignore_cache",Options::ignore_cache,"cache will be ignored and every requested resource will be regenerated");
+
+    CLI11_PARSE(app,argc,argv);
+
+    if (clear_cache){
+        //spdlog::info("clearing cache");
+    }
+
+    return 0; //ok
 }

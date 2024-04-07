@@ -26,8 +26,7 @@ static size_t UPS_screen_resolution_y;
 ///Density for the PDF -> PNG export
 static size_t UPS_density;
 
-///Various sizes
-///
+static bool ignore_cache;
 
 /// Height ratio for title
 static double UPS_TITLE;

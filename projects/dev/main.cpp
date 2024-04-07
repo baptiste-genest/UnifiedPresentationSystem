@@ -29,6 +29,7 @@ void init () {
 int main(int argc,char** argv) {
 
     show.init("dev");
+    show.parseCLI(argc,argv);
     init();
 
     polyscope::state::userCallback = [](){

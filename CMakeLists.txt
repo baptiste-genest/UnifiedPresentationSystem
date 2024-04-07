@@ -39,7 +39,7 @@ file(GLOB SRC_lib
      "src/style/*"
      "src/UnifiedPresentationSystem.h"
      "src/UPS.h"
-     "src/extern/svg.hpp"
+     "src/extern/*"
 )
 file(GLOB HEADER_LIST CONFIGURE_DEPENDS "src/*.h*")
 

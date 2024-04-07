@@ -23,4 +23,6 @@ size_t Options::UPS_density = 800;
 double Options::UPS_TITLE = 0.07;
 double Options::UPS_default_height_ratio = 0.04;
 
+bool Options::ignore_cache = false;
+
 }

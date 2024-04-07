@@ -167,8 +167,9 @@ std::vector<UPS::ImageData> UPS::loadGif(std::string filename)
     auto H = std::to_string(std::hash<std::string>{}(filename));
     std::vector<UPS::ImageData> data;
     std::string folder = UPS::Options::DataPath + "cache/" + H;
-    if (!io::folder_exists(folder)){
+    if (!io::folder_exists(folder) || Options::ignore_cache){
         spdlog::info("Decomposing gif " + filename);
+        system(("rm -rf " + folder + " 2> /dev/null").data());
         system(("mkdir " + folder).data());
         system(("convert "+filename+" -coalesce " + folder + "/gif_%05d.png").data());
     }
