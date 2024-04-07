@@ -229,6 +229,7 @@ void UPS::Slideshow::init(std::string project_name, std::string script_file, boo
     std::cout << "[ UPS PATH ] " << UPS::Options::UPSPath << std::endl;
     std::cout << "[ PROJECT PATH ] " << UPS::Options::ProjectPath << std::endl;
     std::cout << "[ PROJECT CACHE PATH ] " << UPS::Options::ProjectViewsPath << std::endl;
+    std::cout << "[ SCREEN RESOLUTION ] " << UPS::Options::UPS_screen_resolution_x<<"x"<<UPS::Options::UPS_screen_resolution_y  << std::endl;
 
     std::cout << "[ keys description ] " << std::endl;
     std::cout << "  - right arrow : next slide" << std::endl;
