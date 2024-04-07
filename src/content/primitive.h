@@ -52,14 +52,34 @@ struct Primitive {
         auto it = t(this);
         draw(it,sis);
         updater(it,this);
+        bool first_appearance;
+        first_slide_to_appear = std::min(first_slide_to_appear,t.absolute_frame_number);
     }
 
-    virtual void draw(const TimeObject& time,const StateInSlide& sis) = 0;
-    virtual void intro(const TimeObject& t,const StateInSlide& sis) = 0;
-    virtual void outro(const TimeObject& t,const StateInSlide& sis) = 0;
-    virtual void forceDisable() {};
-    virtual void forceEnable() {};
-    virtual void initPolyscope() {}
+    void intro(const TimeObject& t,const StateInSlide& sis) {
+        enable();
+        playIntro(t,sis);
+    }
+
+    void outro(const TimeObject& t,const StateInSlide& sis) {
+        playOutro(t,sis);
+    }
+
+
+    void disable() {
+        if (!enabled)
+            return;
+        enabled = false;
+        forceDisable();
+    }
+
+    void enable() {
+        if (enabled)
+            return;
+        enabled = true;
+        forceEnable();
+        handleInnerTime();
+    }
 
 
     TimeTypeSec getInnerTime(){
@@ -71,8 +91,20 @@ struct Primitive {
     bool isExclusive() const {
         return exclusive;
     }
-private:
+
+    virtual void initPolyscope() {}
+
+protected:
+    virtual void draw(const TimeObject& time,const StateInSlide& sis) = 0;
+    virtual void playIntro(const TimeObject& t,const StateInSlide& sis) = 0;
+    virtual void playOutro(const TimeObject& t,const StateInSlide& sis) = 0;
+    virtual void forceDisable() {};
+    virtual void forceEnable() {};
+
+
     TimeStamp inner_time;
+    bool enabled = false;
+    int first_slide_to_appear = std::numeric_limits<int>::max();
 };
 
 template<class T>

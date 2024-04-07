@@ -17,9 +17,9 @@ void UPS::Slideshow::previousFrame()
     if (!current_slide)
         return;
     for (auto& s : uniqueNext(transitions[current_slide-1]))
-        s->forceDisable();
+        s->disable();
     for (auto& s : uniquePrevious(transitions[current_slide-1]))
-        s->forceEnable();
+        s->enable();
     current_slide--;
     for (auto& s : slides[current_slide]){
         auto p = s.first;
@@ -38,9 +38,9 @@ void UPS::Slideshow::forceNextFrame()
     if (current_slide == slides.size()-1)
         return;
     for (auto& s : uniquePrevious(transitions[current_slide]))
-        s->forceDisable();
+        s->disable();
     for (auto& s : uniqueNext(transitions[current_slide]))
-        s->forceEnable();
+        s->enable();
     current_slide++;
     for (auto& s : slides[current_slide]){
         auto p = s.first;
@@ -190,9 +190,9 @@ void UPS::Slideshow::handleTransition()
         return;
     transition_done = true;
     for (auto& s : uniquePrevious(transitions[current_slide-1]))
-        s->forceDisable();
+        s->disable();
     for (auto& s : uniqueNext(transitions[current_slide-1]))
-        s->forceEnable();
+        s->enable();
 
     if (!slides[current_slide-1].sameCamera(slides[current_slide])){
         slides[current_slide].setCam();
@@ -293,10 +293,10 @@ void UPS::Slideshow::goToSlide(int slide_nb)
     if (slide_nb == current_slide)
         return;
     for (auto& p : slides[current_slide])
-        p.first->forceDisable();
+        p.first->disable();
     current_slide = slide_nb;
     for (auto& p : slides[current_slide])
-        p.first->forceEnable();
+        p.first->enable();
     from_action = Time::now();
     from_action = Time::now();
 }

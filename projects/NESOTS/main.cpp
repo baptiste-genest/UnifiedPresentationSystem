@@ -697,6 +697,7 @@ void init() {
 int main(int argc,char** argv)
 {
     show.init("NESOTS");
+    show.parseCLI(argc,argv);
 
     init();
 

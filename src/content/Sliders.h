@@ -26,8 +26,8 @@ public:
     Sliders(const std::vector<int> &int_vals, const std::string &label, const std::pair<float, float> &bounds);
     Sliders(const std::vector<float> &float_vals, const std::string &label, const std::pair<float, float> &bounds);
     virtual void draw(const TimeObject &time, const StateInSlide &sis) override;
-    virtual void intro(const TimeObject &t, const StateInSlide &sis) override {}
-    virtual void outro(const TimeObject &t, const StateInSlide &sis) override {}
+    virtual void playIntro(const TimeObject &t, const StateInSlide &sis) override {}
+    virtual void playOutro(const TimeObject &t, const StateInSlide &sis) override {}
 
     float getVal(int i) const {
         if (isInteger)

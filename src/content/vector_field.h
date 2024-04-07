@@ -22,10 +22,10 @@ public:
         pq->setEnabled(true);
         pq->setVectorLengthScale(length,false);
     }
-    virtual void intro(const TimeObject &t, const StateInSlide &sis) override {
+    virtual void playIntro(const TimeObject &t, const StateInSlide &sis) override {
         pq->setVectorLengthScale(t.transitionParameter*length,false);
     }
-    virtual void outro(const TimeObject &t, const StateInSlide &sis) override {
+    virtual void playOutro(const TimeObject &t, const StateInSlide &sis) override {
         pq->setVectorLengthScale((1-t.transitionParameter)*length,false);
     }
     virtual void forceDisable() override {

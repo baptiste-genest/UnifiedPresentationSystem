@@ -51,8 +51,8 @@ private:
     // Primitive interface
 public:
     void draw(const TimeObject&, const StateInSlide &sis) override;
-    void intro(const TimeObject& t, const StateInSlide &sis) override;
-    void outro(const TimeObject& t, const StateInSlide &sis) override;
+    void playIntro(const TimeObject& t, const StateInSlide &sis) override;
+    void playOutro(const TimeObject& t, const StateInSlide &sis) override;
     Size getSize() const override;
 };
 
@@ -73,13 +73,13 @@ public:
 
     void draw(const TimeObject& t, const StateInSlide &sis) override;
 
-    void intro(const TimeObject& t, const StateInSlide &sis) override {
+    void playIntro(const TimeObject& t, const StateInSlide &sis) override {
         auto sist = sis;
         sist.alpha = smoothstep(t.transitionParameter)*sis.alpha;
         display(sist);
     }
 
-    void outro(const TimeObject& t, const StateInSlide &sis) override
+    void playOutro(const TimeObject& t, const StateInSlide &sis) override
     {
         auto sist = sis;
         sist.alpha = smoothstep(1-t.transitionParameter)*sis.alpha;

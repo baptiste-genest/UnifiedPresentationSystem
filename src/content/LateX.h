@@ -46,12 +46,12 @@ public:
     virtual void draw(const TimeObject &time, const StateInSlide &sis) override {
         display(sis);
     }
-    virtual void intro(const TimeObject &t, const StateInSlide &sis) override {
+    virtual void playIntro(const TimeObject &t, const StateInSlide &sis) override {
         auto sist = sis;
         sist.alpha = smoothstep(t.transitionParameter)*sis.alpha;
         display(sist);
     }
-    virtual void outro(const TimeObject &t, const StateInSlide &sis) override {
+    virtual void playOutro(const TimeObject &t, const StateInSlide &sis) override {
         auto sist = sis;
         sist.alpha = smoothstep(1-t.transitionParameter)*sis.alpha;
         display(sist);

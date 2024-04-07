@@ -36,11 +36,11 @@ public:
     void draw(const TimeObject&, const StateInSlide &sis) override {
         polyscope_ptr->setTransparency(sis.alpha);
     }
-    void intro(const TimeObject& t,const StateInSlide &sis) override {
+    void playIntro(const TimeObject& t,const StateInSlide &sis) override {
         polyscope_ptr->setTransparency(smoothstep(t.transitionParameter)*sis.alpha);
         updater(t(this),this);
     }
-    void outro(const TimeObject& t,const StateInSlide &sis) override {
+    void playOutro(const TimeObject& t,const StateInSlide &sis) override {
         polyscope_ptr->setTransparency(smoothstep(1-t.transitionParameter)*sis.alpha);
         updater(t(this),this);
     }
@@ -81,8 +81,8 @@ public :
 public:
     T* q;
     void draw(const TimeObject &time, const StateInSlide &sis) override {q->setEnabled(true);}
-    void intro(const TimeObject& t, const StateInSlide &sis) override {q->setEnabled(true);}
-    void outro(const TimeObject& t, const StateInSlide &sis) override {q->setEnabled(false);}
+    void playIntro(const TimeObject& t, const StateInSlide &sis) override {q->setEnabled(true);}
+    void playOutro(const TimeObject& t, const StateInSlide &sis) override {q->setEnabled(false);}
     void forceDisable() override {q->setEnabled(false);}
     bool isScreenSpace() const override {return false;}
 };
@@ -115,11 +115,11 @@ public:
         q->setEnabled(true);
         q->setVectorLengthScale(l0,false);
     }
-    void intro(const TimeObject& t, const StateInSlide &sis) override {
+    void playIntro(const TimeObject& t, const StateInSlide &sis) override {
         q->setVectorLengthScale(l0*smoothstep(t.transitionParameter),false);
         q->setEnabled(true);
     }
-    void outro(const TimeObject& t, const StateInSlide &sis) override {
+    void playOutro(const TimeObject& t, const StateInSlide &sis) override {
         q->setVectorLengthScale(l0*(1-smoothstep(t.transitionParameter)),false);
         if (t.transitionParameter > 0.95)
             q->setEnabled(false);
