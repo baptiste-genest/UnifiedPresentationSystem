@@ -10,7 +10,7 @@ UPS::Mesh::MeshPtr UPS::Mesh::Add(const std::string &objfile,const vec& scale,bo
 
     //load faces
     for (auto f : mesh->getFaceVertexList()){
-        F.push_back({f[0],f[1],f[2]});
+        F.push_back(f);
     }
 
     vecs verts(mesh->nVertices());
@@ -82,7 +82,7 @@ void UPS::Mesh::updateMesh(const vecs &X)
 void UPS::Mesh::initPolyscope()
 {
     pc = polyscope::registerSurfaceMesh(getPolyscopeName(),vertices,faces);
-    pc->setBackFacePolicy(polyscope::BackFacePolicy::Custom);
+    pc->setBackFacePolicy(polyscope::BackFacePolicy::Identical);
     initPolyscopeData(pc);
     setSmooth(smooth);
 }
