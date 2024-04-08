@@ -12,7 +12,7 @@ UPS::vec f_scale(UPS::vec x) {
 int main(int argc,char** argv)
 {
   //Init
-  show.init("tutorials");
+  show.init("tutorials",argc,argv);
   
   //Slideshow title
   show << UPS::Latex::Add("Hello 3D World!",UPS::Options::UPS_TITLE)->at(UPS::CENTER);

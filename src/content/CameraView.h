@@ -9,6 +9,7 @@ namespace UPS {
 
 
 std::string formatCameraFilename(std::string file);
+std::string removeResolutionFromCamfile(std::string json);
 
 class CameraView;
 using CameraViewPtr = std::shared_ptr<CameraView>;
@@ -22,7 +23,7 @@ public:
         fromFile = false;
     }
 
-    CameraView(std::string json,bool fly) : json(json),flyTo(fly) {
+    CameraView(std::string json,bool fly) : jsonContent(json),flyTo(fly) {
         fromFile = true;
     }
 
@@ -33,7 +34,7 @@ public:
 public:
     void enable() {
         if (fromFile)
-            polyscope::view::setCameraFromJson(json,flyTo);
+            polyscope::view::setCameraFromJson(jsonContent,flyTo);
         else
             polyscope::view::lookAt(from,to,up,flyTo);
     }
@@ -44,7 +45,7 @@ public:
 private:
     bool fromFile = false;
     glm::vec3 from,to,up;
-    std::string json;
+    std::string jsonContent;
     bool flyTo;
 };
 

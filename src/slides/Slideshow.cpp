@@ -303,7 +303,7 @@ void UPS::Slideshow::goToSlide(int slide_nb)
 void UPS::Slideshow::saveCamera(std::string file)
 {
     std::ofstream camfile(file);
-    camfile << polyscope::view::getCameraJson();
+    camfile << removeResolutionFromCamfile(polyscope::view::getCameraJson());
     std::cout << "current camera view exported at " << file << std::endl;
 }
 
