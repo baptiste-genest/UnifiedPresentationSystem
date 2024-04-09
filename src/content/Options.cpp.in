@@ -25,4 +25,6 @@ double Options::UPS_default_height_ratio = 0.04;
 
 bool Options::ignore_cache = false;
 
+Eigen::Vector3d Options::DefaultBackgroundColor = Eigen::Vector3d(1,1,1);
+
 }

@@ -134,6 +134,8 @@ PolyscopeQuantity<polyscope::SurfaceVertexVectorQuantity>::PCQuantityPtr AddPoly
 }
 
 
+
+
 }
 
 #endif // POLYSCOPEPRIMITIVE_H

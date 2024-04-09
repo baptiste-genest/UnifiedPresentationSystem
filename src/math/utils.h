@@ -10,8 +10,9 @@ inline std::function<scalar(scalar)> buildRangeMapper(scalar a,scalar b,scalar c
     };
 }
 
-inline vec2 lerp(const vec2& a,const vec2& b,scalar t) {
-    return a + (b-a)*t;
+template <typename T>
+inline T lerp(const T& a,const T& b,scalar t) {
+    return T(a + (b-a)*t);
 }
 
 }

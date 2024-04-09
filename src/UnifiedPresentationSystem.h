@@ -18,5 +18,6 @@
 #include "content/Sliders.h"
 #include "slides/Panel.h"
 #include "extern/svg.hpp"
+#include "content/BackgroundColor.h"
 
 #endif // UNIFIEDPRESENTATIONSYSTEM_H

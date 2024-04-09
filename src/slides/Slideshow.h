@@ -56,7 +56,7 @@ private:
 
     void slideMenu();
 
-    void initialize_slides();
+    void initializeSlides();
 
     void loadSlides();
     std::vector<int> slide_numbers;

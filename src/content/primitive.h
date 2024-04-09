@@ -49,6 +49,7 @@ struct Primitive {
     }
 
     void play(const TimeObject& t,const StateInSlide& sis) {
+        enable();
         auto it = t(this);
         draw(it,sis);
         updater(it,this);
@@ -64,6 +65,8 @@ struct Primitive {
     void outro(const TimeObject& t,const StateInSlide& sis) {
         playOutro(t,sis);
     }
+
+    bool isEnabled() const {return enabled;}
 
 
     void disable() {

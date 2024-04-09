@@ -5,6 +5,8 @@
 #define TOSTRING(x) STRING(x)
 #include <string>
 
+#include "Eigen/Dense"
+
 namespace UPS {
 struct Options{
 
@@ -25,6 +27,8 @@ static size_t UPS_screen_resolution_y;
 
 ///Density for the PDF -> PNG export
 static size_t UPS_density;
+
+static Eigen::Vector3d DefaultBackgroundColor;
 
 static bool ignore_cache;
 

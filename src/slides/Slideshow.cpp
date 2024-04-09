@@ -59,7 +59,7 @@ void UPS::Slideshow::play() {
     ImGui::Begin("Unified Presentation System",NULL,window_flags);
 
     if (!initialized)
-        initialize_slides();
+        initializeSlides();
 
     auto t = TimeFrom(from_action);
 
@@ -116,15 +116,15 @@ void UPS::Slideshow::play() {
                 }
             }
             else {
-                for (auto& s : CS)
+                for (auto& s : CS){
                     s.first->play(T,CS[s.first]);
+                }
                 locked = false;
             }
         }
     }
 
     prompt();
-
 
     handleInputs();
 
@@ -307,7 +307,7 @@ void UPS::Slideshow::saveCamera(std::string file)
     std::cout << "current camera view exported at " << file << std::endl;
 }
 
-void UPS::Slideshow::initialize_slides()
+void UPS::Slideshow::initializeSlides()
 {
     precomputeTransitions();
     loadSlides();
@@ -325,7 +325,7 @@ void UPS::Slideshow::loadSlides()
     }
     nb_distinct_slides = done.size();
 
-    std::cout << "nb distinct slides " << nb_distinct_slides << std::endl;
+    std::cout << "[ number of distinct slides ] " << nb_distinct_slides << std::endl;
 
     slide_number_display.resize(nb_distinct_slides);
     for (int i = 0;i<nb_distinct_slides;i++){

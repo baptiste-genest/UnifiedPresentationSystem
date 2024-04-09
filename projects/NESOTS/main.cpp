@@ -170,11 +170,12 @@ void init() {
     int N = 20;
 
     {
-        show << Title("Non Euclidean Sliced \\\\ Optimal Transport Sampling")->at(UPS::CENTER);
-        show << PlaceBelow(Latex::Add(tex::center("Baptiste Genest \\\\  Nicolas Courty \\\\ David Coeurjolly"),Options::UPS_default_height_ratio*0.8),0.1);
-        show << PlaceBelow(Latex::Add("Eurographics 2024",Options::UPS_default_height_ratio*0.7),0.1);
-        show << PlaceBottomLeft(Latex::Add("aaaaa",Options::UPS_default_height_ratio*0.7),0.01);
-      
+//        show << Title("Non Euclidean Sliced \\\\ Optimal Transport Sampling")->at(UPS::CENTER);
+//        show << PlaceBelow(Latex::Add(tex::center("Baptiste Genest \\\\  Nicolas Courty \\\\ David Coeurjolly"),Options::UPS_default_height_ratio*0.8),0.1);
+//        show << PlaceBelow(Latex::Add("Eurographics 2024",Options::UPS_default_height_ratio*0.7),0.1);
+//        show << PlaceBottomLeft(Latex::Add("aaaaa",Options::UPS_default_height_ratio*0.7),0.01);
+        show << Image::Add("welcome.png",1);
+        show << BackgroudColor::Add(0,0,0);
     }
 
 
@@ -222,7 +223,7 @@ void init() {
             show << inNextFrame << Assignments;
         }
         //show << inNextFrame << PlaceBelow(Image::Add("OT_1D.png",0.7),0.05);
-        show << inNextFrame << PlaceBottom(Latex::Add("$\\mathcal{O}(n\\log(n))$!",Options::UPS_default_height_ratio*1.7));
+        show << inNextFrame << PlaceBottom(Latex::Add("$\\mathcal{O}(n\\log(n))$",Options::UPS_default_height_ratio*1.5));
     }
 
     {
@@ -285,13 +286,14 @@ void init() {
         auto blue_noise = Image::Add("blue_noise.png");
 
         show << newFrame << Title("Sampling problem")->at(UPS::TOP);
+        show << inNextFrame << Formula::Add("\\mu_1")->at("mu1") << Formula::Add("\\mu_2")->at("mu2") << Latex::Add(tex::center("$\\mu_1, \\mu_2 \\sim \\U$,\\\\ where $\\U$ \\\\ is the uniform\\\\ distribution"))->at("follow_u");
         show << beginCenter << Image::Add("uniform.png") << PlaceNextTo(Image::Add("blue_noise.png"),1) << endCenter;
         show << inNextFrame << PlaceRelative(Formula::Add("\\W(\\mu_1,\\U) > \\W(\\mu_2,\\U)"),CENTER_X,placeY::REL_BOTTOM,0,0.05);
-        show << inNextFrame << PlaceBelow(Latex::Add("Idea : go from $\\mu_1$ to $\\mu_2$ by gradient descent !",UPS::Options::UPS_default_height_ratio*1.4),0.05);
+        show << inNextFrame << PlaceBelow(Latex::Add("Idea : go from $\\mu_1$ to $\\mu_2$ by gradient descent on $\\mathcal{SW}(\\mu,\\U)$ !",UPS::Options::UPS_default_height_ratio*1.4),0.05);
     }
 
     auto grad = Formula::Add("\\nabla_{x_i} SW^{\\theta} = T^{\\theta}(x_i) - x_i");
-    auto descent = Formula::Add("x_i^{n+1} = x_i^n - \\tau \\nabla_{x_i^n} SW^\\theta");
+    auto descent = Formula::Add("x_i^{n+1} = x_i^n - \\tau \\nabla_{x_i^n} SW");
 
     {
         show << newFrame << Title("Sliced Optimal Transport Sampling")->at(TOP);
@@ -337,12 +339,14 @@ void init() {
 
         show << inNextFrame << mupc << NUpc;
 
-        show << inNextFrame << Formula::Add("\\U \\approx \\sum_i^N \\delta_{y_i} \\\\ y_i \\sim \\U")->at("U");
+        auto approx = Latex::Add(tex::center("We approximate \\\\ the target distribution $\\nu$ \\\\ by a large \\\\ number of samples: \\\\ $\\tilde{\\nu} = \\sum_i^N \\delta_{y_i},$ \\\\ where $y_i \\sim \\nu$"));
+        show << inNextFrame << approx->at("U");
 
 
-        show << inNextFrame << removeLast << NUpc->at(0.5) << inNextFrame;
 
-        int K = 8;
+        show << inNextFrame << NUpc->at(0.5) << inNextFrame;
+
+        int K = 4;
 
         std::vector<vecs> gradients;
 
@@ -401,7 +405,7 @@ void init() {
 
         show << PlaceLeft(Formula::Add("\\nabla_{x_i} SW\\leftarrow  \\frac{1}{L}\\sum_{\\theta}\\nabla_{x_i} SW^\\theta"),0.5,0.03);
 
-        show << CameraView::Add("close_grad",true);
+        show << CameraView::Add("close_grad",true) >> approx;
 
         vecs combined_gradients(N,vec::Zero());
         show << inNextFrame;
@@ -426,8 +430,10 @@ void init() {
     {
         auto offset = 1.5;
         auto T = Title("Non-Euclidean Sliced \\\\ Optimal Transport Sampling");
-        show << newFrame << Title("Contributions");
+        show << newFrame;
         show << T->at(UPS::TOP);
+        show << Image::Add("nesots_model.png",1.2)->at("models");
+        /*
         show << inNextFrame << Mesh::Add(Options::DataPath + "meshes/ico_sphere_5.obj")->translate(vec(-offset,0,0));
         show << CameraView::Add("models");
         show << grid->apply([offset](const vec& x) {
@@ -436,6 +442,7 @@ void init() {
         });
         show << Formula::Add("\\mathbb{S}^d")->at("S2");
         show << Formula::Add("\\mathbb{H}^d")->at("H2");
+        */
         /*
         show << Image::Add("sphere_sampling.png",0.6)->at("sphere_sampling");
         show << Image::Add("geomed_gain.png",0.6)->at("geomed");
@@ -527,6 +534,7 @@ void init() {
         //2530 1914
         show << inNextFrame;
         show << S;
+        auto cursor = Formula::Add("\\rightarrow");
 
         vec mu = S->getVertices()[2530];
         vec nu = S->getVertices()[1914];
@@ -539,7 +547,7 @@ void init() {
 
         show << Formula::Add("y")->track([nupc](){return nupc->getCurrentPos();},vec2(0.02,0.02));
         auto slice_label =  Formula::Add("\\theta");
-        show << inNextFrame << slice << slice_label->at("slice");
+        show << inNextFrame << slice << slice_label->at("slice") << cursor->at("cursor0");
 
         vec pi_mu = vec(mu(0),mu(1),0).normalized();
         vec pi_nu = vec(nu(0),nu(1),0).normalized();
@@ -564,16 +572,16 @@ void init() {
             return slerp(x,nu,pi_nu);
         },0.035);
         vec R = Eigen::AngleAxis(th,vec(0,0,1))*mu;
-        show << inNextFrame << pimupc << pinupc;
+        show << inNextFrame << pimupc << pinupc << cursor->at("cursor1");
         auto projlabel = Formula::Add("P^\\theta(x)");
         show << projlabel->track([pimupc](){return pimupc->getCurrentPos();},vec2(0.02,0.04));
         auto T = Curve3D::Add([pi_mu,pi_nu](scalar t){return slerp(t,pi_mu,pi_nu);},30,false,0.018);
         auto projlabel_nu = Formula::Add("P^\\theta(y)");
         show << projlabel_nu->track([pinupc](){return pinupc->getCurrentPos();},vec2(0.02,-0.04));
-        show << inNextFrame << T;
+        show << inNextFrame << T << cursor->at("cursor2");
         auto Tlabel = Formula::Add("\\text{here, } T(P^\\theta(x)) = P^\\theta(y)");
         show << Tlabel->at("plan");
-        auto group_label = Latex::Add(tex::center("$R \\in SO(3)$ \\\\ s.t. $RP^\\theta(x) = P^\\theta(y)$"));
+        auto group_label = Latex::Add(tex::center("Find $\\Gamma_\\theta$, \\\\ s.t. $\\Gamma_{\\theta}(P^\\theta(x)) = P^\\theta(y)$"));
 
 
 
@@ -583,35 +591,34 @@ void init() {
                 return R;
             return slerp(x,mu,R);
         },0.035);
-        show << inNextFrame << rot_mu;
-        auto rotlabel = Formula::Add("Rx");
+        show << inNextFrame << rot_mu << cursor->at("cursor3");
+        auto rotlabel = Formula::Add("\\Gamma_\\theta(x)");
         show << rotlabel->track([rot_mu](){return rot_mu->getCurrentPos();},vec2(0.02,0.02));
         show << group_label->at("group_action");
         auto grad = mupc->addVector([mu,R](scalar){return Log(mu,R);});
-        show << inNextFrame << grad;
+        show << inNextFrame << grad << cursor->at("cursor4");
         show << inNextFrame >> pimupc >> pinupc >> slice >> T >> rot_mu >> projlabel>> projlabel_nu >> rotlabel >> Tlabel >> group_label >> slice_label;
-        show << Formula::Add("\\nabla_x \\text{SW}^\\theta(\\mu,\\nu) = \\text{Log}_x(R(x))")->at("grad");
+        show << Formula::Add("\\nabla_x \\text{SW}^\\theta(\\mu,\\nu) = \\text{Log}_x(\\Gamma_\\theta((x))")->at("grad");
         show << newFrame;
         show << Title("Results")->at(TOP) << Gif::Add("sphere_sampling.gif",20,1.3,false);
         //show << Image::Add("logexp.png",1)->at("logexp");
     }
     {
         show << newFrame << Title("Geometric Median for robust SGD")->at(TOP);
+        show << Image::Add("sphere_density.png")->at("density_on_sphere");
         show << Latex::Add("Classic SGD:")->at("SGD");
-        show << PlaceBelow(Formula::Add("\\nabla_{x_i} \\mathcal{SW}\\left(\\sum_i \\delta_{x_i},\\nu\\right) \\leftarrow \\frac{1}{L}\\sum_{l = 1}^{L} \\left( T(x_i) - x_i\\right) "));
+        show << PlaceBelow(Formula::Add("\\nabla_{x_i} SW \\leftarrow \\frac{1}{L}\\sum_{l = 1}^{L} \\nabla_{x_i}SW^{\\theta_l}"));
         auto meangd = Image::Add("mean_GD.png");
         show << meangd->at("meangd");
         show << inNextFrame;
         show << Latex::Add("GeoMed Descent:")->at("GMD");
-        show << PlaceBelow(Formula::Add("\\text{GeoMed}(\\{ T(x_i) - x_i\\}_i)"));
+        show << PlaceBelow(Formula::Add("\\text{GeoMed}(\\{\\nabla_{x_i}SW^{\\theta_l}\\}_l)"));
         show << inNextFrame;
         show << Image::Add("geomed_GD.png")->at("geomed2");
     }
 
     {
-        show << newFrame << Title("Applications")->at(TOP);
-        show << Latex::Add("NESOTS is a very generic tool:")->at("generic");
-        show << inNextFrame << PlaceBelow(Latex::Add("Sample any probability on $\\Sp^d$, $\\Hy^d$ and $\\mathbb{P}^d$"),0.1);
+        show << newFrame << Title("Applications");
         show << inNextFrame << PlaceBelow(Latex::Add("Our hope : sampling curved domains $\\implies$ easier to apply to Geometry ! "),0.1);
     }
 
@@ -683,13 +690,14 @@ void init() {
         show << inNextFrame << Latex::Add("$\\rightarrow$ sampling unit Quaternions $\\subset \\mathbb{S}^3$")->at("unit_quat");
         show << inNextFrame << Formula::Add("q^{-1}\\Vec{x}q")->at("quat");
         show << inNextFrame << PlaceNextTo(Formula::Add("=(-q)^{-1}\\Vec{x}(-q)"),1);
-        show << inNextFrame << Image::Add("rot_sampling.png")->at("rot2");
+        //show << inNextFrame << Image::Add("rot_sampling.png")->at("rot2");
+        show << inNextFrame << Gif::Add("rotation_sampling.gif")->at("rot2");
         show << newFrameSameTitle << PlaceBelow(Latex::Add("And much more !"));
         show << inNextFrame << Image::Add("line_sampling.png",1.2)->at("line");
     }
 
     show << newFrame << Title("Thank you for your attention");
-    show << PlaceBelow(Latex::Add("Code Available : baptiste-genest (Github)"));
+    show << PlaceBelow(Latex::Add("Code Available : github.com/baptiste-genest/NESOTS"));
 
 }
 
