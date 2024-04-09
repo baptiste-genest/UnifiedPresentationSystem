@@ -16,7 +16,7 @@ void Text::display(const StateInSlide &sis) const
     pushFont();
 
     //set imgui font size
-    ImGui::SetWindowFontScale(2);
+    ImGui::SetWindowFontScale(1.5);
 
     auto size = ImGui::CalcTextSize(content.c_str());
     size.x *= 2;
