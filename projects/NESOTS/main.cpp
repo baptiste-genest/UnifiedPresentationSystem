@@ -173,7 +173,7 @@ void init() {
         show << Title("Non Euclidean Sliced \\\\ Optimal Transport Sampling")->at(UPS::CENTER);
         show << PlaceBelow(Latex::Add(tex::center("Baptiste Genest \\\\  Nicolas Courty \\\\ David Coeurjolly"),Options::UPS_default_height_ratio*0.8),0.1);
         show << PlaceBelow(Latex::Add("Eurographics 2024",Options::UPS_default_height_ratio*0.7),0.1);
-        //show << PlaceBottomLeft(Latex::Add("aaaaa",Options::UPS_default_height_ratio*0.7),0.01);
+        show << PlaceBottomLeft(Latex::Add("aaaaa",Options::UPS_default_height_ratio*0.7),0.01);
       
     }
 
