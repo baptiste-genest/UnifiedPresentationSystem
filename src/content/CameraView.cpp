@@ -17,6 +17,9 @@ UPS::CameraViewPtr UPS::CameraView::Add(std::string file, bool flyTo)
     std::string str((std::istreambuf_iterator<char>(camfile)),
                     std::istreambuf_iterator<char>());
     str = removeResolutionFromCamfile(str);
+  
+  std::cout<<str<<std::endl;
+  
     return std::make_shared<CameraView>(str,flyTo);
 }
 
