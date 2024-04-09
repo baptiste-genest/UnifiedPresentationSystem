@@ -18,8 +18,6 @@ UPS::CameraViewPtr UPS::CameraView::Add(std::string file, bool flyTo)
                     std::istreambuf_iterator<char>());
     str = removeResolutionFromCamfile(str);
   
-  std::cout<<str<<std::endl;
-  
     return std::make_shared<CameraView>(str,flyTo);
 }
 
@@ -36,12 +34,12 @@ std::string UPS::removeResolutionFromCamfile(std::string str)
     using json = nlohmann::json;
     json j = json::parse(str);
     {
-        auto it = j.find("\"windowHeight\"");
+        auto it = j.find("windowHeight");
         if (it != j.end())
             j.erase(it);
     }
     {
-        auto it = j.find("\"windowWidth\"");
+        auto it = j.find("windowWidth");
         if (it != j.end())
             j.erase(it);
     }
