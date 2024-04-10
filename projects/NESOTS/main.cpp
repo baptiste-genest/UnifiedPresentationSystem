@@ -229,7 +229,8 @@ void init() {
     {
         show << newFrame << Title("Sliced Optimal Transport")->at(UPS::TOP);
 
-
+        show << PlaceBottomLeft(Latex::Add("\\scriptsize \\color{orange}[Pitié at al. 2005], [Rabin et al. 2011], [Bonneel et al. 2015]"),0.01);
+      
         auto mu = randomPointCloud(N);
         auto mupc = PointCloud::Add(mu);
         auto nu = randomPointCloud(N);
@@ -278,6 +279,7 @@ void init() {
         }
         show << Formula::Add(R"(\frac{1}{L} \sum_i^L\W(\Pi^{\theta_i}_\# \mu ,\Pi^{\theta_i}_\# \nu) \rightarrow )")->at("W2") << inNextFrame << PlaceNextTo(Formula::Add(R"(\int_{\Sp} \W(\proj_\# \mu ,\proj_\# \nu) d\theta = SW(\mu,\nu))"),1);
         show << inNextFrame << PlaceNextTo(Formula::Add("\\approx \\W(\\mu,\\nu)"),1);
+       
     }
 
     {
@@ -297,6 +299,8 @@ void init() {
 
     {
         show << newFrame << Title("Sliced Optimal Transport Sampling")->at(TOP);
+        show << PlaceBottomLeft(Latex::Add("\\scriptsize \\color{orange}[Paulin at el. 2020]"),0.01);
+
         show << inNextFrame << PlaceBelow(Latex::Add("Stochastic Gradient Descent on $\\mu \\mapsto SW(\\mu,\\U)$"),0.04);
         auto back = show.getCurrentSlide();
         show << CameraView::Add("planar_close");
