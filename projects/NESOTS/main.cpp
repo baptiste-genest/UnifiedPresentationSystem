@@ -183,7 +183,7 @@ void init() {
     {
         show << newFrame << Title("Optimal Transport")->at(UPS::TOP);
         show << PlaceBelow(Latex::Add("Discrete to Discrete"));
-        show << PlaceBottom(Latex::Add(tex::center("Among all bijections $\\gamma$, \\\\ which one minimizes the effort \\\\ to move each $x_i$ to $\\gamma(x_i)$?")),0.5,0.1);
+        show << PlaceBottom(Latex::Add(tex::center("Among all bijections $\\gamma$, which one minimizes the effort to move each $x_i$ to $\\gamma(x_i)$?")),0.5,0.1);
 
         show << Image::Add("OT_1.png");
         show << inNextFrame << Replace(Image::Add("OT_2.png"));
@@ -300,9 +300,10 @@ void init() {
     auto descent = Formula::Add("x_i^{n+1} = x_i^n - \\tau \\nabla_{x_i^n} SW");
 
     {
-        show << newFrame << Title("Sliced Optimal Transport Sampling")->at(TOP);
+        show << newFrame;
         show << PlaceBottomLeft(Image::Add("article.png",.3),0.01)     ;
         show << PlaceBottomLeft(Latex::Add("\\scriptsize \\color{orange}[Paulin at el. 2020]"),0.01);
+        show << Title("Sliced Optimal Transport Sampling")->at(TOP);
 
         show << inNextFrame << PlaceBelow(Latex::Add("Stochastic Gradient Descent on $\\mu \\mapsto SW(\\mu,\\U)$"),0.04);
         auto back = show.getCurrentSlide();
