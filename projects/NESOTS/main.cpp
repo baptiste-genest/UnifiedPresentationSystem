@@ -166,7 +166,8 @@ void init() {
     Latex::NewCommand("Sp","\\mathbb{S}");
     Latex::NewCommand("Hy","\\mathbb{H}");
     Latex::NewCommand("proj","\\Pi^\\theta");
-
+    Latex::UsePackage("cmbright");
+  
     int N = 20;
 
     {
