@@ -532,6 +532,7 @@ void init() {
         show << inNextFrame >> Log << Replace(Formula::Add((R"( \nabla_{x_i} SW^\theta = \text{Log}_{x_i}(T^\theta (x_i)))")),grad) >> question;
     }
     {
+        /*
         show << newFrame << Latex::Add(R"(
 \begin{table}[]
 \centering
@@ -543,6 +544,7 @@ Log               & $x-y$                         &                             
 \end{tabular}
 \end{table}
 )");
+*/
     }
     auto S = Mesh::Add(Options::DataPath + "meshes/ico_sphere_5.obj",vec(1,1,1),true);
 
