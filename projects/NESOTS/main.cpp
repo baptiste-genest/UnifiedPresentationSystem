@@ -701,7 +701,7 @@ void init() {
     }
 
     show << newFrame << Title("Thank you for your attention");
-    show << PlaceBelow(Latex::Add("Code Available : github.com/baptiste-genest/NESOTS"));
+    show << PlaceBelow(Latex::Add("Code Available : \\url{https://github.com/baptiste-genest/NESOTS}"));
 
 }
 
