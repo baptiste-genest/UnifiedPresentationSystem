@@ -231,7 +231,7 @@ void init() {
         show << newFrame << Title("Sliced Optimal Transport")->at(UPS::TOP);
 
         show << PlaceBottomLeft(Image::Add("article.png",.3),0.01)     ;
-        show << PlaceBottomLeft(Latex::Add("\\scriptsize \\color{orange}[Pitié at al. 2005], [Rabin et al. 2011], [Bonnotte 2011], [Bonneel et al. 2015], [Nadjahi et al. 2020]"),0.01);
+        show << PlaceNextTo(Latex::Add("\\scriptsize \\color{orange}[Pitié at al. 2005], [Rabin et al. 2011], [Bonnotte 2011], [Bonneel et al. 2015], [Nadjahi et al. 2020]"),1,0.01);
       
         auto mu = randomPointCloud(N);
         auto mupc = PointCloud::Add(mu);
@@ -302,7 +302,7 @@ void init() {
     {
         show << newFrame;
         show << PlaceBottomLeft(Image::Add("article.png",.3),0.01)     ;
-        show << PlaceBottomLeft(Latex::Add("\\scriptsize \\color{orange}[Paulin at el. 2020]"),0.01);
+        show << PlaceNextTo(Latex::Add("\\scriptsize \\color{orange}[Paulin at el. 2020]"),1,0.01);
         show << Title("Sliced Optimal Transport Sampling")->at(TOP);
 
         show << inNextFrame << PlaceBelow(Latex::Add("Stochastic Gradient Descent on $\\mu \\mapsto SW(\\mu,\\U)$"),0.04);
