@@ -531,6 +531,19 @@ void init() {
         show << inNextFrame << ExpLog;
         show << inNextFrame >> Log << Replace(Formula::Add((R"( \nabla_{x_i} SW^\theta = \text{Log}_{x_i}(T^\theta (x_i)))")),grad) >> question;
     }
+    {
+        show << newFrame << Latex::Add(R"(
+\begin{table}[]
+\centering
+\begin{tabular}{llll}
+                  & \multicolumn{1}{c}{euclidean} & \multicolumn{1}{c}{spherical}                                   & \multicolumn{1}{c}{hyperbolic} \\
+$\text{Exp}_x(v)$ & \multicolumn{1}{c}{$x+v$}     & \multicolumn{1}{c}{$\cos(||v||)x + \sin(||v||)\frac{v}{||v||}$} &                                \\
+Log               & $x-y$                         &                                                                 &                                \\
+                  &                               &                                                                 &
+\end{tabular}
+\end{table}
+)");
+    }
     auto S = Mesh::Add(Options::DataPath + "meshes/ico_sphere_5.obj",vec(1,1,1),true);
 
     {
