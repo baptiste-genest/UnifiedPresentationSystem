@@ -437,7 +437,7 @@ void init() {
         auto T = Title("Non-Euclidean Sliced \\\\ Optimal Transport Sampling");
         show << newFrame;
         show << T->at(UPS::TOP);
-        show << Image::Add("nesots_model.png",1.2)->at("models");
+        show << Image::Add("nesots_model2.png",1)->at("models");
         /*
         show << inNextFrame << Mesh::Add(Options::DataPath + "meshes/ico_sphere_5.obj")->translate(vec(-offset,0,0));
         show << CameraView::Add("models");
