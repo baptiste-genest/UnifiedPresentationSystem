@@ -2,7 +2,7 @@
 
 UPS::SlideManager::TransitionSets UPS::SlideManager::computeTransitionsBetween(const Slide &A, const Slide &B)
 {
-    Primitives common,uniqueA,uniqueB;
+    PrimitiveSet common,uniqueA,uniqueB;
     for (auto sb : B)
         uniqueB.insert(sb.first);
 
@@ -20,14 +20,29 @@ UPS::SlideManager::TransitionSets UPS::SlideManager::computeTransitionsBetween(c
             uniqueA.insert(sa.first);
         }
     }
-    return {common,uniqueA,uniqueB};
+    //sort by depth
+    Primitives common_sorted(common.begin(),common.end());
+    std::sort(common_sorted.begin(),common_sorted.end(),[](PrimitivePtr a,PrimitivePtr b){
+        return a->getDepth() < b->getDepth();
+    });
+    Primitives uniqueA_sorted(uniqueA.begin(),uniqueA.end());
+    std::sort(uniqueA_sorted.begin(),uniqueA_sorted.end(),[](PrimitivePtr a,PrimitivePtr b){
+        return a->getDepth() < b->getDepth();
+    });
+
+    Primitives uniqueB_sorted(uniqueB.begin(),uniqueB.end());
+    std::sort(uniqueB_sorted.begin(),uniqueB_sorted.end(),[](PrimitivePtr a,PrimitivePtr b){
+        return a->getDepth() < b->getDepth();
+    });
+
+    return {common_sorted,uniqueA_sorted,uniqueB_sorted};
 }
 
 void UPS::SlideManager::precomputeTransitions(){
     initialized = true;
     appearing_primitives.resize(slides.size());
     for (auto& p : slides[0])
-        appearing_primitives[0].insert(p.first);
+        appearing_primitives[0].push_back(p.first);
     for (int i = 0;i<slides.size()-1;i++){
         transitions.push_back(
             computeTransitionsBetween(

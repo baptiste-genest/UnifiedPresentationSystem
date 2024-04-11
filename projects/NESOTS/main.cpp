@@ -155,6 +155,21 @@ std::vector<scalar> readLayoutBelong(std::string path,int N) {
     return V;
 }
 
+vecs sample2DGaussian(int N) {
+    //sample 2D gaussian points between -3 and 3
+
+    //define 1D gaussian
+    std::normal_distribution<double> dist(0,1);
+    std::default_random_engine gen;
+
+    vecs points(N,vec::Zero());
+    for (int i = 0;i<N;++i) {
+        points[i](0) = dist(gen);
+        points[i](2) = dist(gen);
+    }
+    return points;
+}
+
 using VFPC = std::shared_ptr<PolyscopeQuantity<polyscope::PointCloudVectorQuantity>>;
 bool runall = false;
 void init() {
@@ -179,6 +194,11 @@ void init() {
         show << BackgroudColor::Add(0,0,0);
     }
 
+    {
+        show << newFrame << Title("Abstract")->at(TOP);
+        show << PlaceRelative(Latex::Add(tex::center("We contribute to the blue-noise sampling techniques that uses optimal transport by extending those techniques to non-euclidean domains.")),CENTER_X,UPS::REL_BOTTOM,0.03,0.1);
+        show << PlaceBottom(Image::Add("teaser.png"),0.5,0.1);
+    }
 
     {
         show << newFrame << Title("Optimal Transport")->at(UPS::TOP);
@@ -192,9 +212,11 @@ void init() {
     {
         show << newFrame << Title("Optimal Transport")->at(UPS::TOP);
         show << PlaceBelow(Latex::Add("The Wasserstein distance"));
-        show << Latex::Add("Given two probability measures $A$ and $B$")->at("wass_def");
-        show << inNextFrame << Formula::Add(R"(\W_p^p(A,B) = \inf_{\gamma \in \Pi(A,B)} \int d(x,y)^p d\gamma)");
-        show << inNextFrame << Latex::Add("Very importantly, $A$ and $B$ can be discrete or continuous!")->at("discrete");
+        show << PlaceRelative(Latex::Add("Given two probability measures $A$ and $B$"),placeX::ABS_LEFT,UPS::REL_BOTTOM,0.05,0.1);
+        show << PlaceRelative(Formula::Add(R"(\W_p^p(A,B) = \inf_{\gamma \in \Pi(A,B)} \int d(x,y)^p d\gamma)"),placeX::CENTER_X,UPS::REL_BOTTOM,0.05,0.1);
+        show << inNextFrame << PlaceRelative(Latex::Add("Very importantly, $A$ and $B$ can be discrete or continuous!"),placeX::ABS_LEFT,UPS::REL_BOTTOM,0.05,0.1);
+        show << PlaceRelative(Image::Add("OT_discrete_conti.png"),placeX::CENTER_X,UPS::REL_BOTTOM,0.05,0.01);
+        show << PlaceRelative(Latex::Add("Image by Gabriel Peyré",Options::UPS_default_height_ratio*0.6),placeX::ABS_LEFT,UPS::REL_BOTTOM);
     }
     {
         show << newFrame << Title("How hard is it?")->at(UPS::TOP);
@@ -279,10 +301,15 @@ void init() {
             show <<inNextFrame << Assigments;
             show << inNextFrame >> pct >> m >> n >> Assigments;
         }
-        show << Formula::Add(R"(\frac{1}{L} \sum_i^L\W(\Pi^{\theta_i}_\# \mu ,\Pi^{\theta_i}_\# \nu) \rightarrow )")->at("W2") << inNextFrame << PlaceNextTo(Formula::Add(R"(\int_{\Sp} \W(\proj_\# \mu ,\proj_\# \nu) d\theta = SW(\mu,\nu))"),1);
+        show << Formula::Add(R"(\frac{1}{L} \sum_i^L\W(\Pi^{\theta_i}_\# \mu ,\Pi^{\theta_i}_\# \nu) )" + tex::AbelowB("L\\rightarrow \\infty","\\longrightarrow"))->at("W2") << inNextFrame << PlaceNextTo(Formula::Add(R"(\int_{\Sp} \W(\proj_\# \mu ,\proj_\# \nu) d\theta = \textcolor{red}{SW(\mu,\nu)})"),1);
         show << inNextFrame << PlaceNextTo(Formula::Add("\\approx \\W(\\mu,\\nu)"),1);
-       
+        show << newFrameSameTitle << PlaceBelow(Latex::Add("Continuous densities"));
+        show << inNextFrame << PlaceBelow(Latex::Add(tex::center("To remain in this simple setting, one can approximate continuous densities by a large number of samples")),0.1);
+        auto app = Formula::Add("\\approx");
+        show  << app->at(0.5,0.7) << PlaceRelative(Image::Add("gaussian_density.png"),app,UPS::REL_LEFT,placeY::SAME_Y) << PlaceRelative(Image::Add("gaussian_samples.png"),app,UPS::REL_RIGHT,placeY::SAME_Y);
+
     }
+
 
     {
 
@@ -290,9 +317,9 @@ void init() {
         auto blue_noise = Image::Add("blue_noise.png");
 
         show << newFrame << Title("Sampling problem")->at(UPS::TOP);
-        show << inNextFrame << Formula::Add("\\mu_1")->at("mu1") << Formula::Add("\\mu_2")->at("mu2") << Latex::Add(tex::center("$\\mu_1, \\mu_2 \\sim \\U$,\\\\ where $\\U$ \\\\ is the uniform\\\\ distribution"))->at("follow_u");
-        show << beginCenter << Image::Add("uniform.png") << PlaceNextTo(Image::Add("blue_noise.png"),1) << endCenter;
-        show << inNextFrame << PlaceRelative(Formula::Add("\\W(\\mu_1,\\U) > \\W(\\mu_2,\\U)"),CENTER_X,placeY::REL_BOTTOM,0,0.05);
+        show << inNextFrame << Formula::Add("\\mu_1")->at("mu1") << Formula::Add("\\mu_2")->at("mu2") << Formula::Add("\\U")->at("unif_den");// << Latex::Add(tex::center("$\\mu_1, \\mu_2 \\sim \\U$,\\\\ where $\\U$ \\\\ is the uniform\\\\ distribution"))->at("follow_u");
+        show << beginCenter << Image::Add("unif.png") << PlaceNextTo(Image::Add("uniform.png"),1) << PlaceNextTo(Image::Add("blue_noise.png"),1) << endCenter;
+        show << inNextFrame << PlaceRelative(Formula::Add("\\W(\\mu_1,\\U) > \\W(\\mu_2,\\U)"),CENTER_X,placeY::REL_BOTTOM,0,0.08);
         show << inNextFrame << PlaceBelow(Latex::Add("Idea : go from $\\mu_1$ to $\\mu_2$ by gradient descent on $\\mathcal{SW}(\\mu,\\U)$ !",UPS::Options::UPS_default_height_ratio*1.4),0.05);
     }
 
@@ -310,7 +337,7 @@ void init() {
         show << CameraView::Add("planar_close");
 
         {
-            auto swgrad = Formula::Add(R"(SW^\theta(\delta_x,\delta_y) = \frac{1}{2}(x-y)^2 \implies -\nabla_{x} SW^\theta = ?)");
+            auto swgrad = Formula::Add(R"(SW^\theta(\delta_x,\delta_y) = \frac{1}{2}(x-y)^2 \implies -\nabla_{x} SW^\theta = T^{\theta}(x_i) - x_i)");
             vec theta = vec(1,0,0);
             auto pct = Curve3D::Add(vecs{-theta*3,theta*3},false,0.005);
 
@@ -333,7 +360,6 @@ void init() {
                 Assignments << Curve3D::Add(roundArrowParam(proj(mup[i],theta),proj(nup[i],theta)),100,false,0.005);
             }
             show << Assignments;
-            show << inNextFrame << Replace(grad,swgrad);
         }
 
         show << back << CameraView::Add("planar");
@@ -347,8 +373,10 @@ void init() {
 
         show << inNextFrame << mupc << NUpc;
 
+        /*
         auto approx = Latex::Add(tex::center("We approximate \\\\ the target distribution $\\nu$ \\\\ by a large \\\\ number of samples: \\\\ $\\tilde{\\nu} = \\sum_i^N \\delta_{y_i},$ \\\\ where $y_i \\sim \\nu$"));
         show << inNextFrame << approx->at("U");
+        */
 
 
 
@@ -411,9 +439,9 @@ void init() {
             show << inNextFrame >> pct >> m >> n >> nupc;
         }
 
-        show << PlaceLeft(Formula::Add("\\nabla_{x_i} SW\\leftarrow  \\frac{1}{L}\\sum_{\\theta}\\nabla_{x_i} SW^\\theta"),0.5,0.03);
+        show << PlaceLeft(Formula::Add(+  "\\frac{1}{L}\\sum_{\\theta}\\nabla_{x_i} SW^\\theta" +  tex::AbelowB("L\\rightarrow\\infty","\\longrightarrow") + "\\nabla_{x_i} SW" ),0.5,0.03);
 
-        show << CameraView::Add("close_grad",true) >> approx;
+        show << CameraView::Add("close_grad",true);
 
         vecs combined_gradients(N,vec::Zero());
         show << inNextFrame;
@@ -489,9 +517,9 @@ void init() {
         show << mupc << gradfpc << Formula::Add("x")->track([mupc](){return mupc->getCurrentPos();},vec2(-0.02,0.02));
         show << inNextFrame;
 
+        auto descent = Formula::Add("x_i^{n+1} = x_i^n \\textcolor{red}{-} \\tau \\nabla_{x_i^n} SW");
         show << descent->at("grad_optim");
-        auto question = Latex::Add("?");
-        show << inNextFrame << PlaceAbove(question) << inNextFrame;
+        show << inNextFrame;
 
         auto RGD =  Latex::Add("Riemannian Gradient Descent:\\\\ $x_{n+1} = \\text{Exp}_{x_n}(-\\tau \\nabla f (x_n))$");
         show << RGD->at("RGD");
@@ -508,17 +536,17 @@ void init() {
         vec nu = S->getVertices()[1489];
         auto nupc = Point::Add(nu,0.035);
 
-        show << Replace(Formula::Add((R"( x^{n+1}_i = \text{Exp}_{x^n_i}(-\tau\nabla_{x^n_i} SW))")),descent);
-        show >> RGD >> question >> gradfpc;
+        show << PlaceBelow(Formula::Add((R"( x^{n+1}_i = \text{Exp}_{x^n_i}(-\tau\nabla_{x^n_i} SW))")),descent);
+        show >> RGD >> gradfpc;
         show << inNextFrame;
-        show << PlaceBelow(grad) << inNextFrame;
-        show << PlaceBelow(question);
+
+        auto grad = Formula::Add("\\nabla_{x_i} SW^{\\theta} = T^{\\theta}(x_i) \\textcolor{red}{-} x_i");
+        show << PlaceBelow(grad,0.05) << inNextFrame;
         show << inNextFrame;
         show << nupc << Formula::Add("y")->track([nupc](){return nupc->getCurrentPos();},vec2(0.02,0.02));
-        show << Formula::Add("\\text{Exp}^{-1} ?")->at("Log");
         show << inNextFrame;
         auto Log = Formula::Add("\\text{Log}_x(y)");
-        show << Replace(Log);
+        show << Log->at("Log");
         vec logy = orthoproj(nu-mu,mu)*0.5;
         show << mupc->addVector(logy);
         auto ExpLog = Point::Add([mu,nu](TimeObject t){
@@ -529,35 +557,36 @@ void init() {
         },0.035);
 
         show << inNextFrame << ExpLog;
-        show << inNextFrame >> Log << Replace(Formula::Add((R"( \nabla_{x_i} SW^\theta = \text{Log}_{x_i}(T^\theta (x_i)))")),grad) >> question;
+        show << inNextFrame >> Log << PlaceBelow(Formula::Add((R"( \nabla_{x_i} SW^\theta = \text{Log}_{x_i}(T^\theta (x_i)))")),grad);
     }
     {
-        /*
+
         show << newFrame << Latex::Add(R"(
 \begin{table}[]
 \centering
-\begin{tabular}{llll}
-                  & \multicolumn{1}{c}{euclidean} & \multicolumn{1}{c}{spherical}                                   & \multicolumn{1}{c}{hyperbolic} \\
-$\text{Exp}_x(v)$ & \multicolumn{1}{c}{$x+v$}     & \multicolumn{1}{c}{$\cos(||v||)x + \sin(||v||)\frac{v}{||v||}$} &                                \\
-Log               & $x-y$                         &                                                                 &                                \\
-                  &                               &                                                                 &
+\begin{tabular}{cccc}
+\multicolumn{1}{c|}{}                  & \multicolumn{1}{c|}{euclidean} & \multicolumn{1}{c|}{spherical}                                           & hyperbolic                                                                                                 \\ \hline
+\multicolumn{1}{c|}{$\text{Exp}_x(v)$} & \multicolumn{1}{c|}{$x+v$}     & \multicolumn{1}{c|}{$\cos(||v||)x + \sin(||v||)\frac{v}{||v||}$}         & $\text{cosh}(||v||_L)x + \text{cosh}(||v||_L)\frac{v}{||v||} $                                             \\ \hline
+\multicolumn{1}{c|}{$\text{Log}_x(y)$} & \multicolumn{1}{c|}{$y-x$}     & \multicolumn{1}{c|}{$\frac{\Pi_{TM_x}(y-x)}{||\Pi_{TM_x}(y-x)||}d(x,y)$} & $\frac{\text{arccosh}(-\langle x,y\rangle_L)}{\sqrt{\langle x,y \rangle_L^2-1}}(y+\langle x,y\rangle_L x)$ \\
+                                       &                                &                                                                          &
 \end{tabular}
 \end{table}
-)");
-*/
+)",Options::UPS_default_height_ratio*1.2);
+
     }
     auto S = Mesh::Add(Options::DataPath + "meshes/ico_sphere_5.obj",vec(1,1,1),true);
 
     {
         show << newFrame << Title("NESOTS algorithm")->at(TOP);
-        show << Image::Add("nesots_algo.png",0.8)->at("nesots");
+        show << PlaceRight(Image::Add("nesots_algo.png",0.8),0.5,0.05);
         show << CameraView::Add("nesots");
         auto slice= Curve3D::Add([] (scalar t) {return vec(cos(t*2*M_PI),sin(t*2*M_PI),0);},100,true,0.01);
         //S->pc->setEdgeWidth(0);
         //2530 1914
         show << inNextFrame;
         show << S;
-        auto cursor = Formula::Add("\\rightarrow");
+        auto cursor = Image::Add("highlight.png");
+        cursor->setDepth(1);
 
         vec mu = S->getVertices()[2530];
         vec nu = S->getVertices()[1914];
@@ -642,14 +671,14 @@ Log               & $x-y$                         &                             
 
     {
         show << newFrame << Title("Applications");
-        show << inNextFrame << PlaceBelow(Latex::Add("Our hope : sampling curved domains $\\implies$ easier to apply to Geometry ! "),0.1);
+        //show << inNextFrame << PlaceBelow(Latex::Add("Our hope : sampling curved domains $\\implies$ easier to apply to Geometry ! "),0.1);
     }
 
     {
         show << newFrame << Title("Intrinsic Mesh Sampling")->at(TOP);
-        show << PlaceBelow(Formula::Add(R"(\text{Mesh} \rightarrow \Sp\text{ or }\Hy \rightarrow \text{NESOTS} \rightarrow \text{Mesh})"),0.05);
-        show << Image::Add("mesh_sampling.png");
-        show << PlaceBelow(Formula::Add("g=0"));
+        //show << PlaceBelow(Formula::Add(R"(\text{Mesh} \rightarrow \Sp\text{ or }\Hy \rightarrow \text{NESOTS} \rightarrow \text{Mesh})"),0.05);
+        show << Image::Add("mesh_sampling_full.png");
+        //show << PlaceBelow(Formula::Add("g=0"));
         show << newFrameSameTitle << PlaceBelow(Formula::Add("g > 1"));
         show << CameraView::Add("macaca");
         mapping N = [] (vec x) {
@@ -669,6 +698,7 @@ Log               & $x-y$                         &                             
             if (i < 3)
                 show << inNextFrame >> L;
         }
+        show << newFrameSameTitle << Gif::Add("macaca_sampling.gif",14,1.3);
         show << newFrameSameTitle << Image::Add("mesh_sampling_cmp.png");
     }
     {
@@ -716,7 +746,23 @@ Log               & $x-y$                         &                             
         //show << inNextFrame << Image::Add("rot_sampling.png")->at("rot2");
         show << inNextFrame << Gif::Add("rotation_sampling.gif")->at("rot2");
         show << newFrameSameTitle << PlaceBelow(Latex::Add("And much more !"));
-        show << inNextFrame << Image::Add("line_sampling.png",1.2)->at("line");
+        show << inNextFrame << Image::Add("line_sampling.png",1.4)->at("line");
+        show << Formula::Add("ax+by+c = 0")->at("cartesian");
+    }
+
+    {
+        show << newFrame << Title("Conclusion")->at(TOP);
+        show <<
+            PlaceRelative(Latex::Add(
+                                                 tex::enumerate(
+                                                 "We introduced NESOTS, a general algorithm for blue-noise sampling on non-euclidean geometries",
+                                                                       "It allows us to intrinsincly sample meshes",
+                                                                       "Projective sampling appears to be new and promising")
+                                                        +"\n Future works : \n " +
+                                                        tex::enumerate(
+                                                        " Extension to other domains (e.g. Lie groups)"
+                                                                                                  )),ABS_LEFT,REL_BOTTOM,0.04,0.15);
+        //        show << inNextFrame << PlaceBelow(Latex::Add("We showed how to apply it to various geometries"),0.1);
     }
 
     show << newFrame << Title("Thank you for your attention");
@@ -726,6 +772,7 @@ Log               & $x-y$                         &                             
 
 int main(int argc,char** argv)
 {
+    srand(1);
     show.init("NESOTS",argc,argv);
 
     init();

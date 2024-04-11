@@ -88,7 +88,8 @@ struct Font {
 struct Primitive;
 using PrimitivePtr = std::shared_ptr<Primitive>;
 using PrimitiveID = long;
-using Primitives = std::set<PrimitivePtr>;
+using PrimitiveSet = std::set<PrimitivePtr>;
+using Primitives = std::vector<PrimitivePtr>;
 
 using curve_param = std::function<vec(scalar)>;
 

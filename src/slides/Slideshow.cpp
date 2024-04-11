@@ -74,7 +74,7 @@ void UPS::Slideshow::play() {
 
     if (backward || !locked) {
         locked = false;
-        for (auto& s : CS)
+        for (auto& s : CS.getDepthSorted())
             s.first->play(T,CS[s.first]);
     }
     else {
@@ -103,7 +103,7 @@ void UPS::Slideshow::play() {
                 }
             }
             else {
-                for (auto& s : CS){
+                for (auto& s : CS.getDepthSorted()){
                     s.first->play(T,CS[s.first]);
                 }
                 locked = false;
@@ -111,12 +111,12 @@ void UPS::Slideshow::play() {
         }
         else {
             if (t < transitionTime){
-                for (auto& s : CS){
+                for (auto& s : CS.getDepthSorted()){
                     s.first->intro(T(t/transitionTime),CS[s.first]);
                 }
             }
             else {
-                for (auto& s : CS){
+                for (auto& s : CS.getDepthSorted()){
                     s.first->play(T,CS[s.first]);
                 }
                 locked = false;

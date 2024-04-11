@@ -83,6 +83,7 @@ public:
         auto s = getSize();
         return Size(s(0)/Options::UPS_screen_resolution_x,s(1)/Options::UPS_screen_resolution_y);
     }
+
 };
 
 struct TextualPrimitive : public ScreenPrimitive {

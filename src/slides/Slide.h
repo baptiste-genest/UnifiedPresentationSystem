@@ -29,6 +29,16 @@ struct Slide : public std::map<PrimitivePtr,StateInSlide> {
         add(p,StateInSlide(pos));
     }
 
+    std::vector<PrimitiveInSlide> getDepthSorted() {
+        std::vector<PrimitiveInSlide> rslt;
+        for (auto&& [ptr,sis] : *this)
+            rslt.push_back({ptr,sis});
+        std::sort(rslt.begin(),rslt.end(),[](PrimitiveInSlide a,PrimitiveInSlide b){
+            return a.first->getDepth() < b.first->getDepth();
+        });
+        return rslt;
+    }
+
     void add(PrimitiveInSlide pis){
         add(pis.first,pis.second);
     }

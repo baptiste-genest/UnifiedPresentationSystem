@@ -97,6 +97,9 @@ struct Primitive {
 
     virtual void initPolyscope() {}
 
+    void setDepth(int d) {depth = d;}
+    int getDepth() const {return depth;}
+
 protected:
     virtual void draw(const TimeObject& time,const StateInSlide& sis) = 0;
     virtual void playIntro(const TimeObject& t,const StateInSlide& sis) = 0;
@@ -104,6 +107,7 @@ protected:
     virtual void forceDisable() {};
     virtual void forceEnable() {};
 
+    int depth = 0;
 
     TimeStamp inner_time;
     bool enabled = false;
