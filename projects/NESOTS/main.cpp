@@ -180,6 +180,7 @@ void init() {
     Latex::NewCommand("U","\\mathcal{U}");
     Latex::NewCommand("Sp","\\mathbb{S}");
     Latex::NewCommand("Hy","\\mathbb{H}");
+    Latex::NewCommand("Rd","\\mathbb{R}^d");
     Latex::NewCommand("proj","\\Pi^\\theta");
     Latex::UsePackage("cmbright");
   
@@ -517,7 +518,7 @@ void init() {
         show << mupc << gradfpc << Formula::Add("x")->track([mupc](){return mupc->getCurrentPos();},vec2(-0.02,0.02));
         show << inNextFrame;
 
-        auto descent = Formula::Add("x_i^{n+1} = x_i^n \\textcolor{red}{-} \\tau \\nabla_{x_i^n} SW");
+        auto descent = Formula::Add("\\Rd : x_i^{n+1} = x_i^n \\textcolor{red}{-} \\tau \\nabla_{x_i^n} SW");
         show << descent->at("grad_optim");
         show << inNextFrame;
 
@@ -536,11 +537,11 @@ void init() {
         vec nu = S->getVertices()[1489];
         auto nupc = Point::Add(nu,0.035);
 
-        show << PlaceBelow(Formula::Add((R"( x^{n+1}_i = \text{Exp}_{x^n_i}(-\tau\nabla_{x^n_i} SW))")),descent);
+        show << PlaceRelative(Formula::Add((R"(\text{manifolds : } x^{n+1}_i = \text{Exp}_{x^n_i}(-\tau\nabla_{x^n_i} SW))")),descent,ABS_LEFT,REL_BOTTOM);
         show >> RGD >> gradfpc;
         show << inNextFrame;
 
-        auto grad = Formula::Add("\\nabla_{x_i} SW^{\\theta} = T^{\\theta}(x_i) \\textcolor{red}{-} x_i");
+        auto grad = Formula::Add("\\Rd : \\nabla_{x_i} SW^{\\theta} = T^{\\theta}(x_i) \\textcolor{red}{-} x_i");
         show << PlaceBelow(grad,0.05) << inNextFrame;
         show << inNextFrame;
         show << nupc << Formula::Add("y")->track([nupc](){return nupc->getCurrentPos();},vec2(0.02,0.02));
@@ -557,23 +558,9 @@ void init() {
         },0.035);
 
         show << inNextFrame << ExpLog;
-        show << inNextFrame >> Log << PlaceBelow(Formula::Add((R"( \nabla_{x_i} SW^\theta = \text{Log}_{x_i}(T^\theta (x_i)))")),grad);
+        show << inNextFrame >> Log << PlaceBelow(Formula::Add((R"(\text{manifolds : } \nabla_{x_i} SW^\theta = \text{Log}_{x_i}(T^\theta (x_i)))")),grad);
     }
-    {
 
-        show << newFrame << Latex::Add(R"(
-\begin{table}[]
-\centering
-\begin{tabular}{cccc}
-\multicolumn{1}{c|}{}                  & \multicolumn{1}{c|}{euclidean} & \multicolumn{1}{c|}{spherical}                                           & hyperbolic                                                                                                 \\ \hline
-\multicolumn{1}{c|}{$\text{Exp}_x(v)$} & \multicolumn{1}{c|}{$x+v$}     & \multicolumn{1}{c|}{$\cos(||v||)x + \sin(||v||)\frac{v}{||v||}$}         & $\text{cosh}(||v||_L)x + \text{cosh}(||v||_L)\frac{v}{||v||} $                                             \\ \hline
-\multicolumn{1}{c|}{$\text{Log}_x(y)$} & \multicolumn{1}{c|}{$y-x$}     & \multicolumn{1}{c|}{$\frac{\Pi_{TM_x}(y-x)}{||\Pi_{TM_x}(y-x)||}d(x,y)$} & $\frac{\text{arccosh}(-\langle x,y\rangle_L)}{\sqrt{\langle x,y \rangle_L^2-1}}(y+\langle x,y\rangle_L x)$ \\
-                                       &                                &                                                                          &
-\end{tabular}
-\end{table}
-)",Options::UPS_default_height_ratio*1.2);
-
-    }
     auto S = Mesh::Add(Options::DataPath + "meshes/ico_sphere_5.obj",vec(1,1,1),true);
 
     {
@@ -656,6 +643,27 @@ void init() {
         //show << Image::Add("logexp.png",1)->at("logexp");
     }
     {
+        show << newFrame << Title("Generic and closed form")->at(TOP) << Latex::Add(R"(
+\begin{table}[]
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{c|c|c|c}
+                  & euclidean & spherical                                   & hyperbolic                                                     \\ \hline
+$\text{Exp}_x(v)$ & $x+v$     & $\cos(||v||)x + \sin(||v||)\frac{v}{||v||}$ & $\text{cosh}(||v||_L)x + \text{cosh}(||v||_L)\frac{v}{||v||} $ \\ \hline
+$\text{Log}_x(y)$ &
+  $y-x$ &
+  $\frac{\Pi_{TM_x}(y-x)}{||\Pi_{TM_x}(y-x)||}d(x,y)$ &
+  $\frac{\text{arccosh}(-\langle x,y\rangle_L)}{\sqrt{\langle x,y \rangle_L^2-1}}(y+\langle x,y\rangle_L x)$ \\ \hline
+$P^\theta(x)$ &
+  $\theta \langle \theta , x \rangle$ &
+  $\frac{\Pi^\theta(x)}{||\Pi^\theta(x)||}$ &
+  $\frac{\Pi^\theta(x)}{\sqrt{-\langle \Pi^\theta(x),\Pi^\theta(x) \rangle_L}}$
+\end{tabular}%
+}
+\end{table}
+)",Options::UPS_default_height_ratio*1);
+        show << PlaceBottom(Latex::Add("See details in paper."));
+    }
+    {
         show << newFrame << Title("Geometric Median for robust SGD")->at(TOP);
         show << Image::Add("sphere_density.png")->at("density_on_sphere");
         show << Latex::Add("Classic SGD:")->at("SGD");
@@ -718,7 +726,6 @@ void init() {
         auto sample_sphere = Latex::Add("Sampling $\\Sp^2$");
         show << sample_sphere->at("space");
 
-        show << inNextFrame;
         show << fibopc;
         show << pts->at("fibo") << PlaceNextTo(hearth_eyes,1);
         show << inNextFrame;
@@ -740,13 +747,13 @@ void init() {
 
         show << newFrameSameTitle;
         show << PlaceBelow(Latex::Add("Rotation sampling"));
-        show << inNextFrame << Latex::Add("$\\rightarrow$ sampling unit Quaternions $\\subset \\mathbb{S}^3$")->at("unit_quat");
-        show << inNextFrame << Formula::Add("q^{-1}\\Vec{x}q")->at("quat");
-        show << inNextFrame << PlaceNextTo(Formula::Add("=(-q)^{-1}\\Vec{x}(-q)"),1);
-        //show << inNextFrame << Image::Add("rot_sampling.png")->at("rot2");
+        show << inNextFrame << Latex::Add("Idea : sampling unit Quaternions $\\subset \\mathbb{S}^3$")->at("unit_quat");
+        show << Latex::Add("But since, $q^{-1}\\Vec{x}q = (-q)^{-1}\\Vec{x}(-q)$ we need projective sampling !")->at("quat");
         show << inNextFrame << Gif::Add("rotation_sampling.gif")->at("rot2");
+        show << inNextFrame << Image::Add("visibility.png",0.8)->at("visibility");
+
         show << newFrameSameTitle << PlaceBelow(Latex::Add("And much more !"));
-        show << inNextFrame << Image::Add("line_sampling.png",1.4)->at("line");
+        show << Image::Add("line_sampling.png",1.4)->at("line");
         show << Formula::Add("ax+by+c = 0")->at("cartesian");
     }
 
@@ -754,14 +761,15 @@ void init() {
         show << newFrame << Title("Conclusion")->at(TOP);
         show <<
             PlaceRelative(Latex::Add(
-                                                 tex::enumerate(
-                                                 "We introduced NESOTS, a general algorithm for blue-noise sampling on non-euclidean geometries",
-                                                                       "It allows us to intrinsincly sample meshes",
-                                                                       "Projective sampling appears to be new and promising")
-                                                        +"\n Future works : \n " +
-                                                        tex::enumerate(
-                                                        " Extension to other domains (e.g. Lie groups)"
-                                                                                                  )),ABS_LEFT,REL_BOTTOM,0.04,0.15);
+                                  tex::enumerate(
+                                      "We introduced NESOTS, a general algorithm for blue-noise sampling on non-euclidean geometries",
+                                      "It allows us to intrinsincly sample meshes",
+                                      "Projective sampling appears to be new and promising")
+                                  +"\n Future works : \n " +
+                                  tex::enumerate(
+                                      " Extension to other domains (e.g. Lie groups)",
+                                                                             "Multiscale OT sampling"
+                                                                             )),ABS_LEFT,REL_BOTTOM,0.04,0.15);
         //        show << inNextFrame << PlaceBelow(Latex::Add("We showed how to apply it to various geometries"),0.1);
     }
 

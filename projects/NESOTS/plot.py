@@ -66,6 +66,26 @@ def __(X, np, plt):
 
 
 @app.cell
+def __(np, plt):
+    # read data file
+    fibo = np.array(np.loadtxt('data/superfibo.data'))
+    sots = np.array(np.loadtxt('data/NESOTS.data'))
+    #load into array
+
+    # plot both histograms
+    plt.hist(fibo, bins=50, alpha=0.5, label='SuperFibonacci', color='r')
+    plt.hist(sots, bins=50, alpha=0.5, label='NESOTS', color='b')
+
+    # add title
+    plt.title('Variances of visibility scores for 16 uniform rotations')
+
+    plt.legend()
+    plt.show()
+
+    return fibo, sots
+
+
+@app.cell
 def __():
     return
 
