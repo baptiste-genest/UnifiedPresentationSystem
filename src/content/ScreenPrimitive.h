@@ -51,9 +51,10 @@ public:
     }
 
 
-    inline ScreenPrimitiveInSlide at(std::string label) {
+    inline ScreenPrimitiveInSlide at(std::string label,scalar alpha = 1) {
         StateInSlide sis;
         sis.anchor = LabelAnchor::Add(label);
+        sis.alpha = alpha;
         return {get(pid),sis};
     }
 

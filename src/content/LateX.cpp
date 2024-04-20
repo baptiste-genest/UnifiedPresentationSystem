@@ -36,6 +36,7 @@ void UPS::generate_latex(const std::string &filename,
     formula_file << "\\usepackage{url}"<< std::endl;
     formula_file << "\\usepackage{aligned-overset}"<< std::endl;
     formula_file << "\\usepackage{ragged2e}"<< std::endl;
+    formula_file << "\\usepackage{booktabs}"<< std::endl;
 
     formula_file << Latex::context << std::endl;
     formula_file << "\\begin{document}"<< std::endl;
