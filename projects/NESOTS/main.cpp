@@ -478,6 +478,8 @@ void init() {
         show << newFrame;
         show << T->at(UPS::TOP);
         show << Image::Add("nesots_model2.png",1)->at("models");
+        show << PlaceBottomLeft(Image::Add("article.png",.3),0.01)     ;
+        show << PlaceNextTo(Latex::Add("\\scriptsize \\color{orange}[Bonet et al. 2023]"),1,0.01);
     }
     {
         auto T = Title("Optimization on Manifolds");
