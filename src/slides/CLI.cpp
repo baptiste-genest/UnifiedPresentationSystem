@@ -17,7 +17,21 @@ int parseCLI(int argc,char** argv) {
     std::string resolution = "1920x1080";
     app.add_option("--resolution",resolution,"screen resolution (default 1920x1080)");
 
+    int seed = -1;
+    app.add_option("--seed",seed,"seed for random generator");
+
     CLI11_PARSE(app,argc,argv);
+    try {
+        app.parse(argc,argv);
+    } catch (const CLI::ParseError& e) {
+        app.exit(e);
+    }
+
+    if (seed == -1)
+        srand(time(NULL));
+    else{
+        srand(seed);
+    }
 
     if (clear_cache){
         spdlog::info("clearing cache");

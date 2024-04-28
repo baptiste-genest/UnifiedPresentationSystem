@@ -1,6 +1,6 @@
 import marimo
 
-__generated_with = "0.1.63"
+__generated_with = "0.1.50"
 app = marimo.App()
 
 
@@ -77,7 +77,7 @@ def __(np, plt):
     plt.hist(sots, bins=50, alpha=0.5, label='NESOTS', color='b')
 
     # add title
-    plt.title('Variances of visibility scores for 16 uniform rotations')
+    plt.title('Visibility scores of the faces of a sphere for 16 uniform rotations')
 
     plt.legend()
     plt.show()

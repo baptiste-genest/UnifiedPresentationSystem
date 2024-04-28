@@ -212,7 +212,8 @@ void UPS::Slideshow::ImGuiWindowConfig()
 
 void UPS::Slideshow::init(std::string project_name,int argc,char** argv)
 {
-    parseCLI(argc,argv);
+    if (parseCLI(argc,argv))
+        assert(false);
     from_action = Time::now();
     from_begin = Time::now();
 
