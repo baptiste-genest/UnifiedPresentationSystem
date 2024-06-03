@@ -1,7 +1,7 @@
 #ifndef PROMPTER_H
 #define PROMPTER_H
 
-#include "../UPS.h"
+#include "../libslope.h"
 #include "../content/primitive.h"
 #include <iostream>
 #include <fstream>
@@ -11,7 +11,7 @@
 #include <unistd.h>
 
 
-namespace UPS {
+namespace slope {
 
 using promptTag = std::string;
 

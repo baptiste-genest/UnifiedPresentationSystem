@@ -5,7 +5,7 @@
 #include "StateInSlide.h"
 #include "Anchor.h"
 
-namespace UPS {
+namespace slope {
 class ScreenPrimitive;
 using ScreenPrimitivePtr = std::shared_ptr<ScreenPrimitive>;
 using ScreenPrimitiveInSlide = std::pair<ScreenPrimitivePtr,StateInSlide>;
@@ -82,7 +82,7 @@ public:
 
     Size getRelativeSize() const {
         auto s = getSize();
-        return Size(s(0)/Options::UPS_screen_resolution_x,s(1)/Options::UPS_screen_resolution_y);
+        return Size(s(0)/Options::Slope_screen_resolution_x,s(1)/Options::Slope_screen_resolution_y);
     }
 
 };

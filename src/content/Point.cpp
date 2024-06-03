@@ -1,26 +1,26 @@
 #include "Point.h"
 
-UPS::Point::PointPtr UPS::Point::Add(const curve_param &phi,scalar r)
+slope::Point::PointPtr slope::Point::Add(const curve_param &phi,scalar r)
 {
     return NewPrimitive<Point>([phi](TimeObject t){return phi(t.inner_time);},r);
 }
 
-UPS::Point::PointPtr UPS::Point::Add(const vec &x, scalar rad)
+slope::Point::PointPtr slope::Point::Add(const vec &x, scalar rad)
 {
     return NewPrimitive<Point>(x,rad);
 }
 
-UPS::Point::PointPtr UPS::Point::Add(const DynamicParam &phi, scalar rad)
+slope::Point::PointPtr slope::Point::Add(const DynamicParam &phi, scalar rad)
 {
     return NewPrimitive<Point>(phi,rad);
 }
 
-UPS::Point::VectorQuantityPtr UPS::Point::addVector(const vec &v)
+slope::Point::VectorQuantityPtr slope::Point::addVector(const vec &v)
 {
     return addVector([v](scalar){return v;});
 }
 
-UPS::Point::VectorQuantity::PCQuantityPtr UPS::Point::addVector(const curve_param &phiX)
+slope::Point::VectorQuantity::PCQuantityPtr slope::Point::addVector(const curve_param &phiX)
 {
     vecs X = {phiX(0)};
     auto name = getPolyscopeName() + std::to_string(vectors.size());
@@ -31,14 +31,14 @@ UPS::Point::VectorQuantity::PCQuantityPtr UPS::Point::addVector(const curve_para
     return V;
 }
 
-void UPS::Point::setPos(const vec &v)
+void slope::Point::setPos(const vec &v)
 {
     x = v;
     vecs X = {v};
     pc->updatePointPositions(X);
 }
 
-void UPS::Point::updateVectors()
+void slope::Point::updateVectors()
 {
     for (int i = 0;i<vectors.size();i++){
         if (vectors[i].first->q->isEnabled()){
@@ -52,7 +52,7 @@ void UPS::Point::updateVectors()
     }
 }
 
-UPS::Point::PointPtr UPS::Point::apply(const mapping &f) const
+slope::Point::PointPtr slope::Point::apply(const mapping &f) const
 {
     auto Phi = phi;
     return Point::Add(DynamicParam([f,Phi](TimeObject t){
@@ -60,7 +60,7 @@ UPS::Point::PointPtr UPS::Point::apply(const mapping &f) const
                       }),radius);
 }
 
-void UPS::Point::initPolyscope()
+void slope::Point::initPolyscope()
 {
     vecs X = {x};
     pc = polyscope::registerPointCloud(getPolyscopeName(),X);
@@ -69,7 +69,7 @@ void UPS::Point::initPolyscope()
 }
 
 
-UPS::Point::Point(const DynamicParam &phi, scalar radius) :
+slope::Point::Point(const DynamicParam &phi, scalar radius) :
     phi(phi),
     radius(radius)
 {

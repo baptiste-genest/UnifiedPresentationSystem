@@ -14,7 +14,7 @@
 #include <string>
 #endif //__APPLE__
 
-namespace UPS {
+namespace slope {
   
   void screenshot(std::string file);
 }

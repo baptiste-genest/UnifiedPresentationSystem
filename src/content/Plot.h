@@ -3,7 +3,7 @@
 #include "primitive.h"
 
 /*
-namespace UPS {
+namespace slope {
 
 class Plot : public Primitive
 {

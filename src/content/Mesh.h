@@ -1,12 +1,12 @@
 #ifndef MESH_H
 #define MESH_H
-#include "../UPS.h"
+#include "../libslope.h"
 #include "PolyscopePrimitive.h"
 #include "polyscope/surface_mesh.h"
 #include "geometrycentral/surface/meshio.h"
 #include "../math/geometry.h"
 
-namespace UPS {
+namespace slope {
   
   class Mesh : public PolyscopePrimitive
   {

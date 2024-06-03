@@ -1,9 +1,9 @@
 #ifndef KERNELS_H
 #define KERNELS_H
 
-#include "../UPS.h"
+#include "../libslope.h"
 
-namespace UPS {
+namespace slope {
 template <typename T> int sgn(T val) {
     return (T(0) < val) - (val < T(0));
 }

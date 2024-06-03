@@ -8,7 +8,7 @@
 #include "../content/PrimitiveGroup.h"
 //#include "Panel.h"
 
-namespace UPS {
+namespace slope {
 
 inline StateInSlide transition(parameter t, const StateInSlide &sa, const StateInSlide &sb){
     StateInSlide St;

@@ -4,7 +4,7 @@
 #include "Placement.h"
 #include "../slides/Slide.h"
 
-namespace UPS {
+namespace slope {
 
 struct PrimitiveGroup {
     Slide buffer;

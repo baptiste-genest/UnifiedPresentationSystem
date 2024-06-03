@@ -1,3 +1,3 @@
 #include "PolyscopePrimitive.h"
 
-size_t UPS::PolyscopePrimitive::count = 0;
+size_t slope::PolyscopePrimitive::count = 0;

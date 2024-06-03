@@ -1,6 +1,6 @@
 #include "Sliders.h"
 
-void UPS::Sliders::draw(const TimeObject &time, const StateInSlide &sis)
+void slope::Sliders::draw(const TimeObject &time, const StateInSlide &sis)
 {
     ImGuiIO& io = ImGui::GetIO(); (void)io;
     io.WantCaptureMouse = true;
@@ -17,7 +17,7 @@ void UPS::Sliders::draw(const TimeObject &time, const StateInSlide &sis)
 }
 
 
-namespace UPS {
+namespace slope {
 Sliders::SlidersPtr AddIntSliders(int nb, const std::string &label,int default_val, const std::pair<float, float> &bounds)
 {
     std::vector<int> ints(nb,default_val);

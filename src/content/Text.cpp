@@ -1,7 +1,7 @@
 #include "Text.h"
 
 
-namespace UPS {
+namespace slope {
 
 Text::TextPtr Text::Add(const std::string &content, FontID font)
 {

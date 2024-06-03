@@ -1,6 +1,6 @@
 #include "io.h"
 
-void UPS::io::SaveMatrix(string fileName, const Mat &M) {
+void slope::io::SaveMatrix(string fileName, const Mat &M) {
     //https://eigen.tuxfamily.org/dox/structEigen_1_1IOFormat.html
     const static IOFormat CSVFormat(FullPrecision, DontAlignCols, ", ", "\n");
 
@@ -12,7 +12,7 @@ void UPS::io::SaveMatrix(string fileName, const Mat &M) {
     }
 }
 
-UPS::Mat UPS::io::LoadMatrix(string fileToOpen)
+slope::Mat slope::io::LoadMatrix(string fileToOpen)
 {
 
     vector<double> matrixEntries;

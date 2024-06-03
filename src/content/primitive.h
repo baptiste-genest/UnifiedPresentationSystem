@@ -1,7 +1,7 @@
 #ifndef PRIMITIVE_H
 #define PRIMITIVE_H
 
-#include "../UPS.h"
+#include "../libslope.h"
 #include "../math/kernels.h"
 #include "TimeObject.h"
 #include "Options.h"
@@ -9,7 +9,7 @@
 #include <iostream>
 #include "io.h"
 
-namespace UPS {
+namespace slope {
 
 using PrimitiveInSlide = std::pair<PrimitivePtr,StateInSlide>;
 

@@ -5,7 +5,7 @@
 #include "polyscope/point_cloud.h"
 #include "../math/Parametrization.h"
 
-namespace UPS {
+namespace slope {
 
 using DynamicParam = std::function<vec(const TimeObject&)>;
 

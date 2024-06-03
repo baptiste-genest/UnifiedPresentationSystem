@@ -1,6 +1,6 @@
 #include "Mesh.h"
 
-UPS::Mesh::MeshPtr UPS::Mesh::Add(const std::string &objfile,const vec& scale,bool smooth)
+slope::Mesh::MeshPtr slope::Mesh::Add(const std::string &objfile,const vec& scale,bool smooth)
 {
     std::vector<std::array<double,3>> V;
     Faces F;
@@ -23,7 +23,7 @@ UPS::Mesh::MeshPtr UPS::Mesh::Add(const std::string &objfile,const vec& scale,bo
     return rslt;
 }
 
-UPS::Mesh::MeshPtr UPS::Mesh::apply(const VertexMap &phi,bool smooth) const
+slope::Mesh::MeshPtr slope::Mesh::apply(const VertexMap &phi,bool smooth) const
 {
     auto Vphi = vertices;
     for (int i = 0;i<Vphi.size();i++)
@@ -32,7 +32,7 @@ UPS::Mesh::MeshPtr UPS::Mesh::apply(const VertexMap &phi,bool smooth) const
     return rslt;
 }
 
-UPS::Mesh::MeshPtr UPS::Mesh::applyDynamic(const VertexTimeMap &phi,bool smooth) const
+slope::Mesh::MeshPtr slope::Mesh::applyDynamic(const VertexTimeMap &phi,bool smooth) const
 {
     MeshPtr rslt = NewPrimitive<Mesh>(vertices,original_vertices,faces,smooth);
     rslt->updater = [phi] (const TimeObject& t,Primitive* ptr) {
@@ -45,7 +45,7 @@ UPS::Mesh::MeshPtr UPS::Mesh::applyDynamic(const VertexTimeMap &phi,bool smooth)
     return rslt;
 }
 
-void UPS::Mesh::setSmooth(bool set)
+void slope::Mesh::setSmooth(bool set)
 {
     if (set){
         pc->setSmoothShade(true);
@@ -57,7 +57,7 @@ void UPS::Mesh::setSmooth(bool set)
     }
 }
 
-UPS::Vec UPS::Mesh::eval(const scalar_func &f) const
+slope::Vec slope::Mesh::eval(const scalar_func &f) const
 {
     Vec X(vertices.size());
     for (int i = 0;i<vertices.size();i++)
@@ -65,7 +65,7 @@ UPS::Vec UPS::Mesh::eval(const scalar_func &f) const
     return X;
 }
 
-UPS::vecs UPS::Mesh::eval(const vector_func &f) const
+slope::vecs slope::Mesh::eval(const vector_func &f) const
 {
     vecs X(vertices.size());
     for (int i = 0;i<vertices.size();i++)
@@ -73,13 +73,13 @@ UPS::vecs UPS::Mesh::eval(const vector_func &f) const
     return X;
 }
 
-void UPS::Mesh::updateMesh(const vecs &X)
+void slope::Mesh::updateMesh(const vecs &X)
 {
     vertices = X;
     pc->updateVertexPositions(vertices);
 }
 
-void UPS::Mesh::initPolyscope()
+void slope::Mesh::initPolyscope()
 {
     pc = polyscope::registerSurfaceMesh(getPolyscopeName(),vertices,faces);
     pc->setBackFacePolicy(polyscope::BackFacePolicy::Identical);
@@ -88,7 +88,7 @@ void UPS::Mesh::initPolyscope()
 }
 
 
-UPS::Mesh::Mesh(const vecs &vertices, const vecs &original_vertices, const Faces &faces, bool smooth) : vertices(vertices),
+slope::Mesh::Mesh(const vecs &vertices, const vecs &original_vertices, const Faces &faces, bool smooth) : vertices(vertices),
     original_vertices(original_vertices),
     faces(faces),smooth(smooth)
 {

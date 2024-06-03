@@ -3,7 +3,7 @@
 
 #include "PolyscopePrimitive.h"
 
-namespace UPS {
+namespace slope {
 
 
 class Sliders : public PolyscopePrimitive

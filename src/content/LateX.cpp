@@ -2,7 +2,7 @@
 #include <spdlog/spdlog.h>
 #include "Options.h"
 
-UPS::LatexPtr UPS::Latex::Add(const TexObject &tex,scalar height_ratio)
+slope::LatexPtr slope::Latex::Add(const TexObject &tex,scalar height_ratio)
 {
     auto H = std::hash<std::string>{}(Latex::context + tex+"0"+std::to_string(height_ratio));
     std::string filename = Options::DataPath + "formulas/" + std::to_string(H) + ".png";
@@ -15,13 +15,13 @@ UPS::LatexPtr UPS::Latex::Add(const TexObject &tex,scalar height_ratio)
     return rslt;
 }
 
-void UPS::Latex::DeclareMathOperator(const TexObject &name, const TexObject &content) {
+void slope::Latex::DeclareMathOperator(const TexObject &name, const TexObject &content) {
     context += "\\DeclareMathOperator*{\\" + name + "}{" + content + "}";
 }
 
-UPS::TexObject UPS::Latex::context = "";
+slope::TexObject slope::Latex::context = "";
 
-void UPS::generate_latex(const std::string &filename,
+void slope::generate_latex(const std::string &filename,
                          const TexObject &tex,
                          bool formula, 
                          scalar height_ratio)
@@ -47,18 +47,18 @@ void UPS::generate_latex(const std::string &filename,
         formula_file << "\\end{align*}"<< std::endl;
     formula_file << "\\end{document}"<< std::endl;
 
-    std::string latex_cmd = Options::UPS_PDFLATEX+" -output-directory=/tmp /tmp/formula.tex  >>/tmp/UPS.log";
+    std::string latex_cmd = Options::Slope_PDFLATEX+" -output-directory=/tmp /tmp/formula.tex  >>/tmp/UPS.log";
     if (std::system(latex_cmd.c_str())) {
         std::cerr << "[error while generating latex] " <<  std::endl;
         exit(1);
     }
-    if (std::system((Options::UPS_CONVERT+" -density "+std::to_string(Options::UPS_density)+" -quality 100 -trim -border 10 -bordercolor none /tmp/formula.pdf -colorspace RGB " + filename + " >>/tmp/UPS.log").c_str())) {
+    if (std::system((Options::Slope_CONVERT+" -density "+std::to_string(Options::Slope_density)+" -quality 100 -trim -border 10 -bordercolor none /tmp/formula.pdf -colorspace RGB " + filename + " >>/tmp/UPS.log").c_str())) {
         std::cerr << "[error while converting to png]" << std::endl;
         assert(false);
     }
     int h = 1080*height_ratio*Image::getSize(filename).y/99.;
-    spdlog::info((Options::UPS_CONVERT+" " + filename + " -resize x" + std::to_string(h) + " " + filename + " >>/tmp/UPS.log"));
-    if (std::system((Options::UPS_CONVERT+" " + filename + " -resize x" + std::to_string(h) + " " + filename + " >>/tmp/UPS.log").c_str())){
+    spdlog::info((Options::Slope_CONVERT+" " + filename + " -resize x" + std::to_string(h) + " " + filename + " >>/tmp/UPS.log"));
+    if (std::system((Options::Slope_CONVERT+" " + filename + " -resize x" + std::to_string(h) + " " + filename + " >>/tmp/UPS.log").c_str())){
         std::cerr << "[error while resizing]" << std::endl;
         assert(false);
     }
@@ -66,7 +66,7 @@ void UPS::generate_latex(const std::string &filename,
 
 }
 
-UPS::LatexPtr UPS::Formula::Add(const TexObject &tex, scalar height_ratio)
+slope::LatexPtr slope::Formula::Add(const TexObject &tex, scalar height_ratio)
 {
     auto H = std::hash<std::string>{}(tex+"1"+std::to_string(height_ratio));
     std::string filename = Options::DataPath + "formulas/" + std::to_string(H) + ".png";

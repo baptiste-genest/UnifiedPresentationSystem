@@ -1,9 +1,9 @@
 #ifndef PARAMETRIZATION_H
 #define PARAMETRIZATION_H
 
-#include "../UPS.h"
+#include "../libslope.h"
 
-namespace UPS {
+namespace slope {
 
 struct Parametrization {
     curve_param param;

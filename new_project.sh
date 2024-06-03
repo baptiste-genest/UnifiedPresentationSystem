@@ -1,4 +1,4 @@
-echo "[UPS] creating new UPS project $1"
+echo "[UPS] creating new slope project $1"
 
 echo "[UPS] creating folder in project"
 mkdir "projects/$1"

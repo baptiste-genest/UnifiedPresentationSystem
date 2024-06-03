@@ -1,10 +1,10 @@
 #include "polyscope/polyscope.h"
 
-#include "../../src/UnifiedPresentationSystem.h"
+#include "../../src/slope.h"
 #include "imgui.h"
 
 using namespace UPS;
-UPS::Slideshow show;
+slope::Slideshow show;
 
 void init () {
     Latex::UsePackage("tcolorbox");

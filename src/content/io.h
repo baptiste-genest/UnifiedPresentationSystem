@@ -1,6 +1,6 @@
 #ifndef IO_H
 #define IO_H
-#include "../UPS.h"
+#include "../libslope.h"
 #include <geometrycentral/surface/vertex_position_geometry.h>
 #include <geometrycentral/surface/meshio.h>
 #include <iostream>
@@ -10,7 +10,7 @@
 
 #include <fstream>
 
-namespace UPS {
+namespace slope {
 
 namespace io {
 

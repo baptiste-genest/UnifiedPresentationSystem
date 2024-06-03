@@ -6,7 +6,7 @@
 #include "../math/kernels.h"
 #include "../math/geometry.h"
 
-namespace UPS {
+namespace slope {
 
 struct ImageData {
     GLuint texture = 0;

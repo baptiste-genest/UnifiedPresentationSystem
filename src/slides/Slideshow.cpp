@@ -1,7 +1,7 @@
 #include "Slideshow.h"
 
 
-void UPS::Slideshow::nextFrame()
+void slope::Slideshow::nextFrame()
 {
     if (current_slide == slides.size()-1)
         return;
@@ -12,7 +12,7 @@ void UPS::Slideshow::nextFrame()
     transition_done = false;
 }
 
-void UPS::Slideshow::previousFrame()
+void slope::Slideshow::previousFrame()
 {
     if (!current_slide)
         return;
@@ -33,7 +33,7 @@ void UPS::Slideshow::previousFrame()
     locked = true;
 }
 
-void UPS::Slideshow::forceNextFrame()
+void slope::Slideshow::forceNextFrame()
 {
     if (current_slide == slides.size()-1)
         return;
@@ -54,7 +54,7 @@ void UPS::Slideshow::forceNextFrame()
     locked = false;
 }
 
-void UPS::Slideshow::play() {
+void slope::Slideshow::play() {
     ImGuiWindowConfig();
     ImGui::Begin("Unified Presentation System",NULL,window_flags);
 
@@ -136,7 +136,7 @@ void UPS::Slideshow::play() {
     ImGui::End();
 }
 
-void UPS::Slideshow::setInnerTime()
+void slope::Slideshow::setInnerTime()
 {
     if (visited_slide == current_slide)
         return;
@@ -145,7 +145,7 @@ void UPS::Slideshow::setInnerTime()
     visited_slide = current_slide;
 }
 
-void UPS::Slideshow::handleDragAndDrop()
+void slope::Slideshow::handleDragAndDrop()
 {
     auto io = ImGui::GetIO();
     if (!ImGui::IsKeyPressed(341) || io.MouseReleased[0] > 0){//CTRL {
@@ -172,7 +172,7 @@ void UPS::Slideshow::handleDragAndDrop()
     }
 }
 
-void UPS::Slideshow::prompt()
+void slope::Slideshow::prompt()
 {
     if (prompter_ptr == nullptr)
         return;
@@ -184,7 +184,7 @@ void UPS::Slideshow::prompt()
     prompter_ptr->erase(from_begin);
 }
 
-void UPS::Slideshow::handleTransition()
+void slope::Slideshow::handleTransition()
 {
     if (transition_done || current_slide == 0)
         return;
@@ -201,7 +201,7 @@ void UPS::Slideshow::handleTransition()
 
 
 
-void UPS::Slideshow::ImGuiWindowConfig()
+void slope::Slideshow::ImGuiWindowConfig()
 {
     ImGuiIO& io = ImGui::GetIO(); (void)io;
     io.WantCaptureMouse = false;
@@ -210,26 +210,26 @@ void UPS::Slideshow::ImGuiWindowConfig()
     ImGui::SetNextWindowSize(ImVec2(io.DisplaySize.x,io.DisplaySize.y));
 }
 
-void UPS::Slideshow::init(std::string project_name,int argc,char** argv)
+void slope::Slideshow::init(std::string project_name,int argc,char** argv)
 {
     if (parseCLI(argc,argv))
         assert(false);
     from_action = Time::now();
     from_begin = Time::now();
 
-    //UPS::Options::UPSPath = TOSTRING(UPS_SOURCE);
-    UPS::Options::UPSPath = Options::UPSPath;
-    UPS::Options::DataPath = Options::UPSPath + "/data/";
-    UPS::Options::ProjectName = project_name;
-    UPS::Options::ProjectPath = UPS::Options::UPSPath+std::string("/projects/")+UPS::Options::ProjectName+std::string("/");
-    UPS::Options::ProjectViewsPath = UPS::Options::ProjectPath+std::string("views/");
+    //slope::Options::UPSPath = TOSTRING(Slope_SOURCE);
+    slope::Options::SlopePath = Options::SlopePath;
+    slope::Options::SlopePath = Options::SlopePath + "/data/";
+    slope::Options::ProjectName = project_name;
+    slope::Options::ProjectPath = slope::Options::SlopePath+std::string("/projects/")+slope::Options::ProjectName+std::string("/");
+    slope::Options::ProjectViewsPath = slope::Options::ProjectPath+std::string("views/");
 
-    std::cout << "			[ UPS PROJECT : " << UPS::Options::ProjectName << " ]" << std::endl;
+    std::cout << "			[ slope PROJECT : " << slope::Options::ProjectName << " ]" << std::endl;
 
-    std::cout << "[ UPS PATH ] " << UPS::Options::UPSPath << std::endl;
-    std::cout << "[ PROJECT PATH ] " << UPS::Options::ProjectPath << std::endl;
-    std::cout << "[ PROJECT CACHE PATH ] " << UPS::Options::ProjectViewsPath << std::endl;
-    std::cout << "[ SCREEN RESOLUTION ] " << UPS::Options::UPS_screen_resolution_x<<"x"<<UPS::Options::UPS_screen_resolution_y  << std::endl;
+    std::cout << "[ slope PATH ] " << slope::Options::SlopePath << std::endl;
+    std::cout << "[ PROJECT PATH ] " << slope::Options::ProjectPath << std::endl;
+    std::cout << "[ PROJECT CACHE PATH ] " << slope::Options::ProjectViewsPath << std::endl;
+    std::cout << "[ SCREEN RESOLUTION ] " << slope::Options::Slope_screen_resolution_x<<"x"<<slope::Options::Slope_screen_resolution_y  << std::endl;
 
     std::cout << "[ KEY GUIDE ] " << std::endl;
     std::cout << "  - right arrow : next slide" << std::endl;
@@ -265,7 +265,7 @@ void UPS::Slideshow::init(std::string project_name,int argc,char** argv)
 
 }
 
-void UPS::Slideshow::slideMenu()
+void slope::Slideshow::slideMenu()
 {
     ImGui::Begin("Slides");
     std::set<std::string> done;
@@ -280,7 +280,7 @@ void UPS::Slideshow::slideMenu()
     ImGui::End();
 }
 
-std::string UPS::Slideshow::getSlideTitle(int i)
+std::string slope::Slideshow::getSlideTitle(int i)
 {
     auto title = slides[i].getTitle();
     if (title == "")
@@ -288,7 +288,7 @@ std::string UPS::Slideshow::getSlideTitle(int i)
     return title;
 }
 
-void UPS::Slideshow::goToSlide(int slide_nb)
+void slope::Slideshow::goToSlide(int slide_nb)
 {
     if (slide_nb == current_slide)
         return;
@@ -301,21 +301,21 @@ void UPS::Slideshow::goToSlide(int slide_nb)
     from_action = Time::now();
 }
 
-void UPS::Slideshow::saveCamera(std::string file)
+void slope::Slideshow::saveCamera(std::string file)
 {
     std::ofstream camfile(file);
     camfile << removeResolutionFromCamfile(polyscope::view::getCameraJson());
     std::cout << "current camera view exported at " << file << std::endl;
 }
 
-void UPS::Slideshow::initializeSlides()
+void slope::Slideshow::initializeSlides()
 {
     precomputeTransitions();
     loadSlides();
     from_begin = Time::now();
 }
 
-void UPS::Slideshow::loadSlides()
+void slope::Slideshow::loadSlides()
 {
     slide_numbers.resize(slides.size());
     std::set<std::string> done;
@@ -336,7 +336,7 @@ void UPS::Slideshow::loadSlides()
 }
 
 
-UPS::PrimitivePtr UPS::Slideshow::getPrimitiveUnderMouse(scalar x,scalar y) const
+slope::PrimitivePtr slope::Slideshow::getPrimitiveUnderMouse(scalar x,scalar y) const
 {
     auto io = ImGui::GetIO();
     auto S = ImGui::GetWindowSize();
@@ -350,13 +350,13 @@ UPS::PrimitivePtr UPS::Slideshow::getPrimitiveUnderMouse(scalar x,scalar y) cons
     return nullptr;
 }
 
-void UPS::Slideshow::displaySlideNumber()
+void slope::Slideshow::displaySlideNumber()
 {
     const auto& DSN = slide_number_display[slide_numbers[current_slide]];
     DSN.first->play(TimeObject(),DSN.second);
 }
 
-void UPS::Slideshow::handleInputs()
+void slope::Slideshow::handleInputs()
 {
     handleDragAndDrop();
 
@@ -384,13 +384,13 @@ void UPS::Slideshow::handleInputs()
         constexpr int nb_zeros = 6;
         auto n = std::to_string(screenshot_count++);
         std::string file =  "/tmp/screenshot_" + std::string(nb_zeros-n.size(),'0') + n + ".png";
-        UPS::screenshot(file);
+        slope::screenshot(file);
         std::cout << "screenshot saved at " << file << std::endl;
     }
 
 }
 
-void UPS::Slideshow::displayPopUps()
+void slope::Slideshow::displayPopUps()
 {
     std::string file;
 

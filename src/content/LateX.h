@@ -1,14 +1,14 @@
 #ifndef LATEX_H
 #define LATEX_H
 
-#include "../UPS.h"
+#include "../libslope.h"
 #include "Image.h"
 #include "io.h"
 #include <stdarg.h>
 #include <string>
 #include "Options.h"
 
-namespace UPS {
+namespace slope {
 
 using TexObject = std::string;
 
@@ -18,7 +18,7 @@ using LatexPtr = std::shared_ptr<Latex>;
 
 struct Latex : public TextualPrimitive {
 
-    static LatexPtr Add(const TexObject& tex,scalar height_ratio = Options::UPS_default_height_ratio);
+    static LatexPtr Add(const TexObject& tex,scalar height_ratio = Options::Slope_default_height_ratio);
 
     static TexObject context;
     static void Define(const TexObject& tex) {context += tex;}
@@ -60,10 +60,10 @@ public:
     // ScreenPrimitive interface
 public:
     virtual vec2 getSize() const override {
-        bool notfullHD = (Options::UPS_screen_resolution_x != 1920) ||(Options::UPS_screen_resolution_y != 1080);
+        bool notfullHD = (Options::Slope_screen_resolution_x != 1920) ||(Options::Slope_screen_resolution_y != 1080);
         if (notfullHD){
-            double sx =  Options::UPS_screen_resolution_x/1920.;
-            double sy =  Options::UPS_screen_resolution_y/1080.;
+            double sx =  Options::Slope_screen_resolution_x/1920.;
+            double sy =  Options::Slope_screen_resolution_y/1080.;
             return vec2(sx*data.width,sy*data.height);
         }
         return vec2(data.width,data.height);
@@ -71,7 +71,7 @@ public:
 };
 
 struct Formula : public Latex {
-    static LatexPtr Add(const TexObject& tex,scalar height_ratio = Options::UPS_default_height_ratio);
+    static LatexPtr Add(const TexObject& tex,scalar height_ratio = Options::Slope_default_height_ratio);
 };
 
 
@@ -233,7 +233,7 @@ inline LatexPtr Title(TexObject s,bool center = true) {
     auto old = s;
     if (center)
         s = tex::center(s);
-    auto rslt = Latex::Add(s,Options::UPS_TITLE);
+    auto rslt = Latex::Add(s,Options::Slope_TITLE);
     rslt->exclusive = true;
     rslt->content = old;
     return rslt;

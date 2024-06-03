@@ -1,6 +1,6 @@
 #include "FontManager.h"
 
-namespace UPS {
+namespace slope {
 
 std::vector<ImFont*> FontManager::fonts;
 

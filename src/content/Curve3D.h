@@ -5,7 +5,7 @@
 #include "polyscope/curve_network.h"
 #include "../math/Parametrization.h"
 
-namespace UPS {
+namespace slope {
 
 class Curve3D : public PolyscopePrimitive
 {

@@ -7,7 +7,7 @@
 #include "../content/Text.h"
 #include "CLI.h"
 
-namespace UPS {
+namespace slope {
 
 class Slideshow : public PrompterModule
 {

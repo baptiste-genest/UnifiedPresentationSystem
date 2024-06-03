@@ -4,7 +4,7 @@
 #include "PolyscopePrimitive.h"
 #include "polyscope/point_cloud.h"
 
-namespace UPS {
+namespace slope {
 
 class PointCloud : public PolyscopePrimitive
 {

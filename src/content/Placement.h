@@ -4,7 +4,7 @@
 #include "ScreenPrimitive.h"
 
 
-namespace UPS {
+namespace slope {
 
 const vec2 CENTER(0.5,0.5);
 const vec2 TOP(0.5,0.1);

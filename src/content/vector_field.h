@@ -4,7 +4,7 @@
 #include "polyscope/point_cloud.h"
 #include "../math/utils.h"
 
-namespace UPS {
+namespace slope {
 
 class VectorField : public PolyscopePrimitive
 {

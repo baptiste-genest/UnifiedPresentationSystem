@@ -6,7 +6,7 @@
 #include "polyscope/surface_mesh.h"
 #include "StateInSlide.h"
 
-namespace UPS {
+namespace slope {
 class PolyscopePrimitive;
 using PolyscopePrimitivePtr = std::shared_ptr<PolyscopePrimitive>;
 

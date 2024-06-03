@@ -1,6 +1,6 @@
 #include "polyscope/polyscope.h"
 
-#include "../../src/UnifiedPresentationSystem.h"
+#include "../../src/slope.h"
 #include "geometrycentral/surface/vertex_position_geometry.h"
 #include "geometrycentral/surface/meshio.h"
 #include "imgui.h"
@@ -9,8 +9,8 @@
 
 #include "geometrycentral/numerical/linear_solvers.h"
 
-using namespace UPS;
-UPS::Slideshow show;
+using namespace slope;
+slope::Slideshow show;
 
 PrimitiveID explorer_id;
 
@@ -419,11 +419,11 @@ io::GeometryCentralMesh maskGC;
 
 void init () {
     
-    UPS::Options::ProjectName = "../../projects/minimal_surf/";
+    slope::Options::ProjectName = "../../projects/minimal_surf/";
 
     const auto& SHOW = show;
-    auto CMFONTID = UPS::FontManager::addFont(Options::DataPath + "fonts/ComputerModernSR.ttf",50);
-    UPS::Style::default_font = CMFONTID;
+    auto CMFONTID = slope::FontManager::addFont(Options::DataPath + "fonts/ComputerModernSR.ttf",50);
+    slope::Style::default_font = CMFONTID;
     
     auto grid = Mesh::Add(Options::DataPath + "meshes/grid_quad_50.obj");
     auto disk = Mesh::Add(Options::DataPath + "meshes/disk_coarse.obj",0.5,true);
@@ -439,7 +439,7 @@ void init () {
 
     auto top_cam = CameraView::Add(vec(0,0.6,5),vec(0,0.6,0),vec(0,1,0));
 
-    show << Latex::Add("Les opérateurs différentiels sont vos amis.",Options::UPS_TITLE)->at(CENTER);
+    show << Latex::Add("Les opérateurs différentiels sont vos amis.",Options::Slope_TITLE)->at(CENTER);
     show << "Intro";
 
     if (true)
@@ -489,7 +489,7 @@ void init () {
 
         auto curveParam = Curve3D::Add(circle,100,true,0.008);
         auto circle_slow = [](scalar t){return vec(0.3*cos(t) + 0.2,0.3*sin(t),0);};
-        auto point_param = UPS::Point::Add(circle_slow);
+        auto point_param = slope::Point::Add(circle_slow);
 
         show << inNextFrame <<
             curveParam->apply(offset,true)
@@ -654,7 +654,7 @@ void init () {
     {
         show << newFrame << Title("Discrétisation des opérateurs différentiels")->at(TOP);
         show << inNextFrame << PlaceLeft(Latex::Add(tex::center("Opérateurs différentiels classiques")));
-        show << PlaceBelow(Formula::Add("\\partial (f + g) = \\partial f + \\partial g")) << inNextFrame << PlaceRelative(Formula::Add(tex::AaboveB("?","\\longrightarrow"),0.06),UPS::CENTER_X,SAME_Y);
+        show << PlaceBelow(Formula::Add("\\partial (f + g) = \\partial f + \\partial g")) << inNextFrame << PlaceRelative(Formula::Add(tex::AaboveB("?","\\longrightarrow"),0.06),slope::CENTER_X,SAME_Y);
         show << inNextFrame << PlaceRight(Latex::Add(tex::center("Opérateurs différentiels discrets")));
         show << PlaceBelow(Formula::Add("AX"));
 
@@ -677,7 +677,7 @@ void init () {
         show << inNextFrame >> lapdef << topolap->at(CENTER);
         //show << inNextFrame << Vec2(0.5,0.3);
         show << PlaceLeft(Image::Add(Options::DataPath + "images/simple_graph.png"),0.6,0.2);
-        show << PlaceRelative(Image::Add(Options::DataPath + "images/simple_lap_mat.png"),UPS::REL_RIGHT,SAME_Y);
+        show << PlaceRelative(Image::Add(Options::DataPath + "images/simple_lap_mat.png"),slope::REL_RIGHT,SAME_Y);
 
         {
             show << newFrame << Title("Une discrétisation imparfaite ?")->at(TOP);
@@ -696,10 +696,10 @@ void init () {
             show << inNextFrame << Curve3D::Add(X) << Curve3D::Add(Y) << pcx << pcy;
             show << newFrame << Title("Discrétisation du laplacien par éléments finis")->at(TOP);
             show << inNextFrame << PlaceBelow(Formula::Add("\\varphi_v(x_i) = " + cases("1","v=i","0",text("sinon")),0.05),0.05);
-            show << PlaceRelative(Latex::Add(center("Fonction linéaire \\\\ par morceau telle que")),UPS::REL_LEFT,UPS::SAME_Y);
+            show << PlaceRelative(Latex::Add(center("Fonction linéaire \\\\ par morceau telle que")),slope::REL_LEFT,slope::SAME_Y);
                 auto diskverycoarse = Mesh::Add(Options::DataPath + "meshes/disk_very_coarse.obj",1.3);
             diskverycoarse->pc->setEdgeWidth(1);
-            UPS::Vec fem_basis = UPS::Vec::Zero(diskverycoarse->getVertices().size());
+            slope::Vec fem_basis = slope::Vec::Zero(diskverycoarse->getVertices().size());
             auto i = rand()%diskverycoarse->getVertices().size();
             fem_basis(i) = 1;
             //auto Q = PolyscopeQuantity<polyscope::SurfaceVertexScalarQuantity>::Add(diskverycoarse->pc->addVertexScalarQuantity("FEM",fem_basis));
@@ -835,7 +835,7 @@ void init () {
                 show << newFrameSameTitle << PlaceBelow(Latex::Add("Problème de Poisson",0.05));
                 show << PlaceBelow(Formula::Add("\\Delta u = y",0.06),0.1);
                 show << PlaceLeft(Formula::Add("y",0.05),0.35,0.3);
-                UPS::Mat C = illustratePoissonProblem();
+                slope::Mat C = illustratePoissonProblem();
                 auto off = vec(2.5,0,0);
                 auto bunnyY = DuplicatePrimitive(bunny_coarse)->apply(offset(-off));
                 bunnyY->pc->setSmoothShade(false);

@@ -1,6 +1,6 @@
 #include "SlideManager.h"
 
-UPS::SlideManager::TransitionSets UPS::SlideManager::computeTransitionsBetween(const Slide &A, const Slide &B)
+slope::SlideManager::TransitionSets slope::SlideManager::computeTransitionsBetween(const Slide &A, const Slide &B)
 {
     PrimitiveSet common,uniqueA,uniqueB;
     for (auto sb : B)
@@ -38,7 +38,7 @@ UPS::SlideManager::TransitionSets UPS::SlideManager::computeTransitionsBetween(c
     return {common_sorted,uniqueA_sorted,uniqueB_sorted};
 }
 
-void UPS::SlideManager::precomputeTransitions(){
+void slope::SlideManager::precomputeTransitions(){
     initialized = true;
     appearing_primitives.resize(slides.size());
     for (auto& p : slides[0])

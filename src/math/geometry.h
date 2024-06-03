@@ -1,9 +1,9 @@
 #ifndef GEOMETRY_H
 #define GEOMETRY_H
 
-#include "../UPS.h"
+#include "../libslope.h"
 
-namespace UPS {
+namespace slope {
 
 inline ImVec2 operator+(const ImVec2& lhs, const ImVec2& rhs)
 {

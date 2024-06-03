@@ -1,9 +1,9 @@
 #ifndef FONTMANAGER_H
 #define FONTMANAGER_H
 
-#include "../UPS.h"
+#include "../libslope.h"
 
-namespace UPS {
+namespace slope {
 
 
 class FontManager

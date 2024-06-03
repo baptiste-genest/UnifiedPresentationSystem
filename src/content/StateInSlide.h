@@ -1,11 +1,11 @@
 #ifndef STATEINSLIDE_H
 #define STATEINSLIDE_H
-#include "../UPS.h"
+#include "../libslope.h"
 #include "io.h"
 #include "Options.h"
 #include "Anchor.h"
 
-namespace UPS {
+namespace slope {
 
 using RelativePlacer = std::function<vec2(vec2)>;
 

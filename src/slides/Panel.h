@@ -7,7 +7,7 @@
 #include "SlideManager.h"
 #include "Slide.h"
 
-namespace UPS {
+namespace slope {
 
 class SlideManager;
 

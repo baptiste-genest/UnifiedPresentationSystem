@@ -1,16 +1,16 @@
 #include "Curve3D.h"
 
-UPS::Curve3D::Curve3DPtr UPS::Curve3D::Add(const vecs &nodes, bool loop,scalar r)
+slope::Curve3D::Curve3DPtr slope::Curve3D::Add(const vecs &nodes, bool loop,scalar r)
 {
     return NewPrimitive<Curve3D>(nodes,loop,r);
 }
 
-UPS::Curve3D::Curve3DPtr UPS::Curve3D::Add(const curve_param &param,int N, bool loop,scalar r)
+slope::Curve3D::Curve3DPtr slope::Curve3D::Add(const curve_param &param,int N, bool loop,scalar r)
 {
     return NewPrimitive<Curve3D>(param,N,loop,r);
 }
 
-UPS::Curve3D::Curve3DPtr UPS::Curve3D::apply(const mapping &phi,bool loop) const
+slope::Curve3D::Curve3DPtr slope::Curve3D::apply(const mapping &phi,bool loop) const
 {
     auto X = nodes;
     for (auto& x : X)
@@ -19,7 +19,7 @@ UPS::Curve3D::Curve3DPtr UPS::Curve3D::apply(const mapping &phi,bool loop) const
     return C;
 }
 
-void UPS::Curve3D::initPolyscope()
+void slope::Curve3D::initPolyscope()
 {
     if (loop)
         pc = polyscope::registerCurveNetworkLoop(getPolyscopeName(),nodes);
@@ -31,7 +31,7 @@ void UPS::Curve3D::initPolyscope()
 }
 
 
-namespace UPS {
+namespace slope {
 Curve3D::Curve3D(const vecs &nodes,bool loop,scalar r) : loop(loop),
     nodes(nodes),radius(r)
 {
