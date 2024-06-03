@@ -68,8 +68,8 @@ if (BUILD_slope_EXAMPLES)
 add_executable(dev projects/dev/main.cpp)
 target_link_libraries(dev slope)
 
-add_executable(course_MG projects/course_MG/main.cpp)
-target_link_libraries(course_MG slope)
+#add_executable(course_MG projects/course_MG/main.cpp)
+#target_link_libraries(course_MG slope)
 
 add_executable(minimal_surf projects/minimal_surf/main.cpp)
 target_link_libraries(minimal_surf slope)
