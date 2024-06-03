@@ -10541,7 +10541,7 @@ ConfigBase::to_config(const App *app, bool default_also, bool write_description,
     keyChars.push_back(valueDelimiter);
     keyChars.push_back(arraySeparator);
 
-    std::vector<std::string> groslope = app->get_groups();
+    std::vector<std::string> groups = app->get_groups();
     bool defaultUsed = false;
     groups.insert(groups.begin(), std::string("Options"));
     if(write_description && (app->get_configurable() || app->get_parent() == nullptr || app->get_name().empty())) {
@@ -10708,7 +10708,7 @@ CLI11_INLINE std::string Formatter::make_positionals(const App *app) const {
 
 CLI11_INLINE std::string Formatter::make_groups(const App *app, AppFormatMode mode) const {
     std::stringstream out;
-    std::vector<std::string> groslope = app->get_groups();
+    std::vector<std::string> groups = app->get_groups();
 
     // Options
     for(const std::string &group : groups) {

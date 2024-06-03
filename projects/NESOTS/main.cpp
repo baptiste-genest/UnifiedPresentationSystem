@@ -1,6 +1,6 @@
 #include "../../src/slope.h"
 
-using namespace UPS;
+using namespace slope;
 
 Slideshow show;
 

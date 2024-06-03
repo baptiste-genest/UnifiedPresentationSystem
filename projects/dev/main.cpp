@@ -3,7 +3,7 @@
 #include "../../src/slope.h"
 #include "imgui.h"
 
-using namespace UPS;
+using namespace slope;
 slope::Slideshow show;
 
 void init () {

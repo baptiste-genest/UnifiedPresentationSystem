@@ -2,7 +2,7 @@
 
 #include "../../src/slope.h"
 #include "imgui.h"
-using namespace UPS;
+using namespace slope;
 
 //#include <gif_lib.h>
 
@@ -169,7 +169,7 @@ vec biot_savard_field(const vec& p) {
 
 void init () {
 
-    using namespace UPS;
+    using namespace slope;
     auto CMFONTID = FontManager::addFont(Options::DataPath + "fonts/ComputerModernSR.ttf",80);
     auto grid = Mesh::Add(Options::DataPath + "meshes/grid_quad_50.obj");
     auto quad = Mesh::Add(Options::DataPath + "meshes/quad.obj");
