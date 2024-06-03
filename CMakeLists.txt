@@ -84,9 +84,6 @@ target_link_libraries(tuto_mesh slope)
 add_executable(NESOTS projects/NESOTS/main.cpp)
 target_link_libraries(NESOTS slope)
 
-
-add_executable(NESOTS-dav projects/NESOTS-dav/main.cpp)
-target_link_libraries(NESOTS-dav slope)
 endif()
 
 

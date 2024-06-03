@@ -34,8 +34,8 @@ jobs:
        if: matrix.os == 'macOS-latest'
        run: |
             brew install eigen
-            brew install --cask mactex
-            
+            brew install --cask mactex-no-gui
+
      - name: Create Build Environment
        run: cmake -E make_directory ${{runner.workspace}}/build
 
