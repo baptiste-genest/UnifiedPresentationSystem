@@ -18,15 +18,15 @@ find_package(OpenGL REQUIRED)
 
 ## External tools configuration
 find_package(LATEX COMPONENTS PDFLATEX REQUIRED)
-find_program(slope_CONVERT convert)
-if (NOT slope_CONVERT)
+find_program(Slope_CONVERT convert)
+if (NOT Slope_CONVERT)
   message(ERROR "Could not find the 'convert' tool (imagemagick)")
 endif()
-set(slope_PDFLATEX ${PDFLATEX_COMPILER})
-set(slope_SOURCE ${PROJECT_SOURCE_DIR})
-message(STATUS "pdflatex compiler: ${slope_PDFLATEX}")
-message(STATUS "convert tool: ${slope_CONVERT}")
-message(STATUS "Slope source path: ${slope_SOURCE}")
+set(Slope_PDFLATEX ${PDFLATEX_COMPILER})
+set(Slope_SOURCE ${PROJECT_SOURCE_DIR})
+message(STATUS "pdflatex compiler: ${Slope_PDFLATEX}")
+message(STATUS "convert tool: ${Slope_CONVERT}")
+message(STATUS "Slope source path: ${Slope_SOURCE}")
 configure_file(${PROJECT_SOURCE_DIR}/src/content/Options.cpp.in
                ${PROJECT_SOURCE_DIR}/src/content/Options.cpp)
 

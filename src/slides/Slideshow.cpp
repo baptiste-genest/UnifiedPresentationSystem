@@ -219,7 +219,7 @@ void slope::Slideshow::init(std::string project_name,int argc,char** argv)
 
     //slope::Options::UPSPath = TOSTRING(Slope_SOURCE);
     slope::Options::SlopePath = Options::SlopePath;
-    slope::Options::SlopePath = Options::SlopePath + "/data/";
+    slope::Options::DataPath = Options::SlopePath + "/data/";
     slope::Options::ProjectName = project_name;
     slope::Options::ProjectPath = slope::Options::SlopePath+std::string("/projects/")+slope::Options::ProjectName+std::string("/");
     slope::Options::ProjectViewsPath = slope::Options::ProjectPath+std::string("views/");
