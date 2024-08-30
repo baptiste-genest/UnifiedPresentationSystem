@@ -15,6 +15,7 @@ public:
 
     static Curve3DPtr Add(const vecs& nodes, bool loop = false, scalar r = -0.01);
     static Curve3DPtr Add(const curve_param& param,int N = 100,bool loop = false,scalar r = -0.01);
+    static Curve3DPtr Add(const dynamic_curve_param& param,int N = 100,bool loop = false,scalar r = -0.01);
     using edge = std::array<int,2>;
     using edges = std::vector<edge>;
 
@@ -23,6 +24,11 @@ public:
 
 
     Curve3DPtr apply(const mapping& phi,bool loop = false) const;
+
+    void updateNodes(const vecs& X) {
+        nodes = X;
+        pc->updateNodePositions(nodes);
+    }
 
     scalar radius = 0.01;
 protected:

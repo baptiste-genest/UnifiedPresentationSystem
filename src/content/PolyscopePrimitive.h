@@ -129,6 +129,38 @@ public:
 };
 
 template<>
+class PolyscopeQuantity<polyscope::SurfaceVertexParameterizationQuantity> : public Primitive
+{
+public :
+    using T = polyscope::SurfaceVertexParameterizationQuantity;
+    using PCQuantityPtr = std::shared_ptr<PolyscopeQuantity<T>>;
+    static PCQuantityPtr Add(T* ptr) {
+        auto rslt = NewPrimitive<PolyscopeQuantity<T>>();
+        rslt->q = ptr;
+        rslt->q->setEnabled(false);
+        return rslt;
+    }
+
+    // Primitive interface
+public:
+    scalar l0;
+    T* q;
+    void draw(const TimeObject &time, const StateInSlide &sis) override {
+        //std::cout << "ok" << std::endl;
+        q->setEnabled(true);
+    }
+    void playIntro(const TimeObject& t, const StateInSlide &sis) override {
+        q->setEnabled(true);
+    }
+    void playOutro(const TimeObject& t, const StateInSlide &sis) override {
+        if (t.transitionParameter > 0.95)
+            q->setEnabled(false);
+    }
+    void forceDisable() override {q->setEnabled(false);}
+    bool isScreenSpace() const override {return false;}
+};
+
+template<>
 PolyscopeQuantity<polyscope::SurfaceVertexVectorQuantity>::PCQuantityPtr AddPolyscopeQuantity(polyscope::SurfaceVertexVectorQuantity* ptr) {
     return PolyscopeQuantity<polyscope::SurfaceVertexVectorQuantity>::Add(ptr);
 }

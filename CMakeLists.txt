@@ -84,6 +84,12 @@ target_link_libraries(tuto_mesh slope)
 add_executable(NESOTS projects/NESOTS/main.cpp)
 target_link_libraries(NESOTS slope)
 
+file(GLOB implicit_uvs_slides
+     "projects/implicit_uvs/slides/*"
+)
+add_executable(implicit_uvs projects/implicit_uvs/main.cpp ${implicit_uvs_slides})
+target_link_libraries(implicit_uvs slope)
+
 endif()
 
 

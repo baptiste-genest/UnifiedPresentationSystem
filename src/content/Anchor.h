@@ -69,7 +69,7 @@ public:
     }
     void writeAtLabel(double x, double y,bool overwrite) const
     {
-        system(("mkdir " + slope::Options::ProjectViewsPath + " 2>/dev/null").c_str());
+        int rslt = system(("mkdir " + slope::Options::ProjectViewsPath + " 2>/dev/null").c_str());
         std::string filepath = slope::Options::ProjectViewsPath + label + ".pos";
         if (!io::file_exists(filepath) || overwrite){
             std::ofstream file(filepath);

@@ -25,6 +25,9 @@ struct Latex : public TextualPrimitive {
     static void AddToPrefix(const TexObject& tex) {context += tex;}
     static void DeclareMathOperator(const TexObject& name,const TexObject& content);
     static void NewCommand(const TexObject& name,const TexObject& content) {context += "\\newcommand{\\"+name+"}{"+content+"}";}
+    static void NewCommand(const TexObject& name,const TexObject& content,int nb_arg) {
+        context += "\\newcommand{\\"+name+"}" + "[" + std::to_string(nb_arg) + "]{"+content+"}";
+    }
 
     static void UsePackage(std::string pkg,std::string options = "") {
         if (options != "")

@@ -10,6 +10,22 @@ slope::Curve3D::Curve3DPtr slope::Curve3D::Add(const curve_param &param,int N, b
     return NewPrimitive<Curve3D>(param,N,loop,r);
 }
 
+slope::Curve3D::Curve3DPtr slope::Curve3D::Add(const dynamic_curve_param &param,int N, bool loop,scalar r)
+{
+    auto C = NewPrimitive<Curve3D>(vecs(N,vec::Zero()),loop,r);
+    C->updater = [param,loop,N](const TimeObject& time,Primitive* ptr) {
+        auto C = Primitive::get<Curve3D>(ptr->pid);
+        auto X = C->nodes;
+        scalar dt = loop ? 1./N : 1./(N-1);
+        for (int i = 0;i<X.size();i++){
+            scalar t = i*dt;
+            X[i] = param(t,time);
+        }
+        C->updateNodes(X);
+    };
+    return C;
+}
+
 slope::Curve3D::Curve3DPtr slope::Curve3D::apply(const mapping &phi,bool loop) const
 {
     auto X = nodes;

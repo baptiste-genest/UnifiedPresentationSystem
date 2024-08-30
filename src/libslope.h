@@ -91,12 +91,14 @@ using PrimitiveID = long;
 using PrimitiveSet = std::set<PrimitivePtr>;
 using Primitives = std::vector<PrimitivePtr>;
 
-using curve_param = std::function<vec(scalar)>;
 
 using mapping = std::function<vec(const vec&)>;
 using scalar_function = std::function<scalar(scalar)>;
 struct TimeObject;
 using time_mapping = std::function<vec(const vec&,const TimeObject&)>;
+
+using curve_param = std::function<vec(scalar)>;
+using dynamic_curve_param = std::function<vec(scalar,const TimeObject&)>;
 
 inline ImVec2 toVec2(const vec2& x) {
     return ImVec2(x(0),x(1));
