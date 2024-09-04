@@ -18,9 +18,9 @@ public:
 
     Point(const vec &x,scalar radius) : x(x),radius(radius) {
         phi = [x](TimeObject){return x;};
-        updater = [](const TimeObject&,Primitive* ptr){
+        updater = [](const TimeObject& t,Primitive* ptr){
             auto p = Primitive::get<Point>(ptr->pid);
-            p->updateVectors();
+            p->updateVectors(t);
         };
     }
 
@@ -33,11 +33,12 @@ public:
     
     VectorQuantityPtr addVector(const vec& v);
     VectorQuantityPtr addVector(const curve_param& phi);
+    VectorQuantityPtr addVector(const DynamicParam& phi);
     polyscope::PointCloud* pc;
 
     void setPos(const vec& x);
 
-    void updateVectors();
+    void updateVectors(const TimeObject& t);
     PointPtr apply(const mapping& f) const;
     vec getCurrentPos() const {return x;}
     // PolyscopePrimitive interface
@@ -47,7 +48,7 @@ private:
     vec x;
     DynamicParam phi;
     scalar radius;
-    std::vector<std::pair<VectorQuantityPtr,curve_param>> vectors;
+    std::vector<std::pair<VectorQuantityPtr,DynamicParam>> vectors;
 
 };
 

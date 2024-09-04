@@ -59,10 +59,15 @@ public:
     }
     bool isScreenSpace() const override {return false;}
 
+    static void resetColorId() {current_color_id = 0;}
 
+    static glm::vec3 getColor();
 protected:
     polyscope::Structure* polyscope_ptr;
+
     static size_t count;
+    static std::vector<glm::vec3> colors;
+    static int current_color_id;
 
 };
 template<class T>
@@ -127,6 +132,8 @@ public:
     void forceDisable() override {q->setEnabled(false);}
     bool isScreenSpace() const override {return false;}
 };
+
+
 
 template<>
 class PolyscopeQuantity<polyscope::SurfaceVertexParameterizationQuantity> : public Primitive

@@ -178,6 +178,7 @@ inline SlideManager& operator<<(SlideManager& SM,SlideManager::remove_last) {
 inline SlideManager& operator<<(SlideManager& SM,SlideManager::new_frame nf) {
     SM.handleCenter();
     SM.addSlide(Slide());
+    PolyscopePrimitive::resetColorId();
     if (nf.same_title){
         int i = SM.getNumberSlides()-2;
         auto ex = SM.getSlide(i).title_primitive;

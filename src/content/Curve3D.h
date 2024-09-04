@@ -30,6 +30,8 @@ public:
         pc->updateNodePositions(nodes);
     }
 
+    const vecs& getNodes() const {return nodes;}
+
     scalar radius = 0.01;
 protected:
     bool loop;

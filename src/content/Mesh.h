@@ -68,6 +68,7 @@ namespace slope {
       return apply([x](const vec& v) {return vec(x*v);});
     }
 
+    MeshPtr copy() const { return translate(vec::Zero());}
 
 private:
     vecs vertices,original_vertices;

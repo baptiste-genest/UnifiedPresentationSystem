@@ -6,9 +6,9 @@ namespace slope {
 
 struct TimeObject
 {
-    TimeTypeSec from_begin;
-    TimeTypeSec from_action;
-    TimeTypeSec inner_time;
+    TimeTypeSec from_begin = 0;
+    TimeTypeSec from_action = 0;
+    TimeTypeSec inner_time = 0;
     int absolute_frame_number;
     int relative_frame_number;
     parameter transitionParameter = 1;

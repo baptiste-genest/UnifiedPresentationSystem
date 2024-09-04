@@ -35,5 +35,6 @@ void slope::PointCloud::initPolyscope()
     pc = polyscope::registerPointCloud(getPolyscopeName(),points);
     if (radius > 0)
         pc->setPointRadius(radius,false);
+    pc->setPointColor(getColor());
     initPolyscopeData(pc);
 }

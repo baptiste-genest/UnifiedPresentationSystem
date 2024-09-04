@@ -29,7 +29,9 @@ void CreateExpMapSlides(slope::Slideshow& show) {
     show << CameraView::Add("polar_coords");
 
     show << Latex::Add("$\\TM{p}$")->at("TM0");
+    show << PlaceBelow(Latex::Add("(uv space)"));
     show << Latex::Add("M")->at("M0");
+    show << PlaceBelow(Latex::Add("(surface)"));
     show << Formula::Add("(r\\cos(\\theta),r\\sin(\\theta))")->at("polar_coordinates");
 
     vec p = vec(1.5,0,1);
@@ -51,15 +53,19 @@ void CreateExpMapSlides(slope::Slideshow& show) {
 
     auto orig_TpM = Point::Add(vec(-1.5,0,1),0);
     auto v_param = orig_TpM->addVector(curve_param);
+    auto v_label = Point::Add(curve_param,0.);
 
     auto curve_M = Point::Add([](scalar t){
         auto p = lemniscate(t);
         return vec(Exp(vec(0,0,1),p) + vec(1.5,0,0.01));
     });
 
-    show << orig_TpM << v_param << curve_M;
+    show << orig_TpM << v_param << curve_M << v_label;
+    auto v_label_text = Formula::Add("v")->track([v_label](){return vec(v_label->getCurrentPos() + vec(-1.5,0,1));},vec2(0.02,0.02));
+    auto exp_label = Formula::Add("\\Exp_p(v)")->track([curve_M](){return curve_M->getCurrentPos();},vec2(0.02,0.02));
+    show << v_label_text << exp_label;
     show << inNextFrame << Latex::Add("It is an \\emph{explicit} mapping!")->at("explicit_expm");
-    show << inNextFrame >> orig_TpM >> curve_M << PlaceBelow(Formula::Add("\\xleftarrow{\\text{Log}_p}"),expm,0.05);
+    show << inNextFrame >> orig_TpM >> curve_M >> v_label_text.first >> exp_label.first << PlaceBelow(Formula::Add("\\xleftarrow{\\text{Log}_p}"),expm,0.05);
 
     auto Exp = Formula::Add("\\text{Exp}_p(v)");
     auto Log = Formula::Add("\\text{Log}_p(x)");

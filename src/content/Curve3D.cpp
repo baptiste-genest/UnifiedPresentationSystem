@@ -41,8 +41,10 @@ void slope::Curve3D::initPolyscope()
         pc = polyscope::registerCurveNetworkLoop(getPolyscopeName(),nodes);
     else
         pc = polyscope::registerCurveNetworkLine(getPolyscopeName(),nodes);
-    if (radius > 0 )
+    if (radius > 0 ) {
         pc->setRadius(radius,false);
+        pc->setColor(getColor());
+    }
     initPolyscopeData(pc);
 }
 

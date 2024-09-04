@@ -48,10 +48,6 @@ vec order2(const vec& x,const vec& v) {
     return proj_impl(x + v - t*t*0.5*curv*g.normalized()/g.norm());
 }
 
-vec orthoproj(const vec& x,const vec& y) {
-    return x - x.dot(y)*y/(y.norm()*y.norm());
-}
-
 scalar length(const vecs& X) {
     scalar l = 0;
     for (int i = 0;i<X.size()-1;i++)
@@ -67,7 +63,7 @@ vec2 approx_log(const vec& x,const vec& y,const vec& e1,const vec& e2) {
         G[i] = proj_impl(x + (y-x)*t);
     }
     vec n = normal(y);
-    vec d = orthoproj(x-y,n).normalized();
+    vec d = slope::OrthoprojAagainstB(x-y,n).normalized();
     return vec2(d.dot(e1),d.dot(e2))*length(G);
 }
 
@@ -103,7 +99,7 @@ void CreateLogMapSlides(slope::Slideshow& show) {
     show << inNextFrame << labels;
     vec n = normal(x);
 
-    vec pd = orthoproj(d,n) ;
+    vec pd = slope::OrthoprojAagainstB(d,n) ;
     labels << px->addVector(vec(pd*0.3 + vec(0,0,0.03)));
     show << inNextFrame << labels;// << Formula::Add("\\Pi_{\\TM{x}}(y-x)")->at(x+d*0.3,vec2(0.02,0.02));
 
@@ -140,7 +136,7 @@ void CreateLogMapSlides(slope::Slideshow& show) {
     show << Formula::Add("\\gamma")->at(mid,vec2(0,-0.02));
 
     vec ny = normal(y);
-    vec e1 = Eigen::AngleAxisd(-0.5,ny)*orthoproj(x-y,ny).normalized();
+    vec e1 = Eigen::AngleAxisd(-0.5,ny)*OrthoprojAagainstB(x-y,ny).normalized();
     vec e2 = ny.cross(e1);
     e1 += ny*0.04;
     e2 += ny*0.04;
@@ -174,8 +170,4 @@ void CreateLogMapSlides(slope::Slideshow& show) {
     auto pc = surface->pc->addVertexParameterizationQuantity("uv",uvs);
     pc->setCheckerSize(0.05);
     show << inNextFrame << AddPolyscopeQuantity(pc);
-
-
-
-    
 }

@@ -16,6 +16,8 @@ void init() {
     CreateExpMapSlides(show);
     CreateSphereTracingSlides(show);
     CreateLogMapSlides(show);
+    CreateCurveBasedSlides(show);
+    CreateMultipleSeedsSlides(show);
 }
 
 int main(int argc,char** argv)

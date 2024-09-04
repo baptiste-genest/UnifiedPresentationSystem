@@ -85,6 +85,7 @@ void slope::Mesh::initPolyscope()
     pc->setBackFacePolicy(polyscope::BackFacePolicy::Identical);
     initPolyscopeData(pc);
     setSmooth(smooth);
+    pc->setSurfaceColor(getColor());
 }
 
 

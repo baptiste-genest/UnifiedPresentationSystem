@@ -2,9 +2,6 @@
 
 using namespace slope;
 
-scalar sdTorus(const vec& p,scalar r1,scalar r2) {
-    return (vec2(vec2(p(0),p(1)).norm() - r1,p(2)) - vec2(0,0)).norm() - r2;
-}
 
 void CreateSphereTracingSlides(slope::Slideshow& show) {
     auto Context = ImplicitUVsSlides::getContext();
@@ -29,11 +26,21 @@ void CreateSphereTracingSlides(slope::Slideshow& show) {
     show << pt << dir;
 
     vec ref = vec(-1,0.,0.5);
+
+    auto E = slope::CompleteBasis(d);
+    auto set_screen = [p,E] (vec x) {
+        x += vec(0.1,0.1,0.);
+        return vec(x(0)*E.first + x(1)*E.second + p);
+    };
+
+    auto screen = Context.grid->apply(set_screen);
+    show << screen->at(0.5);
+    screen->pc->setEdgeWidth(1);
     show << Point::Add(ref) << Formula::Add("y")->at(ref,vec2(0.02,-0.02));
 
     auto ray = [p,target](scalar t,const TimeObject &time) {
         if (time.relative_frame_number == 0)
-            return vec(p + (target-p)*t*smoothstep(time.from_action));
+            return vec(p + (target-p)*t*smoothstep(time.from_action*0.4));
         return vec(p + (target-p)*t);
     };
 
@@ -52,5 +59,5 @@ void CreateSphereTracingSlides(slope::Slideshow& show) {
     };
     show << inNextFrame << Curve3D::Add(geodesic);
 
-    show << inNextFrame << Latex::Add("Must be computed: \\\\ -in parallel \\\\ -without discretizing the surface")->at("constraints");
+    show << inNextFrame << Latex::Add("UV must be computed: \\\\ -in parallel \\\\ -without discretizing the surface")->at("constraints");
 }
