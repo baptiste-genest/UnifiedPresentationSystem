@@ -202,10 +202,11 @@ void CreateMergingFieldsSlides(slope::Slideshow& show) {
 
     auto sub = Latex::Add("Description of the workflow");
     show << PlaceBelow(sub);
-    show <<  Gif::Add("workflow.gif",30,0.7)->at("workflow");
+    show <<  Gif::Add("workflow.gif",30,0.8)->at("workflow");
     show << PlaceRelative(Latex::Add("On the CPU, once: "),sub,slope::ABS_LEFT,slope::REL_BOTTOM,0.02,0.02);
     show << PlaceRelative(Latex::Add("- From the set of seeds, the user defines which seeds should be merged in a graph $A = (\\{y_i\\},E)$"),slope::ABS_LEFT,slope::REL_BOTTOM,0.05,0.02);
-    show << PlaceRelative(Latex::Add("- Two seeds are merged if $(i,j) \\in E$, and we \\\\ compute (once) the geodesic distance $d_{ij}$ between them."),slope::ABS_LEFT,slope::REL_BOTTOM,0.05,0.02);
+    show << PlaceRelative(Latex::Add("- Two seeds are merged if $(i,j) \\in E$, and we \\\\ compute the geodesic distance $d_{ij}$ between them."),slope::ABS_LEFT,slope::REL_BOTTOM,0.05,0.02);
+    show << PlaceRelative(Latex::Add("- Compute optimal frames and offsets $u_i$"),slope::ABS_LEFT,slope::REL_BOTTOM,0.05,0.02);
     show << inNextFrame << PlaceRelative(Latex::Add("On the GPU, at each frame:"),slope::ABS_LEFT,slope::REL_BOTTOM,0.02,0.03);
     show << PlaceRelative(Latex::Add("- Find closest seed $i_0$. "),slope::ABS_LEFT,slope::REL_BOTTOM,0.05,0.02);
     show << PlaceRelative(Latex::Add("- Compute blending with the neighbors of $i_0$:"),slope::ABS_LEFT,slope::REL_BOTTOM,0.05,0.02);

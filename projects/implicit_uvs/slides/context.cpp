@@ -63,7 +63,7 @@ void CreateContextSlides(slope::Slideshow& show) {
 
     show << Point::Add(target) << Formula::Add("x \\text{ s.t. } f(x) = 0")->at(target,vec2(0.1,-0.02));
 
-    show << inNextFrame << Latex::Add("To keep the benefits of the implicit setting,\\\\ everything must be: \\\\ - in parallel \\\\ - lightweight \\\\- without discretizing the surface")->at("constraints");
+    show << inNextFrame << Latex::Add("To remain in this implicit setting,\\\\ everything must be: \\\\ - point-wise/parallel \\\\ - lightweight \\\\- without discretizing the surface")->at("constraints");
 
 
     show << newFrame << Title("Texturing implicit surfaces")->at(TOP);

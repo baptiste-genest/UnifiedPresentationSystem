@@ -43,7 +43,7 @@ void CreateCompactSupportSlides(slope::Slideshow& show) {
 
 
     show << inNextFrame << PlaceRelative(Latex::Add("In planar geometry, the signed distance to the Voronoï frontier between two points is given by:"),txt,slope::ABS_LEFT,slope::REL_BOTTOM,0.01,0.04);
-    auto euc = Formula::Add("d_{V_{ij}}(x) = \\frac{||x-y_i||^2 - ||x-y_j||^2}{2||y_i-y_j||}");
+    auto euc = Formula::Add("d^{\\text{euc}}_{V_{ij}}(x) = \\frac{||x-y_i||^2 - ||x-y_j||^2}{2||y_i-y_j||}");
     show << PlaceRelative(euc,slope::ABS_LEFT,slope::REL_BOTTOM,0.1,0.04);
     auto p2 = Point::Add(x2);
     show << p1 << p2;
@@ -51,7 +51,7 @@ void CreateCompactSupportSlides(slope::Slideshow& show) {
 
     show << Grid << dist;
 
-    auto geo = Formula::Add("d^M_{V_{ij}}(x) \\approx \\frac{d^M(x,y_i)^2 - d^M(x,y_j)^2}{2d^M(y_i,y_j)}");
+    auto geo = Formula::Add("d_{V_{ij}}(x) \\approx \\frac{d(x,y_i)^2 - d(x,y_j)^2}{2d(y_i,y_j)}");
 
 
     show << inNextFrame >> p1 >> Grid >> p2 << PlaceRelative(Latex::Add("On surfaces, just use the geodesic distance instead!"),slope::ABS_LEFT,slope::REL_BOTTOM,0.01,0.04);
@@ -85,21 +85,21 @@ void CreateCompactSupportSlides(slope::Slideshow& show) {
     show << Sp << geo_dist;
 
     show << inNextFrame << 
-    PlaceRelative(Latex::Add("We only want to blend in the band : $\\{|d^M_{V_{ij}}(x)| < \\sigma \\}$"),slope::ABS_LEFT,slope::REL_BOTTOM,0.01,0.01);
+    PlaceRelative(Latex::Add("We only want to blend in the band : $\\{|d_{V_{ij}}(x)| < \\sigma \\}$"),slope::ABS_LEFT,slope::REL_BOTTOM,0.01,0.01);
 
     show << base;
 
     show << PlaceRelative(Latex::Add("If we are far enough from the frontier, no blending!"),sub,slope::ABS_LEFT,slope::REL_BOTTOM,0.01,0.05);
 
-    show << Formula::Add("w_{ij}(x) = ")->at("wij") << PlaceNextTo(Formula::Add(tex::cases("1","\\text{if } d^M_{V_{ij}}(x) < -\\sigma","\\omega(d^M_{V_{ij}})","\\text{if } -\\sigma < d^M_{V_{ij}}(x) < \\sigma","0","\\text{else}")),1);
+    show << Formula::Add("w_{ij}(x) = ")->at("wij") << PlaceNextTo(Formula::Add(tex::cases("1","\\text{if } d_{V_{ij}}(x) < -\\sigma","\\omega(d_{V_{ij}})","\\text{if } -\\sigma < d_{V_{ij}}(x) < \\sigma","0","\\text{else}")),1);
 
     show << Image::Add("band_weight_labeled.png",0.35)->at("wij_formula");
 
-    show << inNextFrame << Latex::Add("Since $d \\leq d^M$, there is a simply test to check if we can \\\\ avoid to compute $d^M(x,y_j)$:")->at("test_text");
-    show << Formula::Add("d_M(x,y_i)^2 + 2 \\sigma d(y_i,y_j) < ||x-y_j||^2")->at("simple test");
+    show << inNextFrame << Latex::Add("Since $||x - y || \\leq d(x,y)$, there is a simply test to check if we can \\\\ avoid to compute $d(x,y_j)$:")->at("test_text");
+    show << Formula::Add("d(x,y_i)^2 + 2 \\sigma d(y_i,y_j) < ||x-y_j||^2")->at("simple test");
 
     show << newFrameSameTitle << PlaceBelow(Latex::Add("Between n seeds"));
-    show << PlaceRelative(Latex::Add("The weight for one seed $w_i(x)$ is the \\\\ minimum of its weights with its neighbors $w_{ij}(x)$:"),slope::ABS_LEFT,slope::REL_BOTTOM,0.01,0.05);
+    show << PlaceRelative(Latex::Add("The weight for one seed $w_i(x)$ is the \\\\ minimum of its weights with\\\\  its neighbors $w_{ij}(x)$:"),slope::ABS_LEFT,slope::REL_BOTTOM,0.01,0.05);
     show << Formula::Add("w_i(x) = \\min_{j | (i,j) \\in E} w_{ij}(x)")->at("wi_formula");
     show << Image::Add("wi.png")->at("wi_plot");
 

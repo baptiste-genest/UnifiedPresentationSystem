@@ -19,6 +19,7 @@ void init() {
     CreateMultipleSeedsSlides(show);
     CreateMergingFieldsSlides(show);
     CreateCompactSupportSlides(show);
+    CreateAtlasComputeSlides(show);
 }
 
 int main(int argc,char** argv)
