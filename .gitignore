@@ -1,4 +1,5 @@
 build/**
+build_qt/**
 b2/**
 .DS_Store
 

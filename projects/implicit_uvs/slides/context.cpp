@@ -8,21 +8,74 @@ void CreateContextSlides(slope::Slideshow& show) {
 
     show << newFrame;
 
-    show << Title("Context: Texturing implicit surfaces")->at(TOP);
+    show << Title("Implicit surfaces")->at(TOP);
 
-    show << inNextFrame << PlaceLeft(Latex::Add("Implicit representations are a powerful tool to\\\\ represent shapes."));
-    show << PlaceRelative(Image::Add("bunny_sdf.jpg",2.5),slope::ABS_RIGHT,slope::SAME_Y);
+    show << PlaceRelative(Latex::Add("Implicit representations are a powerful tool to\\\\ represent shapes."),slope::ABS_LEFT,slope::REL_BOTTOM,0.03,0.1);
+    show << PlaceRight(Image::Add("bunny_sdf.jpg",1.8),0.3,0.04);
 
-    show << Formula::Add("\\{f(x) = 0\\}")->at("impl_formula_1");
+    show << Image::Add("CSG.png",0.7)->at("csg");
 
-    show << newFrameSameTitle;
+    show << Formula::Add("M = \\{f(x) = 0\\}")->at("impl_formula_1");
+
+    show << Latex::Add("Many advantages : geometric modeling,\\\\ shape optimization, etc...")->at("use_cases");
+
+    show << newFrame <<  Title("Visualizing Implicit surfaces")->at(TOP);
+    show << PlaceBelow(Latex::Add("Sphere tracing"),0.01);
+    
+    auto T = slope::Mesh::Add(Options::DataPath+"meshes/torus.obj",1,true);
+    T->pc->setEdgeWidth(0);
+
+    show << T;
+    show << CameraView::Add("sphere_tracing");
+
+    show << Latex::Add("Sphere tracing is an algorithm that enables real-time rendering of the shape by computing the intersection between a ray and the surface without \\emph{any} discretization, only by evaluating $f$.")->at("sphere_tracing_desc");
+
+
+    vec p = vec(2,0,1.5);
+    vec target = vec(-0.5,0,0);
+    vec d = (target-p).normalized();
+
+    auto pt = Point::Add(p,0.05);
+    auto dir = pt->addVector(vec(d*0.4));
+
+    show << pt << dir;
+
+    vec ref = vec(-1,0.,0.5);
+
+    auto E = slope::CompleteBasis(d);
+    auto set_screen = [p,E] (vec x) {
+        x += vec(0.1,0.1,0.);
+        return vec(x(0)*E.first + x(1)*E.second + p);
+    };
+
+    auto screen = Context.grid->apply(set_screen);
+    show << screen->at(0.5);
+    screen->pc->setEdgeWidth(1);
+
+    auto ray = [p,target](scalar t,const TimeObject &time) {
+        if (time.relative_frame_number == 0)
+            return vec(p + (target-p)*t*smoothstep(time.from_action*0.4));
+        return vec(p + (target-p)*t);
+    };
+
+    auto ray_param = Curve3D::Add(ray);
+    show << inNextFrame << ray_param;
+
+    show << Point::Add(target) << Formula::Add("x \\text{ s.t. } f(x) = 0")->at(target,vec2(0.1,-0.02));
+
+    show << inNextFrame << Latex::Add("To keep the benefits of the implicit setting,\\\\ everything must be: \\\\ - in parallel \\\\ - lightweight \\\\- without discretizing the surface")->at("constraints");
+
+
+    show << newFrame << Title("Texturing implicit surfaces")->at(TOP);
 
     show << PlaceRelative(Latex::Add("Perflecly fine representation of the geometry..."),slope::ABS_LEFT,slope::REL_BOTTOM,0.04,0.2);
-    show << inNextFrame << PlaceRelative(Latex::Add("...but what about textures?"),slope::ABS_LEFT,slope::REL_BOTTOM,0.1,0.04);
+    show << PlaceRelative(Latex::Add("...but what about textures?"),slope::ABS_LEFT,slope::REL_BOTTOM,0.1,0.04);
 
-    show << inNextFrame << PlaceRelative(Latex::Add("Fundamental issue : implicit representations mostly \\\\ model volumes while textures are 2D objects!"),slope::ABS_LEFT,slope::REL_BOTTOM,0.04,0.15);
+    show << inNextFrame << PlaceRelative(Latex::Add("Fundamental issue : implicit representations mostly model volumes while textures are 2D objects!"),slope::ABS_LEFT,slope::ABS_BOTTOM,0.04,0.1);
 
-    show << Image::Add("CSG.png")->at("csg");
+    show << Image::Add("UVMapping.png")->at("uv_map");
+
+
 
     show << newFrameSameTitle;
 
@@ -52,10 +105,13 @@ void CreateContextSlides(slope::Slideshow& show) {
     });
 
     show << CameraView::Add("mesh_vs_impl");
-    show << inNextFrame << Fan << verts << Latex::Add("Mesh")->at("mesh");
+    show << Fan << verts << Latex::Add("Mesh")->at("mesh");
+    show << PlaceBelow(Latex::Add(tex::center("two points are neighboors\\\\ if they share an edge")));
+
 
     auto X0 = PointCloud::Add({offset},0.03);
-    show << inNextFrame << implicit << X0 << Latex::Add("Implicit")->at("impl");
+    show << implicit << X0 << Latex::Add("Implicit")->at("impl");
+    show << PlaceBelow(Latex::Add("no generic test"));
     show << inNextFrame << Latex::Add("?")->track([offset](){return offset;},vec2(0.02,0.02));
     show << implicit->at(0.5);
 }

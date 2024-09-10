@@ -14,10 +14,11 @@ void init() {
     CreateContextSlides(show);
     CreateMovingSlides(show);
     CreateExpMapSlides(show);
-    CreateSphereTracingSlides(show);
     CreateLogMapSlides(show);
     CreateCurveBasedSlides(show);
     CreateMultipleSeedsSlides(show);
+    CreateMergingFieldsSlides(show);
+    CreateCompactSupportSlides(show);
 }
 
 int main(int argc,char** argv)

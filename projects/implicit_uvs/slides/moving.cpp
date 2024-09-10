@@ -80,19 +80,19 @@ void CreateMovingSlides(slope::Slideshow& show) {
 
     show << P << Latex::Add("p")->at(x,vec2(0.02,-0.02));
     show << vp << Latex::Add("v")->at(x + v*0.3,vec2(-0.02,-0.02));
-    show << inNextFrame;
+    //show << inNextFrame;
     auto idea = Latex::Add("No general closed form formula... So: \\\\ Walk on \\emph{approximations} of the surface");
     show << PlaceRelative(idea,walk,slope::ABS_LEFT,slope::REL_BOTTOM,0.02,0.05);
 
     auto taylor = [E, n, x](const Vertex &V, const TimeObject &t)
     {
         vec v = V.pos;
-        if (t.relative_frame_number <= 2)
+        if (t.relative_frame_number <= 3)
         {
             vec p = x + (E.first * v(0) + E.second * v(1)) * 0.5 + n * 0.01;
             return p;
         }
-        else if (t.relative_frame_number == 3)
+        else if (t.relative_frame_number == 4)
         {
             vec p = order2(x, 0.5 * (E.first * v(0) + E.second * v(1)), smoothstep(t.from_action)) + n * 0.01;
             return p;
@@ -114,7 +114,7 @@ void CreateMovingSlides(slope::Slideshow& show) {
     auto order1_approx = Formula::Add("p + \\tau v");
     show << inNextFrame << O1->at("O1") << PlaceRelative(order1_approx,slope::ABS_LEFT,slope::REL_BOTTOM,0.04,0.02);
 
-    show >> normal_legend >> TM;
+    show >> TM;
 
     auto O2 = Latex::Add("Order 2 approximation:");
     auto order2_approx = Formula::Add("p + \\tau v - \\frac{\\tau^2}{2||\\nabla f||} \\langle v, H_f v\\rangle n");

@@ -2,19 +2,6 @@
 
 using namespace slope;
 
-vec ExpSphere(const vec& x,const vec& v) {
-    scalar l = v.norm();
-    if (l < 1e-5)
-        return x;
-    return x*cos(l) + v*sin(l)/l;
-}
-
-vec LogSphere(const vec& x,const vec& y) {
-    if ((x-y).norm() < 1e-5)
-        return vec::Zero();
-    return OrthoprojAagainstB(y-x,x).normalized()*std::acos(x.normalized().dot(y.normalized()));
-}
-
 
 void CreateCurveBasedSlides(slope::Slideshow& show) {
     auto Context = ImplicitUVsSlides::getContext();
@@ -25,7 +12,7 @@ void CreateCurveBasedSlides(slope::Slideshow& show) {
     show << inNextFrame << PlaceBelow(PT,0.02);
     show << CameraView::Add("parallel_transport");
 
-    show << inNextFrame << PlaceRelative(Latex::Add("Parallel transport tells you how a tangent vector \\\\ is transformed when carried along a curve."),slope::ABS_LEFT,slope::REL_BOTTOM,0.04,0.05);
+    show << PlaceRelative(Latex::Add("Parallel transport tells you how a tangent vector \\\\ is transformed when carried along a curve."),slope::ABS_LEFT,slope::REL_BOTTOM,0.04,0.05);
 
     vec c = vec::Zero();
     auto sphere = Point::Add(c,1.);
@@ -118,7 +105,7 @@ void CreateCurveBasedSlides(slope::Slideshow& show) {
         show << Formula::Add("R_{n(x_i)\\rightarrow n(x_{i+1})}")->at("smallest_rot");
         
         show << inNextFrame ;
-        show << inNextFrame << Formula::Add("R_{\\TM{x} \\rightarrow \\TM{y}} = \\prod_{i = 1}^{N-1} R_{n(x_i)\\rightarrow n(x_{i+1})}")->at("parallel_transport_mat");
+        show << Formula::Add("R_{\\TM{x} \\rightarrow \\TM{y}} = \\prod_{i = 1}^{N-1} R_{n(x_i)\\rightarrow n(x_{i+1})}")->at("parallel_transport_mat");
         show << inNextFrame << ptx->addVector(v) << Formula::Add("v")->at(vec(p1+v),vec2(0.0,-0.02)); 
         vp = SmallestRotation(p1,p2)*v;
         show << inNextFrame << pty->addVector(vp) << Formula::Add("v'")->at(vec(p2+vp),vec2(0.01,-0.03));

@@ -73,11 +73,11 @@ void CreateExpMapSlides(slope::Slideshow& show) {
     show << Log->at(vec2(0.7,0.3));
 
     show << inNextFrame << PlaceBelow(Latex::Add(tex::center("From $p$ follow the \\\\ direction $v$")),Exp,0.1);
-    show << inNextFrame << PlaceBelow(Latex::Add("Easy!"),0.1);
+    show << PlaceBelow(Latex::Add("Easy!"),0.1);
 
     show << inNextFrame << PlaceBelow(Latex::Add(tex::center("Shortest path on M \\\\ from $p$ to $x$")),Log,0.1);
-    show << inNextFrame << PlaceBelow(Latex::Add("Hard!"),0.1);
+    show << PlaceBelow(Latex::Add("Hard!"),0.1);
 
-    show << inNextFrame << PlaceBottom(Latex::Add("Djikstra?"),0.5,0.1);
+    show << inNextFrame << PlaceBottom(Latex::Add("Without a mesh, no shortest path algorithm!"),0.5,0.1);
 
 }
