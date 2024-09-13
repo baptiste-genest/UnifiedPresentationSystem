@@ -78,7 +78,7 @@ void CreateMergingFieldsSlides(slope::Slideshow& show) {
 
     show << PlaceRelative(Latex::Add("We wish to take weighted averages of multiple uv-fields."),slope::ABS_LEFT,slope::REL_BOTTOM,0.03,0.04);
     show << PlaceRelative(Latex::Add("However, since each Log map is expressed in its own referential,"),slope::ABS_LEFT,slope::REL_BOTTOM,0.03,0.01);
-    show << PlaceRelative(Latex::Add("we need to express everything in a common refenrential."),slope::ABS_LEFT,slope::REL_BOTTOM,0.03,0.01);
+    show << PlaceRelative(Latex::Add("we need to express everything in a common referential."),slope::ABS_LEFT,slope::REL_BOTTOM,0.03,0.01);
 
 //    show << Image::Add("merging_param_labeled.png",0.4)->at("merging_fields");
 
@@ -122,25 +122,15 @@ void CreateMergingFieldsSlides(slope::Slideshow& show) {
         auto _e2 = ys_pts[i]->addVector(e2[i]);
         _e2->q->setVectorColor(glm::vec3(0,0,1));
         show <<ys_pts[i] << _e1 << _e2;
+        show << Formula::Add("y_" + std::to_string(i+1),Options::Slope_default_height_ratio*0.7)->at(ys[i],vec2(0.02,0.03));
     }
-    show << Formula::Add("y_1")->at(ys[1],vec2(0.02,0.03));
     show << inNextFrame;
     for (int i = 0;i<3;i++){
         vec log_x = LogSphere(ys[i],p)*0.5;
         show << ys_pts[i]->addVector(log_x);
     }
-    show << Formula::Add("\\Log_{y_1}(x)",Options::Slope_default_height_ratio*0.8)->at("log_y1");
+    show << Formula::Add("\\Log_{y_2}(x)",Options::Slope_default_height_ratio*0.7)->at("log_y1");
     show << inNextFrame;
-    slope::Mesh::MeshPtr TMs[3];
-    for (int i = 0;i<3;i++){
-        TMs[i] = Context.grid->apply([i,ys,e1,e2](const vec& x) {
-            vec p = e1[i]*x(0) + e2[i]*x(1) + ys[i];
-            return p;
-        });
-        TMs[i]->pc->setEdgeWidth(1);
-        TMs[i]->pc->setSurfaceColor(glm::vec3(1,1,1));
-        //show << TMs[i]->at(0.9);
-    }
 
     vec uv_offset = -LogSphere(p,ys[2]).normalized()*2.5;
 
@@ -153,32 +143,79 @@ void CreateMergingFieldsSlides(slope::Slideshow& show) {
 
     int f0 = show.getNumberSlides() - 1;
 
+    slope::DynamicParam get_source[3];
+
+    scalar s = 0.6;
+    LatexPtr refs[3];
+    LatexPtr names[3];
+
     for (int i = 0;i<3;i++) {
+
         vec log = LogSphere(p,ys[i]);
         M.sources[i] = E1*log.dot(E1) + E2*log.dot(E2) + uv_offset;
         M.e1[i] = E1*cos(angles(i)) + E2*sin(angles(i));
         M.e2[i] = -E1*sin(angles(i)) + E2*cos(angles(i));
-        uv_frames[i] = Context.grid->apply([i,M,normal](const vec& x) {
-            vec p = (M.e1[i]*x(0) + M.e2[i]*x(1))*0.5  + M.sources[i] + normal*0.01;
+
+        vec b_pos = scalar(1.2*i+2)*E2;
+
+        get_source[i] = [b_pos,i,M,f0,E2,s](TimeObject t) {
+            if (t.absolute_frame_number == f0) {
+                return b_pos;
+            }
+            if (t.absolute_frame_number == f0 + 1) {
+                return lerp(b_pos,M.sources[i],smoothstep(t.from_action*s));
+            }
+            return M.sources[i];
+        };
+
+        auto get_e1_i = [f0,i,M,s] (TimeObject t) {
+            if (t.absolute_frame_number == f0) {
+                return M.E1;
+            }
+            if (t.absolute_frame_number == f0 + 1) {
+                return slerp(M.E1,M.e1[i],smoothstep(t.from_action*s));
+            }
+            return M.e1[i];
+        };
+        auto get_e2_i = [f0,i,M,s] (TimeObject t) {
+            if (t.absolute_frame_number == f0) {
+                return M.E2;
+            }
+            if (t.absolute_frame_number == f0 + 1) {
+                return slerp(M.E2,M.e2[i],smoothstep(t.from_action*s));
+            }
+            return M.e2[i];
+        };
+
+
+        uv_frames[i] = Context.grid->applyDynamic([get_e1_i,get_e2_i,i,M,normal,get_source](const Vertex& v,const TimeObject& t) {
+            auto x = v.pos;
+            vec p = (get_e1_i(t)*x(0) + get_e2_i(t)*x(1))*0.5  + get_source[i](t) + normal*0.01;
             return p;
         });
         uv_frames[i]->pc->setEdgeWidth(1);
         uv_frames[i]->pc->setSurfaceColor(glm::vec3(1,1,1));
         show << uv_frames[i]->at(0.9);
-        auto pt =Point::Add(M.sources[i],0.05); 
-        auto pf1 = pt->addVector(vec(M.e1[i]*0.3));
-        auto pf2 = pt->addVector(vec(M.e2[i]*0.3));
+        auto pt =Point::Add(get_source[i],0.05); 
+        auto pf1 = pt->addVector([get_e1_i](TimeObject t) {return vec(get_e1_i(t)*0.3);});
+        auto pf2 = pt->addVector([get_e2_i](TimeObject t) {return vec(get_e2_i(t)*0.3);});
         pf1->q->setVectorColor(glm::vec3(1,0,0));
         pf2->q->setVectorColor(glm::vec3(0,0,1));
         pt->pc->setPointColor(glm::vec3(1,1,0));
         show << pt << pf1 << pf2;
+        refs[i] = Formula::Add("\\left(0,0\\right)",Options::Slope_default_height_ratio*0.6);
+        names[i] = Formula::Add("\\Log_{y_" + std::to_string(i+1)+"}",Options::Slope_default_height_ratio*0.8);
+        show << refs[i]->at(b_pos,vec2(-0.02,0.02))<< names[i]->at(b_pos,vec2(0,0.15));
     }
-    show << Formula::Add("u_1")->at(M.sources[1],vec2(0.02,0.02));
+    show << inNextFrame;
+    for (int i = 0;i<3;i++){
+        show >> refs[i] >> names[i];
+        show << Formula::Add("u_" + std::to_string(i+1),slope::Options::Slope_default_height_ratio*0.7)->at(M.sources[i],vec2(0.02,0.02));
+    }
     show << Image::Add("referential.png",0.5)->at("uv_ref");
 
     auto grid_thin = Mesh::Add(Options::DataPath+"meshes/grid_quad_50.obj")->apply([E1,E2,normal,uv_offset](const vec& x){
-        scalar angle = 0.1;
-        vec p = Eigen::AngleAxisd(angle,normal)*(x(0)*E1 + x(1)*E2) + uv_offset;
+        vec p = x(0)*E1 + x(1)*E2 + uv_offset;
         return p;
     });
 

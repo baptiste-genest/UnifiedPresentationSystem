@@ -11,5 +11,5 @@ void CreateConclusionSlides(slope::Slideshow& show){
     show << Gif::Add("shell_space_bunny.gif",15,0.8,true)->at("shell_space");
     show << PlaceBelow(Latex::Add("Implicit shell maps"));
     show << newFrame << Title("Thank you! \\\\ Questions?")->at(TOP);
-    show << Gif::Add("texture_seat.gif",20,1.5,false)->at("texture_seat");
+    show << Gif::Add("texture_seat.gif",20,1.3,false)->at("texture_seat");
 }
