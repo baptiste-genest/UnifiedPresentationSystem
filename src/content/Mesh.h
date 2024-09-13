@@ -48,9 +48,11 @@ namespace slope {
     void setSmooth(bool set);
     
     using scalar_func = std::function<scalar(const vec&)>;
+    using vertex_func = std::function<scalar(const Vertex&)>;
     using vector_func = std::function<vec(const vec&)>;
     
     Vec eval(const scalar_func& f) const;
+    Vec eval(const vertex_func& f) const;
     vecs eval(const vector_func& f) const;
     
     polyscope::SurfaceMesh* pc;

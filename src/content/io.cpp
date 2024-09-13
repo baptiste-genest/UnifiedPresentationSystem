@@ -12,6 +12,19 @@ void slope::io::SaveMatrix(string fileName, const Mat &M) {
     }
 }
 
+void slope::io::SaveVec(string fileName, const Vec &V) {
+    //https://eigen.tuxfamily.org/dox/structEigen_1_1IOFormat.html
+    const static IOFormat CSVFormat(FullPrecision, DontAlignCols, ", ", "\n");
+
+    ofstream file(fileName);
+    if (file.is_open())
+    {
+        file << V.format(CSVFormat);
+        file.close();
+    }
+}
+
+
 slope::Mat slope::io::LoadMatrix(string fileToOpen)
 {
 
@@ -37,4 +50,9 @@ slope::Mat slope::io::LoadMatrix(string fileToOpen)
         matrixRowNumber++; //update the column numbers
     }
     return Map<Matrix<double, Dynamic, Dynamic, RowMajor>>(matrixEntries.data(), matrixRowNumber, matrixEntries.size() / matrixRowNumber);
+}
+
+slope::Vec slope::io::LoadVec(string fileToOpen)
+{
+    return LoadMatrix(fileToOpen);
 }

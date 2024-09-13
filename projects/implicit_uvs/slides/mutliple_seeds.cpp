@@ -9,7 +9,7 @@ void CreateMultipleSeedsSlides(slope::Slideshow& show) {
 
     show << Title("One seed is not enough")->at(TOP);
 
-    show << Image::Add("one_seed_bunny.png",0.6);
+    show << Image::Add("one_seed_bunny.png",0.6)->at(CENTER);
 
     show << PlaceAbove(Latex::Add("On smooth surfaces, our method provides Log maps possibly valid on a very large scale..."),0.01);    
 
@@ -17,12 +17,13 @@ void CreateMultipleSeedsSlides(slope::Slideshow& show) {
 
     show << newFrame << Title("Handling multiple seeds")->at(TOP);
 
-    show << PlaceRelative(Latex::Add("When multiple seeds are placed, the uv at a point is the one provided by the closest seed..."),slope::ABS_LEFT,slope::REL_BOTTOM,0.04,0.05);
-    show << inNextFrame << Latex::Add("with respect to the \\emph{geodesic} distance! (+ segmentation)")->at("geo_voronoï");
+    show << PlaceRelative(Latex::Add("When multiple seeds are placed, the uv at a point is the one provided by the closest seed with respect to the \\emph{geodesic} distance!"),slope::ABS_LEFT,slope::REL_BOTTOM,0.04,0.05);
 
     show << inNextFrame << PlaceBottom(Image::Add("geodesic_voronoi_cells.png",0.6),0.5,0.2);
-    show << Latex::Add(tex::center("Implicit decals \\\\ de Groot et al. 2014"))->at("impl_decals");
+    show << Latex::Add(tex::center("Implicit decals \n\n [de Groot et al. 2014]"))->at("impl_decals");
+    show << PlaceBelow(Latex::Add("Euclidean distance",slope::Options::Slope_default_height_ratio*0.7));
     show << Latex::Add("ours")->at("ours 1");
+    show << PlaceBelow(Latex::Add(tex::center("Geodesic distance \\\\ + segmentation"),slope::Options::Slope_default_height_ratio*0.7));
 
     show << newFrame << Title("Multiple local fields")->at(TOP);
     show << Image::Add("multiple_seeds_bunny.png",0.8)->at("multiple_seeds_bunny");

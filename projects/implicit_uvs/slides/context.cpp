@@ -28,7 +28,7 @@ void CreateContextSlides(slope::Slideshow& show) {
     show << T;
     show << CameraView::Add("sphere_tracing");
 
-    show << Latex::Add("Sphere tracing is an algorithm that enables real-time rendering of the shape by computing the intersection between a ray and the surface without \\emph{any} discretization, only by evaluating $f$.")->at("sphere_tracing_desc");
+    show << Latex::Add("Sphere tracing is an algorithm to compute the intersection between a ray and the surface without \\emph{any} discretization.")->at("sphere_tracing_desc");
 
 
     vec p = vec(2,0,1.5);
@@ -39,6 +39,10 @@ void CreateContextSlides(slope::Slideshow& show) {
     auto dir = pt->addVector(vec(d*0.4));
 
     show << pt << dir;
+    auto cam = Image::Add("eye.png",0.5)->at("eye");
+    cam.second.angle = 0.3;
+    show << cam;
+
 
     vec ref = vec(-1,0.,0.5);
 
@@ -63,7 +67,7 @@ void CreateContextSlides(slope::Slideshow& show) {
 
     show << Point::Add(target) << Formula::Add("x \\text{ s.t. } f(x) = 0")->at(target,vec2(0.1,-0.02));
 
-    show << inNextFrame << Latex::Add("To remain in this implicit setting,\\\\ everything must be: \\\\ - point-wise/parallel \\\\ - lightweight \\\\- without discretizing the surface")->at("constraints");
+    show << inNextFrame << Latex::Add("To remain in this implicit setting,\\\\ everything must be: \\\\ - point-wise/parallel \\\\ - lightweight \\\\- \\textbf{without meshing the surface}")->at("constraints");
 
 
     show << newFrame << Title("Texturing implicit surfaces")->at(TOP);
@@ -71,7 +75,7 @@ void CreateContextSlides(slope::Slideshow& show) {
     show << PlaceRelative(Latex::Add("Perflecly fine representation of the geometry..."),slope::ABS_LEFT,slope::REL_BOTTOM,0.04,0.2);
     show << PlaceRelative(Latex::Add("...but what about textures?"),slope::ABS_LEFT,slope::REL_BOTTOM,0.1,0.04);
 
-    show << inNextFrame << PlaceRelative(Latex::Add("Fundamental issue : implicit representations mostly model volumes while textures are 2D objects!"),slope::ABS_LEFT,slope::ABS_BOTTOM,0.04,0.1);
+    show << inNextFrame << PlaceRelative(Latex::Add("Fundamental issue : implicit representations are defined in a volumetric way whereas textures are 2D objects!"),slope::ABS_LEFT,slope::ABS_BOTTOM,0.04,0.2);
 
     show << Image::Add("UVMapping.png")->at("uv_map");
 
@@ -106,7 +110,7 @@ void CreateContextSlides(slope::Slideshow& show) {
 
     show << CameraView::Add("mesh_vs_impl");
     show << Fan << verts << Latex::Add("Mesh")->at("mesh");
-    show << PlaceBelow(Latex::Add(tex::center("two points are neighboors\\\\ if they share an edge")));
+    show << PlaceBelow(Latex::Add(tex::center("two points are neighbors\\\\ if they share an edge")));
 
 
     auto X0 = PointCloud::Add({offset},0.03);

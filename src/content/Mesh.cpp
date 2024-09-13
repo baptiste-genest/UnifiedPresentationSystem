@@ -65,6 +65,15 @@ slope::Vec slope::Mesh::eval(const scalar_func &f) const
     return X;
 }
 
+slope::Vec slope::Mesh::eval(const vertex_func &f) const
+{
+    Vec X(vertices.size());
+    for (int i = 0;i<vertices.size();i++)
+        X[i] = f(Vertex{vertices[i],i});
+    return X;
+}
+
+
 slope::vecs slope::Mesh::eval(const vector_func &f) const
 {
     vecs X(vertices.size());

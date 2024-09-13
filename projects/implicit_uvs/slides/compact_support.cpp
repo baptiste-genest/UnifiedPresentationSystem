@@ -10,8 +10,10 @@ void CreateCompactSupportSlides(slope::Slideshow& show) {
     auto Context = ImplicitUVsSlides::getContext();
 
     show << newFrame << Title("Compact support interpolation")->at(TOP);
+    show << Formula::Add("u(x) = \\frac{\\sum_i \\textcolor{red}{w_i(x)} \\left( \\Log_{y_i}(x) + u_i \\right)}{\\sum_i \\textcolor{red}{w_i(x)}}",Options::Slope_default_height_ratio*2)->at(CENTER);
+
     auto sub = Latex::Add("Between two seeds");
-    show << PlaceBelow(sub);
+    show << newFrameSameTitle << PlaceBelow(sub);
 
     auto base = show.getCurrentSlide();
 
@@ -43,7 +45,7 @@ void CreateCompactSupportSlides(slope::Slideshow& show) {
 
 
     show << inNextFrame << PlaceRelative(Latex::Add("In planar geometry, the signed distance to the Voronoï frontier between two points is given by:"),txt,slope::ABS_LEFT,slope::REL_BOTTOM,0.01,0.04);
-    auto euc = Formula::Add("d^{\\text{euc}}_{V_{ij}}(x) = \\frac{||x-y_i||^2 - ||x-y_j||^2}{2||y_i-y_j||}");
+    auto euc = Formula::Add("\\frac{||x-y_i||^2 - ||x-y_j||^2}{2||y_i-y_j||}");
     show << PlaceRelative(euc,slope::ABS_LEFT,slope::REL_BOTTOM,0.1,0.04);
     auto p2 = Point::Add(x2);
     show << p1 << p2;
@@ -51,10 +53,10 @@ void CreateCompactSupportSlides(slope::Slideshow& show) {
 
     show << Grid << dist;
 
-    auto geo = Formula::Add("d_{V_{ij}}(x) \\approx \\frac{d(x,y_i)^2 - d(x,y_j)^2}{2d(y_i,y_j)}");
+    auto geo = Formula::Add("d_{V_{ij}}(x) \\approx \\frac{d_M(x,y_i)^2 - d_M(x,y_j)^2}{2d_M(y_i,y_j)}");
 
 
-    show << inNextFrame >> p1 >> Grid >> p2 << PlaceRelative(Latex::Add("On surfaces, just use the geodesic distance instead!"),slope::ABS_LEFT,slope::REL_BOTTOM,0.01,0.04);
+    show << inNextFrame >> p1 >> Grid >> p2 << PlaceRelative(Latex::Add("On surfaces, we use the geodesic distance instead."),slope::ABS_LEFT,slope::REL_BOTTOM,0.01,0.04);
     show << PlaceRelative(geo,slope::ABS_LEFT,slope::REL_BOTTOM,0.1,0.04);
 
     auto Sp = Context.sphere->copy();
@@ -95,13 +97,13 @@ void CreateCompactSupportSlides(slope::Slideshow& show) {
 
     show << Image::Add("band_weight_labeled.png",0.35)->at("wij_formula");
 
-    show << inNextFrame << Latex::Add("Since $||x - y || \\leq d(x,y)$, there is a simply test to check if we can \\\\ avoid to compute $d(x,y_j)$:")->at("test_text");
-    show << Formula::Add("d(x,y_i)^2 + 2 \\sigma d(y_i,y_j) < ||x-y_j||^2")->at("simple test");
+    show << inNextFrame << Latex::Add("Since $||x - y|| \\leq d_M(x,y)$, there is a simply test \\\\ to check if we can avoid to compute $d_M(x,y_j)$:")->at("test_text");
+    show << Formula::Add("d_M(x,y_i)^2 + 2 \\sigma d_M(y_i,y_j) < ||x-y_j||^2")->at("simple test");
 
     show << newFrameSameTitle << PlaceBelow(Latex::Add("Between n seeds"));
     show << PlaceRelative(Latex::Add("The weight for one seed $w_i(x)$ is the \\\\ minimum of its weights with\\\\  its neighbors $w_{ij}(x)$:"),slope::ABS_LEFT,slope::REL_BOTTOM,0.01,0.05);
     show << Formula::Add("w_i(x) = \\min_{j | (i,j) \\in E} w_{ij}(x)")->at("wi_formula");
     show << Image::Add("wi.png")->at("wi_plot");
 
-    show << Latex::Add("It can be seen as a smoothed indicatrix of the Geodesic Voronoï cell of $y_i$.")->at("voro_cell");
+    show << inNextFrame << Latex::Add("What is important: \\\\ - only blend at interfaces \\\\ - only depend on distances between the points. \\\\ - simple test to avoid useless computations.")->at("voro_cell");
 }

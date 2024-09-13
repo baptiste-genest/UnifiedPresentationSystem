@@ -52,7 +52,7 @@ void CreateMovingSlides(slope::Slideshow& show) {
     Latex::NewCommand("Exp","\\text{Exp}");
     Latex::NewCommand("Log","\\text{Log}");
 
-    auto title = Title("Moving on implicit surfaces");
+    auto title = Title("Moving along implicit surfaces");
     show << newFrame <<  title;
     show << newFrame << title->at(TOP);
 
@@ -75,7 +75,7 @@ void CreateMovingSlides(slope::Slideshow& show) {
     vec v = -(E.first - E.second).normalized();
     auto vp = P->addVector(vec(v*0.3));
 
-    auto walk = Latex::Add("We would like to walk on the surface from a point $p$ in a direction $v$.");
+    auto walk = Latex::Add("We would like to walk along the surface from a point $p$ in a direction $v$.");
     show << PlaceRelative(walk,title,slope::ABS_LEFT,slope::REL_BOTTOM,0.04,0.05);
 
     show << P << Latex::Add("p")->at(x,vec2(0.02,-0.02));
@@ -126,5 +126,5 @@ void CreateMovingSlides(slope::Slideshow& show) {
     show << inNextFrame << CameraView::Add("moving_far",true);
     auto W = slope::Curve3D::Add(gamma);
     show << inNextFrame << W;
-    show << inNextFrame << PlaceRelative(Formula::Add("\\langle v, H_f v\\rangle \\propto f(x-v) - 2f(x) + f(x+v)"),order2_approx,slope::ABS_LEFT,slope::REL_BOTTOM,0.04,0.02);
+    //show << inNextFrame << PlaceRelative(Formula::Add("\\langle v, H_f v\\rangle = \\frac{f(x-hv) - 2f(x) + f(x+hv)}{h^2} + o(h^2)"),order2_approx,slope::ABS_LEFT,slope::REL_BOTTOM,0.04,0.02);
 }

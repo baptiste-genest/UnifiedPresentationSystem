@@ -135,6 +135,11 @@ void CreateLogMapSlides(slope::Slideshow& show) {
     show << Curve3D::Add(geodesic);
     show << Formula::Add("\\gamma")->at(mid,vec2(0,-0.02));
 
+    show << Latex::Add("How to compute (polar) coordinates from $\\gamma$?")->at("gamma_cords");
+
+    show << inNextFrame << Latex::Add("$\\text{Length}(\\gamma)$ gives an approximation \\\\ of the geodesic distance $d_M(x,y)$")->at("geo_dist");
+    show << CameraView::Add("referential_y",true);
+
     vec ny = normal(y);
     vec e1 = Eigen::AngleAxisd(-0.5,ny)*OrthoprojAagainstB(x-y,ny).normalized();
     vec e2 = ny.cross(e1);
@@ -142,8 +147,8 @@ void CreateLogMapSlides(slope::Slideshow& show) {
     e2 += ny*0.04;
 
     show << inNextFrame << py->addVector(vec(e1*0.3)) << py->addVector(vec(e2*0.3));
+    show << Latex::Add("We compute the angle with \\\\ a reference frame $\\{e_1,e_2\\}$")->at("ref_frame");
     show << Formula::Add("e_1")->at(y+e1*0.3,vec2(-0.02,0.02)) << Formula::Add("e_2")->at(y+e2*0.3,vec2(-0.02,-0.02));
-    show << CameraView::Add("referential_y",true);
 
     vec lx = proj_impl(y + 0.1*(x-y));
     scalar cos_theta = (lx-y).normalized().dot(e1);
@@ -155,10 +160,14 @@ void CreateLogMapSlides(slope::Slideshow& show) {
         vec p = proj_impl(y + (e1*cos(th*t) + e2*sin(th*t))*r);
         return p;
     };
-    show << inNextFrame << Curve3D::Add(arc);
-    show << Formula::Add("\\theta")->at(vec(lx),vec2(0.045,0.01));
 
-    show << Formula::Add("\\text{Log}_y(x) \\approx \\mathcal{L}(\\gamma) (\\cos(\\theta),\\sin(\\theta)) ")->at("approx_log");
+
+    show << inNextFrame << Curve3D::Add(arc);
+
+
+    show << Formula::Add("\\theta")->at(vec(lx),vec2(0.045,0.01));
+    show << inNextFrame << Formula::Add("\\text{Log}_y(x) \\approx \\text{Length}(\\gamma) (\\cos(\\theta),\\sin(\\theta)) ")->at("approx_log");
+
 
     std::vector<vec2> uvs(surface->getVertices().size());
     for (size_t i = 0;i<uvs.size();i++) {
@@ -167,7 +176,9 @@ void CreateLogMapSlides(slope::Slideshow& show) {
         //std::cout << "UV " << i << " : " << uvs[i].transpose() << std::endl;
     }
 
+
     auto pc = surface->pc->addVertexParameterizationQuantity("uv",uvs);
     pc->setCheckerSize(0.05);
     show << inNextFrame << AddPolyscopeQuantity(pc);
+    show << inNextFrame << Latex::Add("We call $\\left(y,e_1,e_2\\right)$ the seed \\\\ of the uv-field")->at("seed");
 }

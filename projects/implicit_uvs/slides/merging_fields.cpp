@@ -77,8 +77,8 @@ void CreateMergingFieldsSlides(slope::Slideshow& show) {
     show << newFrame << Title("Merging uv-fields")->at(TOP);
 
     show << PlaceRelative(Latex::Add("We wish to take weighted averages of multiple uv-fields."),slope::ABS_LEFT,slope::REL_BOTTOM,0.03,0.04);
-    show << PlaceRelative(Latex::Add("Since each Log map is expressed in its own referential,"),slope::ABS_LEFT,slope::REL_BOTTOM,0.03,0.01);
-    show << PlaceRelative(Latex::Add("we need to express everything in a common uv-space."),slope::ABS_LEFT,slope::REL_BOTTOM,0.03,0.01);
+    show << PlaceRelative(Latex::Add("However, since each Log map is expressed in its own referential,"),slope::ABS_LEFT,slope::REL_BOTTOM,0.03,0.01);
+    show << PlaceRelative(Latex::Add("we need to express everything in a common refenrential."),slope::ABS_LEFT,slope::REL_BOTTOM,0.03,0.01);
 
 //    show << Image::Add("merging_param_labeled.png",0.4)->at("merging_fields");
 
@@ -97,7 +97,7 @@ void CreateMergingFieldsSlides(slope::Slideshow& show) {
     vec zero = vec::Zero();
     auto Sp = Point::Add(zero,0.99);
 
-    show << Sp << Point::Add(p);
+    show << Sp << Point::Add(p) << Formula::Add("x")->at(p,vec2(0.02,-0.02));
     slope::Point::PointPtr ys_pts[3];
 
     auto E = slope::CompleteBasis(p);
@@ -150,6 +150,9 @@ void CreateMergingFieldsSlides(slope::Slideshow& show) {
     M.E1 = E1;
     M.E2 = E2;
     slope::Mesh::MeshPtr uv_frames[3];
+
+    int f0 = show.getNumberSlides() - 1;
+
     for (int i = 0;i<3;i++) {
         vec log = LogSphere(p,ys[i]);
         M.sources[i] = E1*log.dot(E1) + E2*log.dot(E2) + uv_offset;

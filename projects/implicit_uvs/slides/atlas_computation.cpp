@@ -5,10 +5,12 @@ using namespace slope;
 void CreateAtlasComputeSlides(slope::Slideshow& show) {
     show << newFrame << Title("Optimal frames and uv-offsets")->at(TOP);
 
+    show << Formula::Add("u(x) = \\frac{\\sum_i w_i(x) \\left( \\Log_{y_i}(x) + \\textcolor{red}{u_i} \\right)}{\\sum_i w_i(x)}",Options::Slope_default_height_ratio*2)->at(CENTER);
+
     vec center = vec(0,0,0);
     auto sphere = Point::Add(center,1);
 
-    show << sphere;
+    show << newFrameSameTitle << sphere;
 
     show << CameraView::Add("atlas");
 
@@ -67,13 +69,17 @@ void CreateAtlasComputeSlides(slope::Slideshow& show) {
     });
     diff->pc->setColor(glm::vec3(1,0,0));
     show << diff;
-    show << inNextFrame << PlaceRelative(Latex::Add("Then, we compute the uv-offsets by trying\\\\ to respect each referential as much as possible: "),e_frame,slope::ABS_LEFT,slope::REL_BOTTOM,0.03,0.04);
+    vec rt0 = x[0].cross(t[0]);
+    show << inNextFrame << pts[0]->addVector(rt0);
+    
+    show << Formula::Add("n(y_i) \\times t_i")->at(x[0] + rt0,vec2(0.02,-0.02));
+    show << Latex::Add("Once the $t_i$ are computed, the frames \\\\  are completed by a 90° rotation.")->at("90_rotation");
+    show << inNextFrame << PlaceRelative(Latex::Add("Then, we compute the uv-offsets by trying\\\\ to respect each referential as much as possible: "),slope::ABS_LEFT,slope::REL_BOTTOM,0.03,0.04);
     show << Formula::Add("\\min_{u_i} \\sum_{(i,j) \\in E} \\frac{||\\Log_{y_i}(y_j) - u_j - u_i||^2}{d_{ij}^2}")->at("offset_energy");
 
     show << newFrameSameTitle << PlaceBelow(Latex::Add("Solving small linear systems"));
-    show << inNextFrame << PlaceRelative(Latex::Add("Solving least-square problems $\\implies$ solving SPD linear systems: "),slope::ABS_LEFT,slope::REL_BOTTOM,0.03,0.04);
-    show << inNextFrame << PlaceRelative(Latex::Add("Of the size of the number of seeds \\\\ in the graph \\textbf{rarely more than 10!}. \\\\ Instantly solvable!"),slope::ABS_LEFT,slope::REL_BOTTOM,0.03,0.04);
+    show << PlaceRelative(Latex::Add("Solving least-square problems $\\implies$ solving SPD linear systems: "),slope::ABS_LEFT,slope::REL_BOTTOM,0.03,0.04);
+    show << inNextFrame << PlaceRelative(Latex::Add("Of the size of the number of seeds \\\\ in the graph \\textbf{rarely more than 10!}."),slope::ABS_LEFT,slope::REL_BOTTOM,0.03,0.04);
+    show << Latex::Add("Instantly solvable!")->at("instant_solve");
     show << Gif::Add("graph_editing.gif",15)->at("graph_editing");
-
-
 }

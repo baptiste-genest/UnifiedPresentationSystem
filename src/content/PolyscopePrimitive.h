@@ -5,6 +5,7 @@
 #include "polyscope/structure.h"
 #include "polyscope/surface_mesh.h"
 #include "StateInSlide.h"
+#include "color_tools.h"
 
 namespace slope {
 class PolyscopePrimitive;

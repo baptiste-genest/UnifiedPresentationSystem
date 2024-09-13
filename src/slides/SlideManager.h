@@ -31,6 +31,8 @@ inline vec2 computeOffsetToMean(const Slide& buffer) {
     return bbox*0.5f;
 }
 
+class SlideManager;
+using PlacementTemplate = std::function<void(SlideManager&,ScreenPrimitivePtr)>;
 
 class SlideManager {
 protected:
@@ -59,8 +61,19 @@ protected:
     bool centering = false;AnchorPtr center_anchor;
 
 
-
 public:
+
+    PlacementTemplate templater = [] (SlideManager& show,ScreenPrimitivePtr ptr) {
+        show.addToLastSlide(ptr,StateInSlide(vec2(0.5,0.5)));
+    };
+
+    void newFrame() {
+        handleCenter();
+        addSlide(Slide());
+        PolyscopePrimitive::resetColorId();
+        last_primitive_inserted = nullptr;
+        last_screen_primitive_inserted = nullptr;
+    }
 
     void duplicateLastSlide(){slides.push_back(slides.back());}
 
@@ -176,9 +189,7 @@ inline SlideManager& operator<<(SlideManager& SM,SlideManager::remove_last) {
 
 
 inline SlideManager& operator<<(SlideManager& SM,SlideManager::new_frame nf) {
-    SM.handleCenter();
-    SM.addSlide(Slide());
-    PolyscopePrimitive::resetColorId();
+    SM.newFrame();
     if (nf.same_title){
         int i = SM.getNumberSlides()-2;
         auto ex = SM.getSlide(i).title_primitive;
@@ -218,7 +229,11 @@ inline SlideManager& operator<<(SlideManager& SM,PrimitiveInSlide obj) {
 }
 
 inline SlideManager& operator<<(SlideManager& SM,PrimitivePtr ptr) {
-    SM.addToLastSlide(ptr,StateInSlide(vec2(0.5,0.5)));
+    if (!SM.getLastScreenPrimitive() || !ptr->isScreenSpace())
+        SM.addToLastSlide(ptr,StateInSlide(vec2(0.5,0.5)));
+    else {
+        SM.templater(SM,std::static_pointer_cast<ScreenPrimitive>(ptr));
+    }
     return SM;
 }
 
