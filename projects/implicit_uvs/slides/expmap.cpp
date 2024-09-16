@@ -64,12 +64,18 @@ void CreateExpMapSlides(slope::Slideshow& show) {
     });
     v_param->q->setVectorColor(curve_M->pc->getPointColor());
 
-    show << orig_TpM << v_param << curve_M << v_label;
+    auto geo = Curve3D::Add([p,curve_M](scalar t,TimeObject to) {
+        vec off = vec(1.5,0,0.01);
+        vec g = Exp(vec(0,0,1),t*LogSphere(vec(0,0,1),curve_M->getCurrentPos() - off)) + off + vec(0,0,0.03);
+        return g;
+    });
+
+    show << orig_TpM << v_param << curve_M << v_label << geo;
     auto v_label_text = Formula::Add("v")->track([v_label](){return vec(v_label->getCurrentPos() + vec(-1.5,0,1));},vec2(0.02,0.02));
     auto exp_label = Formula::Add("\\Exp_p(v)")->track([curve_M](){return curve_M->getCurrentPos();},vec2(0.02,0.02));
     show << v_label_text << exp_label;
     show << inNextFrame << Latex::Add("It is an \\emph{explicit} mapping!")->at("explicit_expm");
-    show << inNextFrame >> curve_M >> v_param >> v_label_text.first >> exp_label.first;
+    show << inNextFrame >> curve_M >> v_param >> v_label_text.first >> exp_label.first >> geo;
     vec target = ExpSphere(vec(0,0,1),vec(1,1,0)*0.4) + vec(1.5,0,0);
     vec source = vec(1.3,0,10);
 
@@ -77,10 +83,17 @@ void CreateExpMapSlides(slope::Slideshow& show) {
         return vec(source + (target-source)*t);
     });
 
+
     auto hit = vec(target + vec(0,0,0.01));
     show << inNextFrame << ray << Point::Add(hit,0.05) << Formula::Add("x")->at(hit,vec2(0.02,-0.02));
     show << inNextFrame << PlaceBelow(Formula::Add("\\xleftarrow{\\Log_p}"),expm,0.05);
-    show << orig_TpM->addVector(vec(0.4,0.4,0.)) << Formula::Add("\\Log_p(x)")->at(vec(-1.5 + 0.41,0.41,1.),vec2(0.02,-0.02));
+    auto log_curve = Curve3D::Add([](scalar t) {
+        return vec(ExpSphere(vec(0,0,1),vec(0.4,0.4,0)*t) + vec(1.5,0,0.04));
+    });
+    auto logx = orig_TpM->addVector(vec(0.4,0.4,0.));
+    logx->q->setVectorColor(log_curve->pc->getColor());
+
+    show << logx << log_curve << Formula::Add("\\Log_p(x)")->at(vec(-1.5 + 0.41,0.41,1.),vec2(0.02,-0.02));
 
     auto Exp = Formula::Add("\\Exp_p(v)");
     auto Log = Formula::Add("\\Log_p(x)");

@@ -119,7 +119,8 @@ void CreateDetailsSlides(slope::Slideshow& show) {
     show << inNextFrame << Latex::Add("To overcome such difficulty, we first \\\\ project the query point on the surface:");
     show << Formula::Add("\\Pi_f(x) = x - f(x) \\nabla f(x)")->at("proj_f");
     
-    show << inNextFrame << Latex::Add("We get:") << disp_f->at("disp_formula") << inNextFrame << arc << inNextFrame >> query >> arc >> source;
+    show << inNextFrame  << arc << inNextFrame >> query >> arc >> source;
+    show << Latex::Add("We get:") << disp_f->at("disp_formula") << inNextFrame;
 
     show << newFrameSameTitle << PlaceBelow(Latex::Add("Displacement maps"));
 
