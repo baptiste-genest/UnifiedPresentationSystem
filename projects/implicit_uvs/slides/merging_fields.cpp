@@ -3,7 +3,7 @@
 
 using namespace slope;
 
-#include "eigen3/Eigen/Geometry"
+#include <Eigen/Geometry>
 
 struct Merging
 {
