@@ -82,4 +82,5 @@ void CreateAtlasComputeSlides(slope::Slideshow& show) {
     show << inNextFrame << PlaceRelative(Latex::Add("Of the size of the number of seeds \\\\ in the graph \\textbf{rarely more than 10!}."),slope::ABS_LEFT,slope::REL_BOTTOM,0.03,0.04);
     show << Latex::Add("Instantly solvable!")->at("instant_solve");
     show << Gif::Add("graph_editing.gif",15)->at("graph_editing");
+    show << PlaceNextTo(Latex::Add(tex::center("Real time editing \\\\ of the uv-field."),slope::Options::Slope_default_height_ratio*0.6),0);
 }

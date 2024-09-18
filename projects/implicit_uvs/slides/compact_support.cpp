@@ -17,7 +17,7 @@ void CreateCompactSupportSlides(slope::Slideshow& show) {
 
     auto base = show.getCurrentSlide();
 
-    auto txt = Latex::Add("In order to reduce as much as possible the computations, we want to interpolate only around the frontier between two seeds.");
+    auto txt = Latex::Add("In order to reduce as much as possible the computations, we want to interpolate only around the frontier between two seeds $V_{ij}$.");
     show << PlaceRelative(txt,sub,slope::ABS_LEFT,slope::REL_BOTTOM,0.01,0.05);
 
     vec x1 = vec(-0.5,0.,0);
@@ -44,7 +44,7 @@ void CreateCompactSupportSlides(slope::Slideshow& show) {
 
 
 
-    show << inNextFrame << PlaceRelative(Latex::Add("In planar geometry, the signed distance to the Voronoï frontier between two points is given by:"),txt,slope::ABS_LEFT,slope::REL_BOTTOM,0.01,0.04);
+    show << inNextFrame << PlaceRelative(Latex::Add("In planar geometry, the signed distance to the Voronoï frontier between two points is given by:"),slope::ABS_LEFT,slope::REL_BOTTOM,0.01,0.04);
     auto euc = Formula::Add("\\frac{||x-y_i||^2 - ||x-y_j||^2}{2||y_i-y_j||}");
     show << PlaceRelative(euc,slope::ABS_LEFT,slope::REL_BOTTOM,0.1,0.04);
     auto p2 = Point::Add(x2);
@@ -86,8 +86,6 @@ void CreateCompactSupportSlides(slope::Slideshow& show) {
 
     show << Sp << geo_dist;
 
-    show << inNextFrame << 
-    PlaceRelative(Latex::Add("We only want to blend in the band : $\\{|d_{V_{ij}}(x)| < \\sigma \\}$"),slope::ABS_LEFT,slope::REL_BOTTOM,0.01,0.01);
 
     show << base;
 

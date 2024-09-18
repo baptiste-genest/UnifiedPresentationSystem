@@ -180,5 +180,5 @@ void CreateLogMapSlides(slope::Slideshow& show) {
     auto pc = surface->pc->addVertexParameterizationQuantity("uv",uvs);
     pc->setCheckerSize(0.05);
     show << inNextFrame << AddPolyscopeQuantity(pc);
-    show << inNextFrame << Latex::Add("We call $\\left(y,e_1,e_2\\right)$ the seed \\\\ of the uv-field")->at("seed");
+    show << inNextFrame << Latex::Add("We call $\\left(y,e_1,e_2\\right)$ \\textbf{the seed \\\\ of the uv-field}")->at("seed");
 }

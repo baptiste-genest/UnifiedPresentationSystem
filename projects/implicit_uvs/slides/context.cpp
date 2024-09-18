@@ -75,13 +75,13 @@ void CreateContextSlides(slope::Slideshow& show) {
     show << PlaceRelative(Latex::Add("Perflecly fine representation of the geometry..."),slope::ABS_LEFT,slope::REL_BOTTOM,0.04,0.2);
     show << PlaceRelative(Latex::Add("...but what about textures?"),slope::ABS_LEFT,slope::REL_BOTTOM,0.1,0.04);
 
+    show << Latex::Add("Usually, one extensively use the connectivity of a mesh to compute global parameterizations.")->at("connec");
 
-    show << Image::Add("UVMapping.png")->at("uv_map");
 
-    show << inNextFrame << PlaceRelative(Latex::Add("Fundamental issue : implicit representations are defined in a volumetric way whereas textures are 2D objects!"),slope::ABS_LEFT,slope::ABS_BOTTOM,0.04,0.2);
+    show << Image::Add("UVMapping.png",1.2)->at("uv_map");
 
     show << newFrameSameTitle;
-    show << PlaceBelow(Latex::Add("Not explicitly 2D"));
+    show << PlaceBelow(Latex::Add("Difficulty of the problem"));
 
 
     vecs X;
