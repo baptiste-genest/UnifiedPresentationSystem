@@ -11,15 +11,41 @@ void CreateContextSlides(slope::Slideshow& show) {
     show << Title("Implicit surfaces")->at(TOP);
 
     show << PlaceRelative(Latex::Add("Implicit representations are a powerful tool to\\\\ represent shapes."),slope::ABS_LEFT,slope::REL_BOTTOM,0.03,0.1);
-    show << PlaceRight(Image::Add("bunny_sdf.jpg",1.8),0.3,0.04);
+
+    auto Grid = Context.grid200->scale(2.);
+    Grid->pc->setEdgeWidth(0);
+
+    int fn = show.getNumberSlides() - 1;
+
+
+    auto dist = PolyscopeQuantity<polyscope::SurfaceVertexScalarQuantity>::Add(Grid->pc->addVertexSignedDistanceQuantity("sdf",Vec::Zero(Grid->getVertices().size())));
+    dist->q->setIsolineWidth(0.05,true);
+
+    Grid->updater = [Grid,dist,fn](TimeObject t, Primitive *)
+    {
+        dist->q->updateData(Grid->eval([fn,t](const Vertex &v)
+                                       {
+            vec x = v.pos;
+            if (t.absolute_frame_number == fn) {
+                return x.norm() - 1.;
+            }
+                scalar s = smoothstep(t.from_action);
+                scalar d1 = (x - vec(s,0,0)).norm() - 0.8;
+                scalar d2 = (x + vec(s,0,0)).norm() - 0.8;
+                return std::min(d1,d2); }));
+    };
+    show << Grid << dist;
+
+    //show << PlaceRight(Image::Add("bunny_sdf.jpg",1.8),0.3,0.04);
 
     show << Image::Add("CSG.png",0.7)->at("csg");
+    show << CameraView::Add("intro");
 
     show << Formula::Add("M = \\{f(x) = 0\\}")->at("impl_formula_1");
 
     show << Latex::Add("Many advantages : geometric modeling,\\\\ shape optimization, etc...")->at("use_cases");
 
-    show << newFrame <<  Title("Visualizing Implicit surfaces")->at(TOP);
+    show<< inNextFrame << newFrame <<  Title("Visualizing Implicit surfaces")->at(TOP);
     show << PlaceBelow(Latex::Add("Context of the work"),0.01);
     
     auto T = slope::Mesh::Add(Options::DataPath+"meshes/torus.obj",1,true);

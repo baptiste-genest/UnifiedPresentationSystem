@@ -90,6 +90,12 @@ file(GLOB implicit_uvs_slides
 add_executable(implicit_uvs projects/implicit_uvs/main.cpp ${implicit_uvs_slides})
 target_link_libraries(implicit_uvs slope)
 
+file(GLOB implicit_uvs_slides_simple
+     "projects/implicit_uvs_simple/slides/*"
+)
+add_executable(implicit_uvs_simple projects/implicit_uvs_simple/main.cpp ${implicit_uvs_slides_simple})
+target_link_libraries(implicit_uvs_simple slope)
+
 endif()
 
 
