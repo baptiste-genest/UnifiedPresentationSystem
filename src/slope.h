@@ -19,5 +19,6 @@
 #include "slides/Panel.h"
 #include "extern/svg.hpp"
 #include "content/BackgroundColor.h"
+#include "content/plots/Plot.h"
 
 #endif // SLOPE_H

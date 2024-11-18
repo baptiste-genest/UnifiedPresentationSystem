@@ -61,10 +61,6 @@ public:
 
 };
 
-struct Plot {
-    using Curve3DPtr = std::shared_ptr<Curve3D>;
-    static Curve3DPtr Add(const scalar_function& f,scalar x0,scalar x1,const Vec2& size,const vec& anchor,int N = 100);
-};
 
 }
 

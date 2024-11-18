@@ -8,3 +8,5 @@ slope::TimeObject slope::TimeObject::operator()(Primitive* p) const {
     tmp.relative_frame_number = p->relativeSlideIndex(tmp.absolute_frame_number);
     return tmp;
 }
+
+slope::TransitionAnimator slope::Primitive::DefaultTransition;

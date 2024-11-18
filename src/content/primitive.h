@@ -8,6 +8,7 @@
 #include <fstream>
 #include <iostream>
 #include "io.h"
+#include "transitions.h"
 
 namespace slope {
 
@@ -33,6 +34,7 @@ struct Primitive {
     static PrimitivePtr get(PrimitiveID id){
         return primitives[id];
     }
+
     template<class T>
     static std::shared_ptr<T> get(PrimitiveID id){
         return std::static_pointer_cast<T>(primitives[id]);
@@ -84,7 +86,6 @@ struct Primitive {
         handleInnerTime();
     }
 
-
     TimeTypeSec getInnerTime(){
         return TimeFrom(inner_time);
     }
@@ -99,6 +100,9 @@ struct Primitive {
 
     void setDepth(int d) {depth = d;}
     int getDepth() const {return depth;}
+
+    TransitionAnimator transition;
+    static TransitionAnimator DefaultTransition;
 
 protected:
     virtual void draw(const TimeObject& time,const StateInSlide& sis) = 0;
@@ -127,6 +131,7 @@ std::shared_ptr<T> NewPrimitive(Args&& ... args){
     auto ptr = std::make_shared<T>(std::forward<Args>(args)...);
     Primitive::addPrimitive(ptr);
     ptr->initPolyscope();
+    ptr->transition = Primitive::DefaultTransition;
     return ptr;
 }
 

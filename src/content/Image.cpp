@@ -27,15 +27,15 @@ ImVec2 slope::Image::getSize(std::string filename)
 slope::Primitive::Size slope::Image::getScaledSize(const ImageData &data, scalar scale)
 {
     double sx = scale,sy = scale;
-    bool notFullHD = (Options::Slope_screen_resolution_x != 1920) ||(Options::Slope_screen_resolution_y != 1080);
+    bool notFullHD = (Options::ScreenResolutionWidth != 1920) ||(Options::ScreenResolutionHeight != 1080);
     if (notFullHD){
-        sx *=  Options::Slope_screen_resolution_x/1920.;
-        sy *=  Options::Slope_screen_resolution_y/1080.;
+        sx *=  Options::ScreenResolutionWidth/1920.;
+        sy *=  Options::ScreenResolutionHeight/1080.;
     }
     return Size(sx*data.width,sy*data.height);
 }
 
-slope::ImageData slope::loadImage(std::string file)
+slope::ImageData slope::loadImage(path file)
 {
     auto filename = file.c_str();
     int w,h;
@@ -78,16 +78,12 @@ void slope::Image::draw(const TimeObject &, const StateInSlide &sis)
 
 void slope::Image::playIntro(const TimeObject& t, const StateInSlide &sis)
 {
-    auto sist = sis;
-    sist.alpha = smoothstep(t.transitionParameter)*sis.alpha;
-    display(sist);
+    display(transition.intro(t,sis));
 }
 
 void slope::Image::playOutro(const TimeObject& t, const StateInSlide &sis)
 {
-    auto sist = sis;
-    sist.alpha = smoothstep(1-t.transitionParameter)*sis.alpha;
-    display(sist);
+    display(transition.outro(t,sis));
 }
 
 slope::Primitive::Size slope::Image::getSize() const {
@@ -129,18 +125,18 @@ void slope::DisplayImage(const ImageData &data, const StateInSlide &sis, scalar 
     RGBA color_multiplier = ImColor(1.f,1.f,1.f,sis.alpha);
     auto P = sis.getAbsolutePosition();
 
-    bool notfullHD = (Options::Slope_screen_resolution_x != 1920) ||(Options::Slope_screen_resolution_y != 1080);
+    bool notfullHD = (Options::ScreenResolutionWidth != 1920) ||(Options::ScreenResolutionHeight != 1080);
 
     if (std::abs(sis.angle) > 0.001 || std::abs(1-scale) > 1e-2 || notfullHD){
-        double sx =  Options::Slope_screen_resolution_x/1920.;
-        double sy =  Options::Slope_screen_resolution_y/1080.;
+        double sx =  Options::ScreenResolutionWidth/1920.;
+        double sy =  Options::ScreenResolutionHeight/1080.;
         ImageRotated((void*)(intptr_t)data.texture,P,ImVec2(sx*data.width*scale,sy*data.height*scale),sis.angle,color_multiplier);
     }
     else {
-        P.x -= data.width*0.5;
-        P.y -= data.height*0.5;
+        P.x -= data.width*0.5*scale;
+        P.y -= data.height*0.5*scale;
         ImGui::SetCursorPos(P);
-        ImGui::Image((void*)(intptr_t)data.texture, ImVec2(data.width,data.height), ImVec2(0.0f, 0.0f), ImVec2(1.0f, 1.0f), color_multiplier);
+        ImGui::Image((void*)(intptr_t)data.texture, ImVec2(data.width*scale,data.height*scale), ImVec2(0.0f, 0.0f), ImVec2(1.0f, 1.0f), color_multiplier);
     }
 
 }
@@ -161,16 +157,16 @@ void slope::Gif::draw(const TimeObject &t, const StateInSlide &sis)
     display(sis);
 }
 
-std::vector<slope::ImageData> slope::loadGif(std::string filename)
+std::vector<slope::ImageData> slope::loadGif(path filename)
 {
     auto H = std::to_string(std::hash<std::string>{}(filename));
     std::vector<slope::ImageData> data;
     std::string folder = slope::Options::DataPath + "cache/" + H;
     if (!io::folder_exists(folder) || Options::ignore_cache){
-        spdlog::info("Decomposing gif " + filename);
+        spdlog::info("Decomposing gif " + filename.string());
         system(("rm -rf " + folder + " 2> /dev/null").data());
         system(("mkdir " + folder).data());
-        system(("convert "+filename+" -coalesce " + folder + "/gif_%05d.png").data());
+        system(("convert "+filename.string()+" -coalesce " + folder + "/gif_%05d.png").data());
     }
     auto images = io::list_directory(folder);
     for (auto& f : images){

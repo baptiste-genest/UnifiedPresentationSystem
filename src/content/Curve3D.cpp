@@ -66,22 +66,6 @@ Curve3D::Curve3D(const curve_param &param, int N, bool loop,scalar r) : loop(loo
     }
 }
 
-Plot::Curve3DPtr Plot::Add(const scalar_function &f, scalar x0, scalar x1,const Vec2& size,const vec& anchor, int N)
-{
-    scalars F(N);
-    for (int i = 0;i<N;i++)
-        F[i] = f(x0 + i*(x1-x0)/(N-1));
-    auto min = *std::min_element(F.begin(),F.end());
-    auto max = *std::max_element(F.begin(),F.end());
-    std::cout << min << " " << max << std::endl;
-    scalar range = max-min;
-    vecs V(N);
-    for (int i = 0;i<N;i++){
-        V[i] = anchor + vec(i/scalar(N-1.),F[i]/range,0.);
-    }
-    return Curve3D::Add(V);
-}
-
 void CurveNetwork::initPolyscope()
 {
     pc = polyscope::registerCurveNetwork(getPolyscopeName(),nodes,E);

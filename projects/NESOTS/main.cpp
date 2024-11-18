@@ -220,7 +220,7 @@ void init() {
         show << PlaceRelative(Formula::Add(R"(\W_p^p(\mu,\nu) = \inf_{\gamma \in \Pi(\mu,\nu)} \int d(x,y)^p d\gamma)"),placeX::CENTER_X,slope::REL_BOTTOM,0.05,0.1);
         show << inNextFrame << PlaceRelative(Latex::Add("Very importantly, $\\mu$ and $\\nu$ can be discrete or continuous!"),placeX::ABS_LEFT,slope::REL_BOTTOM,0.05,0.1);
         show << PlaceRelative(Image::Add("OT_discrete_conti_2.png"),placeX::CENTER_X,slope::REL_BOTTOM,0.05,0.01);
-        show << PlaceRelative(Latex::Add("Image by Gabriel Peyré",Options::Slope_default_height_ratio*0.6),placeX::ABS_RIGHT,slope::REL_BOTTOM,0.01,0.005);
+        show << PlaceRelative(Latex::Add("Image by Gabriel Peyré",Options::DefaultLatexScale*0.6),placeX::ABS_RIGHT,slope::REL_BOTTOM,0.01,0.005);
     }
     {
         show << newFrame;
@@ -253,7 +253,7 @@ void init() {
             show << inNextFrame << Assignments;
         }
         //show << inNextFrame << PlaceBelow(Image::Add("OT_1D.png",0.7),0.05);
-        show << inNextFrame << PlaceBottom(Latex::Add("$\\mathcal{O}(N\\log(N))$",Options::Slope_default_height_ratio*1.5));
+        show << inNextFrame << PlaceBottom(Latex::Add("$\\mathcal{O}(N\\log(N))$",Options::DefaultLatexScale*1.5));
     }
 
     {
@@ -330,7 +330,7 @@ void init() {
         show << Formula::Add(R"(\mu = \frac{1}{N}\sum_{i=1}^N \delta_{x_i} )")->at("discrete_mu");
         show << beginCenter << Image::Add("unif.png") << PlaceNextTo(Image::Add("uniform.png"),1) << PlaceNextTo(Image::Add("blue_noise.png"),1) << endCenter;
         show << inNextFrame << PlaceRelative(Formula::Add("\\W(\\mu_1,\\U) > \\W(\\mu_2,\\U)"),CENTER_X,placeY::REL_BOTTOM,0,0.08);
-        show << inNextFrame << PlaceBelow(Latex::Add("Idea: Optimize $\\mu$ by gradient descent on $SW(\\mu,\\U)$!",slope::Options::Slope_default_height_ratio*1.4),0.05);
+        show << inNextFrame << PlaceBelow(Latex::Add("Idea: Optimize $\\mu$ by gradient descent on $SW(\\mu,\\U)$!",slope::Options::DefaultLatexScale*1.4),0.05);
     }
 
     auto grad = Formula::Add("\\nabla_{x_i} SW^{\\theta} = T^{\\theta}(x_i) - x_i");
@@ -659,7 +659,7 @@ $\textbf{P}^\theta(x)$ &
 \end{tabular}%
 }
 \end{table}
-)",Options::Slope_default_height_ratio*1);
+)",Options::DefaultLatexScale*1);
         show << PlaceBottom(Latex::Add("See details in paper."));
     }
     {
@@ -694,9 +694,9 @@ $\textbf{P}^\theta(x)$ &
             return vec(0.5*x);
         };
         auto M = Mesh::Add(Options::ProjectPath + "macaca.obj")->apply(N);
-        show << M << Formula::Add("\\mathbb{R}^3",Options::Slope_default_height_ratio*1.5)->at("R3");
+        show << M << Formula::Add("\\mathbb{R}^3",Options::DefaultLatexScale*1.5)->at("R3");
         show << inNextFrame;
-        show  << Formula::Add("\\Hy^2",Options::Slope_default_height_ratio*1.5)->at("H2");
+        show  << Formula::Add("\\Hy^2",Options::DefaultLatexScale*1.5)->at("H2");
         for (int i = 1;i<=3;i++) {
             PrimitiveGroup L;
             L << PointCloud::Add(readPointCloud(Options::ProjectPath + "mu_"+std::to_string(i) + ".pts"))->apply(N);

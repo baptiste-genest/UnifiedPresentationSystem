@@ -9,7 +9,7 @@ int main(int argc,char** argv)
   show.init("tutorials",argc,argv);
   
   //Slideshow title
-  show << slope::Latex::Add("Hello World!",slope::Options::Slope_TITLE)->at(slope::CENTER);
+  show << slope::Latex::Add("Hello World!",slope::Options::TitleScale)->at(slope::CENTER);
   
   //New slide
   auto title = slope::Title("The beauty of $\\pi$ ")->at(slope::TOP);

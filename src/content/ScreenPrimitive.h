@@ -82,7 +82,7 @@ public:
 
     Size getRelativeSize() const {
         auto s = getSize();
-        return Size(s(0)/Options::Slope_screen_resolution_x,s(1)/Options::Slope_screen_resolution_y);
+        return Size(s(0)/Options::ScreenResolutionWidth,s(1)/Options::ScreenResolutionHeight);
     }
 
 };
@@ -90,6 +90,7 @@ public:
 struct TextualPrimitive : public ScreenPrimitive {
     std::string content;
 };
+
 using TextualPrimitivePtr = std::shared_ptr<TextualPrimitive>;
 
 

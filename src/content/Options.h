@@ -18,23 +18,23 @@ static   std::string ProjectPath;
 static   std::string ProjectViewsPath;
 
 /// Latex paths
-static std::string Slope_PDFLATEX;
-static std::string Slope_CONVERT;
+static std::string PathToPDFLATEX;
+static std::string PathToCONVERT;
 
 ///Window size
-static size_t Slope_screen_resolution_x;
-static size_t Slope_screen_resolution_y;
+static size_t ScreenResolutionWidth;
+static size_t ScreenResolutionHeight;
 
 ///Density for the PDF -> PNG export
-static size_t Slope_density;
+static size_t PDFtoPNGDensity;
 
 static Eigen::Vector3d DefaultBackgroundColor;
 
 static bool ignore_cache;
 
 /// Height ratio for title
-static double Slope_TITLE;
-static double Slope_default_height_ratio;
+static double TitleScale;
+static double DefaultLatexScale;
 
 };
 }

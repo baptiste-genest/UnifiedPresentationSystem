@@ -12,5 +12,5 @@ void CreateConclusionSlides(slope::Slideshow& show){
     show << PlaceBelow(Latex::Add("Implicit shell maps"));
     show << newFrame << Title("Thank you! \\\\ Questions?")->at(TOP);
     show << Gif::Add("texture_seat.gif",20,1.3,false)->at("texture_seat");
-    show << PlaceBelow(Latex::Add(tex::center("Simple texturing example."),slope::Options::Slope_default_height_ratio*0.6));
+    show << PlaceBelow(Latex::Add(tex::center("Simple texturing example."),slope::Options::DefaultLatexScale*0.6));
 }

@@ -119,9 +119,9 @@ void CreateCurveBasedSlides(slope::Slideshow& show) {
     show << Latex::Add("Since everything is recomputed at each frame, one can change \\emph{any} parameter \\\\ and see the result immediately.")->at("advantages");
 
     show << inNextFrame << Gif::Add("uv_on_moving.gif",30,0.6)->at("uv_on_moving");
-    show << PlaceBelow(Latex::Add(tex::center("change of shape \\\\ parameter"),slope::Options::Slope_default_height_ratio*0.6));
+    show << PlaceBelow(Latex::Add(tex::center("change of shape \\\\ parameter"),slope::Options::DefaultLatexScale*0.6));
     show << Gif::Add("uv_on_noise.gif",30,0.8)->at("uv_on_noise");
-    show << PlaceBelow(Latex::Add(tex::center("time dependant noise"),slope::Options::Slope_default_height_ratio*0.6));
+    show << PlaceBelow(Latex::Add(tex::center("time dependant noise"),slope::Options::DefaultLatexScale*0.6));
     show <<  Gif::Add("move_seed_crop.gif",30,0.8)->at("move_seed");
-    show << PlaceBelow(Latex::Add(tex::center("seed is moved"),slope::Options::Slope_default_height_ratio*0.6));
+    show << PlaceBelow(Latex::Add(tex::center("seed is moved"),slope::Options::DefaultLatexScale*0.6));
 }

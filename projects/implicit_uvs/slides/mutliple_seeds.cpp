@@ -21,9 +21,9 @@ void CreateMultipleSeedsSlides(slope::Slideshow& show) {
 
     show << inNextFrame << PlaceBottom(Image::Add("geodesic_voronoi_cells.png",0.6),0.5,0.2);
     show << Latex::Add(tex::center("Implicit decals \n\n [de Groot et al. 2014]"))->at("impl_decals");
-    show << PlaceBelow(Latex::Add("Euclidean distance",slope::Options::Slope_default_height_ratio*0.7));
+    show << PlaceBelow(Latex::Add("Euclidean distance",slope::Options::DefaultLatexScale*0.7));
     show << Latex::Add("ours")->at("ours 1");
-    show << PlaceBelow(Latex::Add(tex::center("Geodesic distance \\\\ + segmentation"),slope::Options::Slope_default_height_ratio*0.7));
+    show << PlaceBelow(Latex::Add(tex::center("Geodesic distance \\\\ + segmentation"),slope::Options::DefaultLatexScale*0.7));
 
     show << newFrame << Title("Multiple local fields")->at(TOP);
     show << Image::Add("multiple_seeds_bunny.png",0.8)->at("multiple_seeds_bunny");

@@ -420,7 +420,7 @@ void init () {
         show << PlaceLeft(Latex::Add(tex::enumerate("The article aims at an efficient computation of the solution",
                                           "To do so, they propose the use of the FFT",
                                           "This has theoretical consequences that they fully cover",
-                                                    "The final optimization problem can be solved very efficiently"),Options::Slope_default_height_ratio*0.9),0.4) << Image::Add("mini_surf.png",0.7)->at("final");
+                                                    "The final optimization problem can be solved very efficiently"),Options::DefaultLatexScale*0.9),0.4) << Image::Add("mini_surf.png",0.7)->at("final");
     }
 }
 

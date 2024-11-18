@@ -34,6 +34,7 @@ configure_file(${PROJECT_SOURCE_DIR}/src/content/Options.cpp.in
 file(GLOB SRC_lib
      "src/content/*"
      "src/content/Graphics2D/*"
+     "src/content/plots/*"
      "src/math/*"
      "src/slides/*"
      "src/style/*"

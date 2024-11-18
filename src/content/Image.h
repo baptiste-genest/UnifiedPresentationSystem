@@ -15,11 +15,11 @@ struct ImageData {
     size_t assetId = 0;
 };
 
-ImageData loadImage(std::string filename);
+ImageData loadImage(path filename);
 void DisplayImage(const ImageData& data,const StateInSlide& sis,scalar scale = 1);
 void ImageRotated(ImTextureID tex_id, ImVec2 center, ImVec2 size, float angle,const RGBA& color_mult);
 
-std::vector<ImageData> loadGif(std::string filename);
+std::vector<ImageData> loadGif(path filename);
 
 inline std::string formatPath(std::string path) {
     if (path[0] == '/') return path;
@@ -41,7 +41,6 @@ public:
     static Size getScaledSize(const ImageData& data,scalar scale);
     ImageData data;
     scalar scale = 1;
-
 
 private:
     static std::vector<Image> images;

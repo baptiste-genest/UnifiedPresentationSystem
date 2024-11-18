@@ -4,8 +4,8 @@ using namespace slope;
 
 void CreateAtlasComputeSlides(slope::Slideshow& show) {
     show << newFrame << Title("Optimal frames and uv-offsets")->at(TOP);
-
-    show << Formula::Add("u(x) = \\frac{\\sum_i w_i(x) \\left( \\Log_{y_i}(x) + \\textcolor{red}{u_i} \\right)}{\\sum_i w_i(x)}",Options::Slope_default_height_ratio*2)->at(CENTER);
+    
+    show << Formula::Add("u(x) = \\frac{\\sum_i w_i(x) \\left( \\Log_{y_i}(x) + \\textcolor{red}{u_i} \\right)}{\\sum_i w_i(x)}",Options::DefaultLatexScale*2)->at(CENTER);
 
     vec center = vec(0,0,0);
     auto sphere = Point::Add(center,1);
@@ -82,5 +82,5 @@ void CreateAtlasComputeSlides(slope::Slideshow& show) {
     show << inNextFrame << PlaceRelative(Latex::Add("Of the size of the number of seeds \\\\ in the graph \\textbf{rarely more than 10!}."),slope::ABS_LEFT,slope::REL_BOTTOM,0.03,0.04);
     show << Latex::Add("Instantly solvable!")->at("instant_solve");
     show << Gif::Add("graph_editing.gif",15)->at("graph_editing");
-    show << Latex::Add(tex::center("Real time editing \\\\ of the uv-field."),slope::Options::Slope_default_height_ratio*0.6)->at("legend");
+    show << Latex::Add(tex::center("Real time editing \\\\ of the uv-field."),slope::Options::DefaultLatexScale*0.6)->at("legend");
 }

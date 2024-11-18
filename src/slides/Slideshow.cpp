@@ -1,4 +1,6 @@
 #include "Slideshow.h"
+#include "content/LateX.h"
+#include "spdlog/spdlog.h"
 
 
 void slope::Slideshow::nextFrame()
@@ -56,7 +58,7 @@ void slope::Slideshow::forceNextFrame()
 
 void slope::Slideshow::play() {
     ImGuiWindowConfig();
-    ImGui::Begin("Unified Presentation System",NULL,window_flags);
+    ImGui::Begin("Slope",NULL,window_flags);
 
     if (!initialized)
         initializeSlides();
@@ -124,11 +126,16 @@ void slope::Slideshow::play() {
         }
     }
 
+
     prompt();
 
     handleInputs();
 
     displayPopUps();
+
+    if (LatexLoader::initialized)
+        LatexLoader::HotReloadIfModified();
+
 
     if (display_slide_number)
         displaySlideNumber();
@@ -148,13 +155,17 @@ void slope::Slideshow::setInnerTime()
 void slope::Slideshow::handleDragAndDrop()
 {
     auto io = ImGui::GetIO();
-    if (!ImGui::IsKeyPressed(341) || io.MouseReleased[0] > 0){//CTRL {
+    if (!ImGui::IsKeyPressed(ImGuiKey_LeftCtrl) || io.MouseReleased[0] > 0){//CTRL {
+//    if (!ImGui::IsKeyPressed(ImGuiKey_LeftCtrl) || io.MouseReleased[0] > 0){//CTRL {
         selected_primitive = nullptr;
-        io.WantCaptureMouse = false;
+     //   io.WantCaptureMouse = false;
+        ImGui::SetNextFrameWantCaptureMouse(false);
+
         return;
     }
 
-    io.WantCaptureMouse = true;
+    ImGui::SetNextFrameWantCaptureMouse(true);
+//    io.WantCaptureMouse = true;
 
     auto S = ImGui::GetWindowSize();
     auto x = double(io.MousePos.x)/S.x;
@@ -204,10 +215,11 @@ void slope::Slideshow::handleTransition()
 void slope::Slideshow::ImGuiWindowConfig()
 {
     ImGuiIO& io = ImGui::GetIO(); (void)io;
-    io.WantCaptureMouse = false;
-    io.WantCaptureKeyboard = true;
+//    io.WantCaptureMouse = true;
     ImGui::SetNextWindowPos(ImVec2(0,0));
     ImGui::SetNextWindowSize(ImVec2(io.DisplaySize.x,io.DisplaySize.y));
+    ImGui::SetNextFrameWantCaptureMouse(false);
+    ImGui::SetNextFrameWantCaptureKeyboard(true);
 }
 
 void slope::Slideshow::init(std::string project_name,int argc,char** argv)
@@ -229,7 +241,7 @@ void slope::Slideshow::init(std::string project_name,int argc,char** argv)
     std::cout << "[ slope PATH ] " << slope::Options::SlopePath << std::endl;
     std::cout << "[ PROJECT PATH ] " << slope::Options::ProjectPath << std::endl;
     std::cout << "[ PROJECT CACHE PATH ] " << slope::Options::ProjectViewsPath << std::endl;
-    std::cout << "[ SCREEN RESOLUTION ] " << slope::Options::Slope_screen_resolution_x<<"x"<<slope::Options::Slope_screen_resolution_y  << std::endl;
+    std::cout << "[ SCREEN RESOLUTION ] " << slope::Options::ScreenResolutionWidth<<"x"<<slope::Options::ScreenResolutionHeight  << std::endl;
 
     std::cout << "[ KEY GUIDE ] " << std::endl;
     std::cout << "  - right arrow : next slide" << std::endl;
@@ -262,6 +274,8 @@ void slope::Slideshow::init(std::string project_name,int argc,char** argv)
     window_flags |= ImGuiWindowFlags_NoResize;
     window_flags |= ImGuiWindowFlags_NoBackground;
     window_flags |= ImGuiWindowFlags_NoScrollbar;
+
+    ImPlot::CreateContext();
 
 }
 
@@ -363,29 +377,32 @@ void slope::Slideshow::handleInputs()
     if (!keyboardOpen())
         return;
 
-    if (ImGui::IsKeyPressed(262) && !locked){ // RIGHT ARROW
+    if (ImGui::IsKeyPressed(ImGuiKey_RightArrow) && !locked){
         nextFrame();
     }
-    else if (ImGui::IsKeyPressed(263)){// LEFT ARROW
+    else if (ImGui::IsKeyPressed(ImGuiKey_LeftArrow)){
         previousFrame();
-    }else if (ImGui::IsKeyPressed(264)){// DOWN ARROW
+    }else if (ImGui::IsKeyPressed(ImGuiKey_DownArrow)){
         forceNextFrame();
     }
-    if (ImGui::IsKeyDown(258))//TABS
+    if (ImGui::IsKeyDown(ImGuiKey_Tab))
         slideMenu();
-    if (ImGui::IsKeyPressed(67)){// C
+    if (ImGui::IsKeyPressed(ImGuiKey_C)){
         camera_popup = true;
     }
-    if (ImGui::IsKeyPressed(68)){// D
+    if (ImGui::IsKeyPressed(ImGuiKey_D)){
         polyscope::options::buildGui = !polyscope::options::buildGui;
     }
-    if (ImGui::IsKeyPressed(80)){ // P
+    if (ImGui::IsKeyPressed(ImGuiKey_P)){
         static int screenshot_count = 0;
         constexpr int nb_zeros = 6;
         auto n = std::to_string(screenshot_count++);
-        std::string file =  "/tmp/screenshot_" + std::string(nb_zeros-n.size(),'0') + n + ".png";
-        slope::screenshot(file);
-        std::cout << "screenshot saved at " << file << std::endl;
+        path file =  "/tmp/screenshot_" + std::string(nb_zeros-n.size(),'0') + n + ".png";
+        slope::screenshot(file.string());
+        spdlog::info("screenshot saved at {}", file.string());
+    }
+    if (ImGui::IsKeyPressed(ImGuiKey_R)){
+        slope::LatexLoader::ReloadContentAndUpdate();
     }
 
 }

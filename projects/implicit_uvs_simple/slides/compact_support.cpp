@@ -10,7 +10,7 @@ void CreateCompactSupportSlides(slope::Slideshow& show) {
     auto Context = ImplicitUVsSlides::getContext();
 
     show << newFrame << Title("Compact support interpolation")->at(TOP);
-    show << Formula::Add("u(x) = \\frac{\\sum_i \\textcolor{red}{w_i(x)} \\left( \\Log_{y_i}(x) + u_i \\right)}{\\sum_i \\textcolor{red}{w_i(x)}}",Options::Slope_default_height_ratio*2)->at(CENTER);
+    show << Formula::Add("u(x) = \\frac{\\sum_i \\textcolor{red}{w_i(x)} \\left( \\Log_{y_i}(x) + u_i \\right)}{\\sum_i \\textcolor{red}{w_i(x)}}",Options::DefaultLatexScale*2)->at(CENTER);
 
     show << newFrameSameTitle;
 

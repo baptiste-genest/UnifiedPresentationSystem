@@ -15,6 +15,9 @@
 #include <ratio>
 #include <functional>
 
+#include <filesystem>
+#include <regex>
+
 #ifdef __APPLE__
 #include "Eigen/Dense"
 #include "Eigen/Sparse"
@@ -25,6 +28,8 @@
 
 #include "polyscope/polyscope.h"
 #include "polyscope/floating_quantity_structure.h"
+
+#include "extern/json.hpp"
 
 namespace slope {
 
@@ -99,6 +104,10 @@ using time_mapping = std::function<vec(const vec&,const TimeObject&)>;
 
 using curve_param = std::function<vec(scalar)>;
 using dynamic_curve_param = std::function<vec(scalar,const TimeObject&)>;
+
+using path = std::filesystem::path;
+
+using json = nlohmann::json;
 
 inline ImVec2 toVec2(const vec2& x) {
     return ImVec2(x(0),x(1));

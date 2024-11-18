@@ -121,14 +121,14 @@ void CreateMergingFieldsSlides(slope::Slideshow& show) {
         auto _e2 = ys_pts[i]->addVector(e2[i]);
         _e2->q->setVectorColor(glm::vec3(0,0,1));
         show <<ys_pts[i] << _e1 << _e2;
-        show << Formula::Add("y_" + std::to_string(i+1),Options::Slope_default_height_ratio*0.7)->at(ys[i],vec2(0.02,0.03));
+        show << Formula::Add("y_" + std::to_string(i+1),Options::DefaultLatexScale*0.7)->at(ys[i],vec2(0.02,0.03));
     }
     show << inNextFrame;
     for (int i = 0;i<3;i++){
         vec log_x = LogSphere(ys[i],p)*0.5;
         show << ys_pts[i]->addVector(log_x);
     }
-    show << Formula::Add("\\Log_{y_2}(x)",Options::Slope_default_height_ratio*0.7)->at("log_y1");
+    show << Formula::Add("\\Log_{y_2}(x)",Options::DefaultLatexScale*0.7)->at("log_y1");
     auto txt2 = Latex::Add("However, each Log map is expressed in its own referential!");
     show << PlaceRelative(txt2,txt1,slope::ABS_LEFT,slope::REL_BOTTOM,0.03,0.01);
     show << inNextFrame;
@@ -204,15 +204,15 @@ void CreateMergingFieldsSlides(slope::Slideshow& show) {
         pf2->q->setVectorColor(glm::vec3(0,0,1));
         pt->pc->setPointColor(glm::vec3(1,1,0));
         show << pt << pf1 << pf2;
-        refs[i] = Formula::Add("\\left(0,0\\right)",Options::Slope_default_height_ratio*0.6);
-        names[i] = Formula::Add("\\Log_{y_" + std::to_string(i+1)+"}",Options::Slope_default_height_ratio*0.8);
+        refs[i] = Formula::Add("\\left(0,0\\right)",Options::DefaultLatexScale*0.6);
+        names[i] = Formula::Add("\\Log_{y_" + std::to_string(i+1)+"}",Options::DefaultLatexScale*0.8);
         show << refs[i]->at(b_pos,vec2(-0.02,0.02))<< names[i]->at(b_pos,vec2(0,0.15));
     }
     show << inNextFrame;
     show << PlaceRelative(Latex::Add("We have to express everything in a common uv-space."),txt2,slope::ABS_LEFT,slope::REL_BOTTOM,0.03,0.01);
     for (int i = 0;i<3;i++){
         show >> refs[i] >> names[i];
-        show << Formula::Add("u_" + std::to_string(i+1),slope::Options::Slope_default_height_ratio*0.7)->at(M.sources[i],vec2(0.02,0.02));
+        show << Formula::Add("u_" + std::to_string(i+1),slope::Options::DefaultLatexScale*0.7)->at(M.sources[i],vec2(0.02,0.02));
     }
     show << Image::Add("referential.png",0.5)->at("uv_ref");
 
@@ -236,7 +236,7 @@ void CreateMergingFieldsSlides(slope::Slideshow& show) {
     param->q->setCheckerSize(0.1);
     param->q->setGridColors({glm::vec3(0,0,0),glm::vec3(1,1,1)});
     show << inNextFrame << grid_thin << param;
-    show << Formula::Add("u(x) = \\frac{\\sum_i w_i(x) \\left( \\Log_{y_i}(x) + u_i \\right)}{\\sum_i w_i(x)}",Options::Slope_default_height_ratio*0.8)->at("merging_formula");
+    show << Formula::Add("u(x) = \\frac{\\sum_i w_i(x) \\left( \\Log_{y_i}(x) + u_i \\right)}{\\sum_i w_i(x)}",Options::DefaultLatexScale*0.8)->at("merging_formula");
     for (int i = 0;i<3;i++)
         show >> uv_frames[i];
 

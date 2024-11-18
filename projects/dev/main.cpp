@@ -3,25 +3,31 @@
 #include "../../src/slope.h"
 #include "imgui.h"
 
+
 using namespace slope;
 slope::Slideshow show;
 
+
 void init () {
-    Latex::UsePackage("tcolorbox");
-    Latex::AddToPrefix("\\tcbuselibrary{theorems}");
-    Latex::AddToPrefix("\\newtcbtheorem{mytheo}{Theorem}{colback=green!5,colframe=green,fonttitle=\\bfseries}{th}");
+    LatexLoader::Init(Options::ProjectPath + "test.json");
 
-    /*
-    show << Title("TEST")->at(TOP);
-    show << PlaceBelow(Latex::Add("subtitle"));
-    Figure F;
-    F.PlotFunction(0.01,3,f,1000);
-    show << Figure::Add(F);
-    show << Latex::Add("\\begin{mytheo*}{}\n Jepeto\\end{mytheo*}");
-    */
+    show.templater = [] (SlideManager& show,ScreenPrimitivePtr ptr) {
+        show << PlaceRelative(ptr,ABS_LEFT,REL_BOTTOM,0.02,0.05);
+    };
 
-    show << Title("GIFS NOW IN UPS")->at(TOP) << inNextFrame << Gif::Add(Options::ProjectPath + "giphy.gif",10,1.5)->at("test");
-    show << newFrame;
+ //   show << LatexLoader::Load("test");
+
+    int n = 100;
+    scalars X(n),Y(n);
+    for (int i = 0;i<n;i++) {
+        X[i] = scalar(i)/n;
+        Y[i] = std::sin(X[i]*8);
+    }
+    show << Title("Plots now in slope!");
+    show << newFrame << Plot::Add(PlotLines(X,Y))->at("testplot");
+    show  << Plot::Add(PlotLines(X,Y));
+    show  << Plot::Add(PlotLines(X,Y));
+    show << newFrame << Title("Pretty sweet huh?");
 }
 
 
@@ -30,8 +36,10 @@ int main(int argc,char** argv) {
 
     show.init("dev",argc,argv);
     init();
+    polyscope::view::upDir = polyscope::UpDir::YUp;
 
     polyscope::state::userCallback = [](){
+//        ImPlot::ShowDemoWindow();
         show.play();
     };
     polyscope::show();

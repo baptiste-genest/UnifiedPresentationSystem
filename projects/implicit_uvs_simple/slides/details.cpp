@@ -129,7 +129,7 @@ void CreateDetailsSlides(slope::Slideshow& show) {
     show << inNextFrame << Latex::Add("Can be expensive")->at("expensive");
     show << inNextFrame << Latex::Add(tex::center("Or to transform a simple shape \\\\ into a complex one!"))->at("morphing");
     show << Gif::Add("shape_conversion.gif",30,0.8)->at("shape_convert");
-    show << Latex::Add(tex::center("Baking height\\\\ and textures\\\\from a sphere\\\\to a mesh"),slope::Options::Slope_default_height_ratio*0.6)->at("baking");
+    show << Latex::Add(tex::center("Baking height\\\\ and textures\\\\from a sphere\\\\to a mesh"),slope::Options::DefaultLatexScale*0.6)->at("baking");
     show << inNextFrame << Latex::Add("super fast!")->at("super_fast");
     show << newFrame << Title("Implicit advantages, explicit control")->at(TOP);
     show << inNextFrame << Latex::Add("Real time!!")->at("real_time_topo");

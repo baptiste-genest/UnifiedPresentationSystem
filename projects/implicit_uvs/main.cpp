@@ -14,7 +14,9 @@ void init() {
     };
 
     LoadCommon();
+    /*
     CreateIntroSlides(show);
+*/
     CreateContextSlides(show);
     CreateMovingSlides(show);
     CreateExpMapSlides(show);
