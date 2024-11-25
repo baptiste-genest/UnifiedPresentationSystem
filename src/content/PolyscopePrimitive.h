@@ -34,35 +34,52 @@ public:
 
     // Primitive interface
 public:
-    void draw(const TimeObject&, const StateInSlide &sis) override {
+    void draw(const TimeObject& t, const StateInSlide &sis) override {
         polyscope_ptr->setTransparency(sis.alpha);
+        polyscope_ptr->setTransform(sis.LocalToWorld.getMatrix()*localTransform.getMatrix());
+        updater(t,this);
     }
     void playIntro(const TimeObject& t,const StateInSlide &sis) override {
-        polyscope_ptr->setTransparency(smoothstep(t.transitionParameter)*sis.alpha);
-        updater(t(this),this);
+        polyscope_ptr->setTransparency(sis.alpha);
+        polyscope_ptr->setTransform(sis.LocalToWorld.getMatrix()*localTransform.getMatrix());
+        updater(t,this);
     }
     void playOutro(const TimeObject& t,const StateInSlide &sis) override {
-        polyscope_ptr->setTransparency(smoothstep(1-t.transitionParameter)*sis.alpha);
-        updater(t(this),this);
+        polyscope_ptr->setTransparency(sis.alpha);
+        polyscope_ptr->setTransform(sis.LocalToWorld.getMatrix()*localTransform.getMatrix());
+        updater(t,this);
     }
 
+    inline PrimitiveInSlide at(const Transform& T,scalar alpha=1) {
+        StateInSlide sis(T);
+        sis.alpha = alpha;
+        return {get(pid),sis};
+    }
+
+    inline PrimitiveInSlide at(scalar x,scalar y,scalar z,scalar alpha=1) {
+        return at(vec(x,y,z),alpha);
+    }
+
+    inline PrimitiveInSlide at(const vec& x,scalar alpha=1) {
+        return at(Transform::Translation(x),alpha);
+    }
 
 
     void forceDisable() override {
         polyscope_ptr->setEnabled(false);
-        //polyscope_ptr->remove();
     }
 
     void forceEnable() override {
         polyscope_ptr->setEnabled(true);
         polyscope_ptr->setTransparency(0);
-        //initPolyscope();
     }
     bool isScreenSpace() const override {return false;}
 
     static void resetColorId() {current_color_id = 0;}
 
     static glm::vec3 getColor();
+
+    Transform localTransform;
 protected:
     polyscope::Structure* polyscope_ptr;
 

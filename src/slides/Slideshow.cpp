@@ -319,13 +319,18 @@ void slope::Slideshow::saveCamera(std::string file)
 {
     std::ofstream camfile(file);
     camfile << removeResolutionFromCamfile(polyscope::view::getCameraJson());
-    std::cout << "current camera view exported at " << file << std::endl;
+    spdlog::info("current camera view exported at {}",file);
 }
 
 void slope::Slideshow::initializeSlides()
 {
     precomputeTransitions();
     loadSlides();
+    for (int i = 0;const auto& v : slides){
+        for (auto& p : v)
+            p.first->upFirstSlideNumber(i);
+        i++;
+    }
     from_begin = Time::now();
 }
 
@@ -340,7 +345,7 @@ void slope::Slideshow::loadSlides()
     }
     nb_distinct_slides = done.size();
 
-    std::cout << "[ number of distinct slides ] " << nb_distinct_slides << std::endl;
+    spdlog::info("[ number of distinct slides : {} ]",nb_distinct_slides);
 
     slide_number_display.resize(nb_distinct_slides);
     for (int i = 0;i<nb_distinct_slides;i++){

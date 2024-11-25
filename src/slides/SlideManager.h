@@ -8,15 +8,22 @@
 #include "../content/PrimitiveGroup.h"
 //#include "Panel.h"
 
+#include <glm/gtx/matrix_interpolation.hpp>
+
 namespace slope {
 
 inline StateInSlide transition(parameter t, const StateInSlide &sa, const StateInSlide &sb){
     StateInSlide St;
-    St.setOffset(lerp(sa.getPosition(),sb.getPosition(),smoothstep(t)));
-    St.alpha = std::lerp(sa.alpha,sb.alpha,smoothstep(t));
-    St.angle = std::lerp(sa.angle,sb.angle,smoothstep(t));
+
+    t = smoothstep(t);
+
+    St.setOffset(lerp(sa.getPosition(),sb.getPosition(),t));
+    St.alpha = std::lerp(sa.alpha,sb.alpha,t);
+    St.angle = std::lerp(sa.angle,sb.angle,t);
+    St.LocalToWorld = Transform::Interpolate(sa.LocalToWorld,sb.LocalToWorld,t);
     return St;
 }
+
 inline vec2 computeOffsetToMean(const Slide& buffer) {
     double x_min = 100,y_min = 100,x_max = -100,y_max = -100;
     for (auto&& [ptr,sis] : buffer) {

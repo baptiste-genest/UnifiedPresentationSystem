@@ -5,6 +5,8 @@
 #include "Options.h"
 #include "Anchor.h"
 
+#include "Transform.h"
+
 namespace slope {
 
 using RelativePlacer = std::function<vec2(vec2)>;
@@ -18,6 +20,8 @@ struct StateInSlide {
     scalar angle=0;
     bool offseted = false;
 
+    Transform LocalToWorld;
+
     StateInSlide() {
     }
 
@@ -26,6 +30,10 @@ struct StateInSlide {
 
     StateInSlide(const vec2& x)  {
         anchor = AbsoluteAnchor::Add(x);
+    }
+
+    StateInSlide(const Transform& T) {
+        LocalToWorld = T;
     }
 
     void setOffset(const vec2& x) {

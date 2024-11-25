@@ -2,6 +2,7 @@
 
 #include "../../src/slope.h"
 #include "imgui.h"
+#include "spdlog/spdlog.h"
 
 
 using namespace slope;
@@ -11,23 +12,17 @@ slope::Slideshow show;
 void init () {
     LatexLoader::Init(Options::ProjectPath + "test.json");
 
-    show.templater = [] (SlideManager& show,ScreenPrimitivePtr ptr) {
-        show << PlaceRelative(ptr,ABS_LEFT,REL_BOTTOM,0.02,0.05);
+    Primitive::DefaultTransition = SlideInSlideOut();
+
+    auto M = Mesh::Add(slope::Options::DataPath + "meshes/torus.obj",1,true);
+
+    M->updater = [M] (TimeObject time,Primitive*) {
+        scalar t = time.from_begin*2;
+        M->localTransform = Transform::ScalePositionRotate(0.75 + 0.25*sin(t),vec(0,0,sin(t)*0.2),vec(0,1,0),t);
     };
 
- //   show << LatexLoader::Load("test");
-
-    int n = 100;
-    scalars X(n),Y(n);
-    for (int i = 0;i<n;i++) {
-        X[i] = scalar(i)/n;
-        Y[i] = std::sin(X[i]*8);
-    }
-    show << Title("Plots now in slope!");
-    show << newFrame << Plot::Add(PlotLines(X,Y))->at("testplot");
-    show  << Plot::Add(PlotLines(X,Y));
-    show  << Plot::Add(PlotLines(X,Y));
-    show << newFrame << Title("Pretty sweet huh?");
+    show << Title("yoo") << newFrame << M->at(-2,0,0) << inNextFrame << M->at(2,0,0);
+    show << newFrame;
 }
 
 

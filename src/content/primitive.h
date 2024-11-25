@@ -40,10 +40,8 @@ struct Primitive {
         return std::static_pointer_cast<T>(primitives[id]);
     }
 
-    std::set<index> visited_slides;
     index relativeSlideIndex(index in) {
-        visited_slides.insert(in);
-        return std::distance(visited_slides.begin(),visited_slides.find(in));
+        return in - first_slide_to_appear;
     }
 
     void handleInnerTime() {
@@ -53,19 +51,19 @@ struct Primitive {
     void play(const TimeObject& t,const StateInSlide& sis) {
         enable();
         auto it = t(this);
-        draw(it,sis);
         updater(it,this);
-        bool first_appearance;
-        first_slide_to_appear = std::min(first_slide_to_appear,t.absolute_frame_number);
+        draw(it,sis);
     }
 
     void intro(const TimeObject& t,const StateInSlide& sis) {
         enable();
-        playIntro(t,sis);
+        auto it = t(this);
+        playIntro(it,transition.intro(it,sis));
     }
 
     void outro(const TimeObject& t,const StateInSlide& sis) {
-        playOutro(t,sis);
+        auto it = t(this);
+        playOutro(it,transition.outro(it,sis));
     }
 
     bool isEnabled() const {return enabled;}
@@ -103,6 +101,10 @@ struct Primitive {
 
     TransitionAnimator transition;
     static TransitionAnimator DefaultTransition;
+
+    void upFirstSlideNumber(int f) {
+        first_slide_to_appear = std::min(first_slide_to_appear,f);
+    }
 
 protected:
     virtual void draw(const TimeObject& time,const StateInSlide& sis) = 0;

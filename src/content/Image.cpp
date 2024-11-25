@@ -78,12 +78,12 @@ void slope::Image::draw(const TimeObject &, const StateInSlide &sis)
 
 void slope::Image::playIntro(const TimeObject& t, const StateInSlide &sis)
 {
-    display(transition.intro(t,sis));
+    display(sis);
 }
 
 void slope::Image::playOutro(const TimeObject& t, const StateInSlide &sis)
 {
-    display(transition.outro(t,sis));
+    display(sis);
 }
 
 slope::Primitive::Size slope::Image::getSize() const {
