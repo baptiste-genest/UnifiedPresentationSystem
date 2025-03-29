@@ -9,9 +9,12 @@ Slideshow show;
 void init() {
     Latex::UsePackage("cmbright");
 
+    LatexLoader::Init(Options::ProjectPath + "text.json");
+
     show.templater = [] (SlideManager& show,ScreenPrimitivePtr ptr) {
         show << PlaceRelative(ptr,ABS_LEFT,REL_BOTTOM,0.02,0.05);
     };
+
 
     LoadCommon();
     CreateIntroSlides(show);

@@ -53,7 +53,7 @@ void CreateContextSlides(slope::Slideshow& show) {
     show << Latex::Add("Usually, one extensively use the connectivity of a mesh to compute global parameterizations.")->at("connec");
 
 
-    show << Image::Add("UVMapping.png",1.2)->at("uv_map");
+    show << Image::Add("UVMapping.png",1.)->at("uv_map");
 
     show << newFrameSameTitle;
     show << PlaceBelow(Latex::Add("Difficulty of the problem"));

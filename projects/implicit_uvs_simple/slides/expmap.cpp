@@ -74,7 +74,7 @@ void CreateExpMapSlides(slope::Slideshow& show) {
     auto v_label_text = Formula::Add("v")->track([v_label](){return vec(v_label->getCurrentPos() + vec(-1.5,0,1));},vec2(0.02,0.02));
     auto exp_label = Formula::Add("\\Exp_p(v)")->track([curve_M](){return curve_M->getCurrentPos();},vec2(0.02,0.02));
     show << v_label_text << exp_label;
-    show << inNextFrame << Latex::Add("It is an \\emph{explicit} mapping!")->at("explicit_expm");
+    show << inNextFrame << Latex::Add("We need the opposite of that!")->at("explicit_expm");
     show << inNextFrame >> curve_M >> v_param >> v_label_text.first >> exp_label.first >> geo;
     vec target = ExpSphere(vec(0,0,1),vec(1,1,0)*0.4) + vec(1.5,0,0);
     vec source = vec(1.3,0,10);

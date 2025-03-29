@@ -32,12 +32,11 @@ void CreateCurveBasedSlides(slope::Slideshow& show) {
     auto save = show.getCurrentSlide();
 
     vec Log = LogSphere(p1,p2);
-    int fn = show.getNumberSlides() - 1;
 
-    auto geo = [p1,p2,Log,fn](scalar t,const TimeObject& time) {
-        if (time.absolute_frame_number == fn)
+    auto geo = [p1,p2,Log](scalar t,const TimeObject& time) {
+        if (time.relative_frame_number == 0)
             return p1;
-        if (time.absolute_frame_number == fn+1)
+        if (time.relative_frame_number == 1)
             return ExpSphere(p1,t*Log*smoothstep(time.from_action));
         return ExpSphere(p1,t*Log);
     };
@@ -46,7 +45,7 @@ void CreateCurveBasedSlides(slope::Slideshow& show) {
 
     auto geo_head = [Geo] (scalar) {
         return vec(Geo->getNodes().back());
-    }; 
+    };
 
     auto carry_vector = Point::Add(geo_head,0.0);
 
@@ -57,14 +56,60 @@ void CreateCurveBasedSlides(slope::Slideshow& show) {
     };
     show << Geo << carry_vector << carry_vector->addVector(transported_vector);
 
-    show << inNextFrame << inNextFrame >> carry_vector;
+    show << inNextFrame << save;
 
-    show << Latex::Add("We can accumulate a rotation matrix to map \\\\ vectors from $\\TM{x}$ to $\\TM{y}$ .")->at("discretization");
-        
-    show << Formula::Add("R_{\\TM{x} \\rightarrow \\TM{y}} = \\prod_{i = 1}^{N-1} R_{n(x_i)\\rightarrow n(x_{i+1})}")->at("parallel_transport_mat");
-    show << ptx->addVector(v) << Formula::Add("v")->at(vec(p1+v),vec2(0.0,-0.02)); 
-    vec vp = SmallestRotation(p1,p2)*v;
-    show << inNextFrame << pty->addVector(vp) << Formula::Add("v'")->at(vec(p2+vp),vec2(0.01,-0.03));
+
+    int N = 5;
+    vecs iterates(N);
+    for (int i = 0;i<N;i++)
+        iterates[i] = ExpSphere(p1,Log*i/(N-1));
+
+    auto iterates_pts = PointCloud::Add(iterates,0.03);
+    auto normals = iterates_pts->pc->addVectorQuantity("n",iterates);
+    normals->setVectorLengthScale(0.1);
+    normals->setVectorRadius(0.01);
+    show << iterates_pts << PolyscopeQuantity<polyscope::PointCloudVectorQuantity>::Add(normals);
+
+    {
+        vec x1 = iterates[1];
+        vec x2 = iterates[2];
+        vec Log = LogSphere(x1,x2);
+
+        auto geo = [x1, x2, Log](const TimeObject &time)
+        {
+            if (time.relative_frame_number == 0)
+                return x1;
+            if (time.relative_frame_number == 1)
+                return ExpSphere(x1, Log * smoothstep(time.from_action));
+            return x2;
+        };
+        vec vp = SmallestRotation(p1,x1)*v;
+        vec Tvp = SmallestRotation(x1,x2)*vp;
+        auto tangent_mapped = [vp,Tvp] (const TimeObject& time) {
+            if (time.relative_frame_number <= 1)
+                return vp;
+            if (time.relative_frame_number == 2)
+                return vec(slerp(vp.normalized(),Tvp.normalized(),smoothstep(time.from_action))*.3);
+            return Tvp;
+        };
+        auto normal_mapped = [x1,x2] (const TimeObject& time) {
+            if (time.relative_frame_number <= 1)
+                return vec(x1*.3);
+            if (time.relative_frame_number == 2)
+                return vec(slerp(x1,x2,smoothstep(time.from_action))*.3);
+            return vec(x2*.3);
+        };
+        auto pt =Point::Add(geo,0.);
+        show << pt << pt->addVector(normal_mapped) << pt->addVector(tangent_mapped) << inNextFrame;
+        show << Latex::Add("It can be discretized by aligning \\\\ consecutive normals along the curve, \\\\ using the smallest rotation \\\\ between $n(x_i)$ and $n(x_{i+1})$.")->at("discretization");
+        show << Formula::Add("R_{n(x_i)\\rightarrow n(x_{i+1})}")->at("smallest_rot");
+
+        show << inNextFrame ;
+        show << Formula::Add("R_{\\TM{x} \\rightarrow \\TM{y}} = \\prod_{i = 1}^{N-1} R_{n(x_i)\\rightarrow n(x_{i+1})}")->at("parallel_transport_mat");
+        show << inNextFrame << ptx->addVector(v) << Formula::Add("v")->at(vec(p1+v),vec2(0.0,-0.02));
+        vp = SmallestRotation(p1,p2)*v;
+        show << inNextFrame << pty->addVector(vp) << Formula::Add("v'")->at(vec(p2+vp),vec2(0.01,-0.03));
+    }
 
     show << newFrameSameTitle << PlaceBelow(Latex::Add("Detection of sharp features"),0.02);
 
@@ -110,7 +155,7 @@ void CreateCurveBasedSlides(slope::Slideshow& show) {
         auto crit = Latex::Add(" Stop if : $\\theta > \\epsilon$")->at("sharp_features_test");
         show << inNextFrame << crit ;
 
-        show << base << crit << Latex::Add("This implies that the surface is \\\\ implicitly segmented into smooth regions.")->at("sharp_features_text"); 
+        show << base << crit << Latex::Add("This implies that the surface is \\\\ implicitly segmented into smooth regions.")->at("sharp_features_text");
         show << Image::Add("sharp_features.png",0.7)->at("sharp_features_img");
     }
 

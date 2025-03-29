@@ -75,6 +75,8 @@ using mat2 = Eigen::Matrix<scalar,2,2>;
 using mat = Eigen::Matrix<scalar,3,3>;
 using vecs = std::vector<vec>;
 
+using colors = vecs;
+
 struct Vertex {
     vec pos;
     int id;
