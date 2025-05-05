@@ -243,7 +243,12 @@ void CreateMergingFieldsSlides(slope::Slideshow& show) {
     for (int i = 0;i<3;i++)
         show >> uv_frames[i];
 
-    show << newFrameSameTitle;
+    show << newFrame << Title("\\textbf{Not} like triplanar mapping")->at(TOP);
+    show << Image::Add("triplanar.png",0.8)->at("triplanar");
+    show << Latex::Add(tex::center("Triplanar mapping \\\\ (blending colors)"))->at("triplanar_text");
+    show << Latex::Add(tex::center("Ours \\\\ (merging uvs)"))->at("ours_uv_merge_text");
+
+    show << newFrame << title->at(TOP);
 
     auto sub = Latex::Add("Description of the workflow");
     show << PlaceBelow(sub);

@@ -13,11 +13,11 @@ void CreateConclusionSlides(slope::Slideshow& show){
     show << newFrame << Title("Conclusion")->at(TOP);
 
     show << LatexLoader::Load("conclusion")->at("conclusion");
-    show << LatexLoader::Load("appli")->at("appli");
-    show << LatexLoader::Load("limitations")->at("limits");
-    show << LatexLoader::Load("futurwork")->at("future");
-    //show << Latex::Add("We introduce the first method to compute uv coordinates \\\\ on implicit surfaces without discretization, in real time.")->at("summary");
     show << Image::Add("EG.png",1.)->at("EG");
+    show << inNextFrame << LatexLoader::Load("appli")->at("appli");
+    show << inNextFrame << LatexLoader::Load("limitations")->at("limits");
+    show << inNextFrame << LatexLoader::Load("futurwork")->at("future");
+    //show << Latex::Add("We introduce the first method to compute uv coordinates \\\\ on implicit surfaces without discretization, in real time.")->at("summary");
 
     show << newFrame << Title("Thank you! \\\\ Questions?")->at(TOP);
     show << Gif::Add("texture_seat.gif",20,1.3,false)->at("texture_seat");
