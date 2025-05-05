@@ -46,8 +46,8 @@ void CreateContextSlides(slope::Slideshow& show) {
     show << Latex::Add("Many advantages : geometric modeling,\\\\ shape optimization, etc...")->at("use_cases");
     show << inNextFrame;
 
-    show<< newFrameSameTitle <<  Title("Visualizing implicit surfaces")->at(TOP);
-    show << PlaceBelow(Latex::Add("In a sphere tracing rendering pipeline"),0.01);
+    show<< newFrame <<  Title("Visualizing implicit surfaces")->at(TOP);
+    show << PlaceBelow(Latex::Add("The sphere tracing rendering pipeline"),0.01);
 
     auto T = slope::Mesh::Add(Options::DataPath+"meshes/torus.obj",1,true);
     T->pc->setEdgeWidth(0);
