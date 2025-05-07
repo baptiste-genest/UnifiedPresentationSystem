@@ -81,9 +81,8 @@ void CreateExpMapSlides(slope::Slideshow& show) {
 
     auto ray = Curve3D::Add([source,target](scalar t) {
         return vec(source + (target-source)*t);
-    });
-
-    // TODO CHANGE RAY COLOR
+               });
+    ray->pc->setColor(glm::vec3(0.5,0.5,1.));
 
     auto hit = vec(target + vec(0,0,0.01));
     show << inNextFrame << ray << Point::Add(hit,0.05) << Formula::Add("x")->at(hit,vec2(0.02,-0.02));

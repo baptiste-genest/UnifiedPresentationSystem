@@ -5,7 +5,7 @@ using namespace slope;
 void CreateAtlasComputeSlides(slope::Slideshow& show) {
     show << newFrame << Title("Optimal frames and uv-offsets")->at(TOP);
 
-    show << Formula::Add("u(x) = \\frac{\\sum_i w_i(x) \\left( \\Log_{y_i}(x) + \\textcolor{red}{u_i} \\right)}{\\sum_i w_i(x)}",Options::DefaultLatexScale*2)->at(CENTER);
+    show << Formula::Add("u(x) = \\frac{\\sum_i w_i(x) \\left( \\Log_{y_i}(x) + \\textcolor{blue}{u_i} \\right)}{\\sum_i w_i(x)}",Options::DefaultLatexScale*2)->at(CENTER);
 
     vec center = vec(0,0,0);
     auto sphere = Point::Add(center,1);

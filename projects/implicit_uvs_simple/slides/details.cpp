@@ -42,7 +42,8 @@ std::pair<Vec,Vec> load_fields(Mesh::MeshPtr Grid) {
 void CreateDetailsSlides(slope::Slideshow& show) {
     auto Context = ImplicitUVsSlides::getContext();
 
-    show << newFrame << Title("Applications");
+    show << newFrame << Title("Applications")->at("applications");
+    show << Image::Add("robot_fields.png")->at("robot_fields");
     show << newFrame << Title("Details on implicit surfaces")->at(TOP);
     show << PlaceBelow(Latex::Add("Color, roughness, normal maps"));
 

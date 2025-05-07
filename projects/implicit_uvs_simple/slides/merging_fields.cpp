@@ -79,6 +79,17 @@ void CreateMergingFieldsSlides(slope::Slideshow& show) {
     show << PlaceBelow(Latex::Add("by weighted averages of coordinates"));
     show << newFrameSameTitle << TOP;
 
+    auto sub = Latex::Add("Description of the workflow");
+    show << PlaceBelow(sub);
+    show <<  Gif::Add("workflow.gif",30,0.8)->at("workflow");
+    show << PlaceRelative(Latex::Add("On the CPU, the user defines a graph to define\\\\ which fields are to be merged."),sub,slope::ABS_LEFT,slope::REL_BOTTOM,0.02,0.04);
+    show << PlaceRelative(Latex::Add("- From that graph, compute blending parameters."),slope::ABS_LEFT,slope::REL_BOTTOM,0.05,0.05);
+    show << PlaceRelative(Latex::Add("The graph is sent to the GPU:"),slope::ABS_LEFT,slope::REL_BOTTOM,0.02,0.2);
+    show << PlaceRelative(Latex::Add("- each point can know which fields to merge "),slope::ABS_LEFT,slope::REL_BOTTOM,0.05,0.05);
+
+    show << newFrameSameTitle;
+
+
     auto txt1 = Latex::Add("We wish to take weighted averages of multiple uv-fields.");
     show << PlaceRelative(txt1,slope::ABS_LEFT,slope::REL_BOTTOM,0.03,0.04);
 
@@ -242,7 +253,7 @@ void CreateMergingFieldsSlides(slope::Slideshow& show) {
 
     // TODO COLOR w(x) u_i
 
-    show << Formula::Add("u(x) = \\frac{\\sum_i w_i(x) \\left( \\Log_{y_i}(x) + u_i \\right)}{\\sum_i w_i(x)}",Options::DefaultLatexScale*0.8)->at("merging_formula");
+    show << Formula::Add("u(x) = \\frac{\\sum_i {\\color{red} w_i(x)} \\left( \\Log_{y_i}(x) + {\\color{blue} u_i} \\right)}{\\sum_i {\\color{red}w_i(x)}}",Options::DefaultLatexScale*0.8)->at("merging_formula");
     for (int i = 0;i<3;i++)
         show >> uv_frames[i];
 
@@ -251,18 +262,9 @@ void CreateMergingFieldsSlides(slope::Slideshow& show) {
     show << Latex::Add(tex::center("Triplanar mapping \\\\ (blending colors)"))->at("triplanar_text");
     show << Latex::Add(tex::center("Ours \\\\ (merging uvs)"))->at("ours_uv_merge_text");
 
-    show << newFrame << title->at(TOP);
+//    show << newFrame << title->at(TOP);
 
     // WORKFLOW BEFORE INTERP
-
-    auto sub = Latex::Add("Description of the workflow");
-    show << PlaceBelow(sub);
-    show <<  Gif::Add("workflow.gif",30,0.8)->at("workflow");
-    show << PlaceRelative(Latex::Add("On the CPU, the user defines a graph to define\\\\ which fields are to be merged."),sub,slope::ABS_LEFT,slope::REL_BOTTOM,0.02,0.04);
-    show << PlaceRelative(Latex::Add("- From that graph, compute optimal frames and uv-offsets $u_i$."),slope::ABS_LEFT,slope::REL_BOTTOM,0.05,0.02);
-    show << PlaceRelative(Latex::Add("The graph is sent to the GPU:"),slope::ABS_LEFT,slope::REL_BOTTOM,0.02,0.2);
-    show << PlaceRelative(Latex::Add("- each point can know which fields to merge "),slope::ABS_LEFT,slope::REL_BOTTOM,0.05,0.02);
-
     /*
     auto sub = Latex::Add("Description of the workflow");
     show << PlaceBelow(sub);

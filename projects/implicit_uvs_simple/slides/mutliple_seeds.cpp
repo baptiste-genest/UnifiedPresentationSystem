@@ -37,7 +37,6 @@ void CreateMultipleSeedsSlides(slope::Slideshow& show) {
 
     show << PlaceRelative(multiple,slope::ABS_LEFT,slope::REL_BOTTOM,0.04,0.05);
     show << Image::Add("multiple_seeds_bunny_single.png")->at("multiple_seeds_single");
-    show << inNextFrame;
     show << newFrameSameTitle << multiple;
     show << Latex::Add(tex::center("Implicit decals \n\n [de Groot et al. 2014]"))->at("impl_decals");
     show << PlaceBelow(Latex::Add("Euclidean distance",0.7));

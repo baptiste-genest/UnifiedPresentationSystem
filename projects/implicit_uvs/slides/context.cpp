@@ -10,7 +10,7 @@ void CreateContextSlides(slope::Slideshow& show) {
 
     show << Title("Implicit surfaces")->at(TOP);
 
-    show << PlaceRelative(Latex::Add("Implicit representations are a powerful tool to\\\\ represent shapes."),slope::ABS_LEFT,slope::REL_BOTTOM,0.03,0.1);
+    show << PlaceRelative(Latex::Add("Implicit representations are powerful tools to\\\\ represent shapes."),slope::ABS_LEFT,slope::REL_BOTTOM,0.03,0.1);
 
     auto Grid = Context.grid200->scale(2.);
     Grid->pc->setEdgeWidth(0);
@@ -78,9 +78,25 @@ void CreateContextSlides(slope::Slideshow& show) {
         return vec(x(0)*E.first + x(1)*E.second + p);
     };
 
+    auto screen_uvs = [E] (vec x) -> vec2 {
+        return {x(0),x(1)};
+    };
+
+    std::vector<vec2> uvs;
+    for (size_t i = 0;i<Context.grid->getVertices().size();i++)
+        uvs.push_back(screen_uvs(Context.grid->getVertices()[i]));
+
     auto screen = Context.grid->apply(set_screen);
-    show << screen->at(0.5);
-    screen->pc->setEdgeWidth(1);
+    show << screen;//->at(0.5);
+    //screen->pc->setEdgeWidth(1);
+
+    auto qparam = screen->pc->addVertexParameterizationQuantity("uvs",uvs);
+
+    int V = Context.grid->getVertices().size();
+    colors C(V,vec::Zero());
+    polyscope::SurfaceTextureColorQuantity* qcolor1 = screen->pc->addTextureColorQuantity("render1",*qparam,11,11,C,polyscope::ImageOrigin::LowerLeft);
+    show << PolyscopeQuantity<polyscope::SurfaceTextureColorQuantity>::Add(qcolor1);
+
 
     auto ray = [p,target](scalar t,const TimeObject &time) {
         if (time.relative_frame_number == 0)

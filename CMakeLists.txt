@@ -15,6 +15,11 @@ include(spdlog)
 
 find_package(OpenGL REQUIRED)
 
+find_package(PkgConfig REQUIRED)
+pkg_check_modules(CAIRO REQUIRED cairo)
+pkg_check_modules(RSVG REQUIRED librsvg-2.0)
+pkg_check_modules(GDKPIXBUF REQUIRED gdk-pixbuf-2.0)
+
 
 ## External tools configuration
 find_package(LATEX COMPONENTS PDFLATEX REQUIRED)
@@ -46,9 +51,16 @@ file(GLOB HEADER_LIST CONFIGURE_DEPENDS "src/*.h*")
 
 ## The library
 add_library(slope STATIC ${SRC_lib})
-target_link_libraries(slope PUBLIC polyscope Eigen3::Eigen spdlog  OpenGL::GL geometry-central)
+target_link_libraries(slope PUBLIC polyscope Eigen3::Eigen spdlog  OpenGL::GL geometry-central ${CAIRO_LIBRARIES} ${RSVG_LIBRARIES} ${RSVG_LDFLAGS} ${GDKPIXBUF_LIBRARIES})
 target_compile_features(slope PUBLIC cxx_std_20)
-target_include_directories(slope PUBLIC src/)
+target_include_directories(slope PUBLIC src/ PRIVATE ${CAIRO_INCLUDE_DIRS} ${RSVG_INCLUDE_DIRS})
+include_directories(
+        ${CAIRO_INCLUDE_DIRS}
+        ${RSVG_INCLUDE_DIRS}
+        ${GDKPIXBUF_INCLUDE_DIRS}
+)
+link_directories(slope PRIVATE ${CAIRO_LIBRARY_DIRS} ${RSVG_LIBRARY_DIRS})
+target_compile_options(slope PRIVATE ${CAIRO_CFLAGS_OTHER})
 set_target_properties(slope PROPERTIES PUBLIC_HEADER "${HEADER_LIST}")
 
 ##INSTALL
