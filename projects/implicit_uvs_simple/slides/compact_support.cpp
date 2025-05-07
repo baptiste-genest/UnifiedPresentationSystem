@@ -44,7 +44,7 @@ void CreateCompactSupportSlides(slope::Slideshow& show) {
     show << Sp << geo_dist;
     show << Image::Add("band_weight_labeled.png",0.25)->at("wij_formula");
 
-    show << Latex::Add("What is important: \\\\ - only blend at interfaces \\\\ - only depend on distances between the points. \\\\ - simple test to avoid useless computations.")->at("voro_cell");
+    show << Latex::Add("What is important: \\\\ - we only blend at interfaces \\\\ - it only depends on distances between the points. \\\\ - simple test to avoid useless computations.")->at("voro_cell");
 //    auto Context = ImplicitUVsSlides::getContext();
 
 //    show << newFrame << Title("Compact support interpolation")->at(TOP);

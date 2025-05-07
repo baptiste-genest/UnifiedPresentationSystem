@@ -239,6 +239,9 @@ void CreateMergingFieldsSlides(slope::Slideshow& show) {
     param->q->setCheckerSize(0.1);
     param->q->setGridColors({glm::vec3(0,0,0),glm::vec3(1,1,1)});
     show << inNextFrame << grid_thin << param;
+
+    // TODO COLOR w(x) u_i
+
     show << Formula::Add("u(x) = \\frac{\\sum_i w_i(x) \\left( \\Log_{y_i}(x) + u_i \\right)}{\\sum_i w_i(x)}",Options::DefaultLatexScale*0.8)->at("merging_formula");
     for (int i = 0;i<3;i++)
         show >> uv_frames[i];
@@ -249,6 +252,8 @@ void CreateMergingFieldsSlides(slope::Slideshow& show) {
     show << Latex::Add(tex::center("Ours \\\\ (merging uvs)"))->at("ours_uv_merge_text");
 
     show << newFrame << title->at(TOP);
+
+    // WORKFLOW BEFORE INTERP
 
     auto sub = Latex::Add("Description of the workflow");
     show << PlaceBelow(sub);

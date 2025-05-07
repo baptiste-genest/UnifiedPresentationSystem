@@ -83,6 +83,7 @@ void CreateExpMapSlides(slope::Slideshow& show) {
         return vec(source + (target-source)*t);
     });
 
+    // TODO CHANGE RAY COLOR
 
     auto hit = vec(target + vec(0,0,0.01));
     show << inNextFrame << ray << Point::Add(hit,0.05) << Formula::Add("x")->at(hit,vec2(0.02,-0.02));

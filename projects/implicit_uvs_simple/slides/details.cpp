@@ -58,7 +58,9 @@ void CreateDetailsSlides(slope::Slideshow& show) {
 
     show << Latex::Add("Displacement maps encode a displacement \\\\ of the surface in the normal direction.");
 
-    show << inNextFrame << Latex::Add("It is trickier since it must take effect on the  \\\\ entire scalar field whereas the displacement \\\\ is only defined at the surface.");
+    show << Formula::Add(" h : \\text{uv} \\rightarrow \\mathbb{R}")->at("def_h");
+
+    show << inNextFrame << Latex::Add("We have to extend the displacement \\\\ in the entire field");
     show << CameraView::Add("displacement");
 
 
@@ -102,7 +104,7 @@ void CreateDetailsSlides(slope::Slideshow& show) {
         }));
     };
 
-    auto disp_f = Formula::Add("f_h = f - h \\circ \\text{uv} \\circ \\Pi_f");
+    auto disp_f = Formula::Add("f_h = f - {\\color{red} h \\circ \\text{uv}} \\circ \\Pi_f");
 
     auto source = Point::Add(y,r);
     
@@ -116,7 +118,7 @@ void CreateDetailsSlides(slope::Slideshow& show) {
 
     show << Grid << query << source << dist;// << Formula::Add("y")->at(y,vec2(0.0,-0.02)) << Formula::Add("x")->at(q,vec2(0.02,-0.02));
 
-    show << inNextFrame << Latex::Add("To overcome such difficulty, we first \\\\ project the query point on the surface:");
+    show << inNextFrame << Latex::Add("To do so, we first project \\\\ the query point on the surface:");
     show << Formula::Add("\\Pi_f(x) = x - f(x) \\nabla f(x)")->at("proj_f");
     
     show << inNextFrame  << arc << inNextFrame >> query >> arc >> source;

@@ -143,7 +143,6 @@ void CreateContextSlides(slope::Slideshow& show) {
 
     show << implicit << Latex::Add(tex::center("Implicit \\\\ surface"))->at("impl");
     show << PlaceRelative(Latex::Add(tex::center("In practice, \\\\ purely volumetric")),slope::SAME_X,slope::ABS_BOTTOM,0.,0.1);
-    show << inNextFrame; 
     auto volume =  Mesh::Add(Options::DataPath+"meshes/cube_simple.obj")->apply([offset,r](const vec& x) {
         vec p = x;
         p = offset + p*r;

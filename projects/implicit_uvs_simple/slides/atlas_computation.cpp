@@ -117,9 +117,10 @@ void CreateAtlasComputeSlides(slope::Slideshow& show) {
 */
 
     show << newFrameSameTitle << PlaceBelow(Latex::Add("Solving small linear systems"));
-    show << PlaceRelative(Latex::Add("Solving least-square problems $\\implies$ solving SPD linear systems: "),slope::ABS_LEFT,slope::REL_BOTTOM,0.03,0.04);
+    show << PlaceRelative(Latex::Add("Solving least-square problems $\\implies$ solving SPD linear systems "),slope::ABS_LEFT,slope::REL_BOTTOM,0.03,0.04);
     show << inNextFrame << PlaceRelative(Latex::Add("Of the size of the number of seeds \\\\ in the graph \\textbf{rarely more than 10!}."),slope::ABS_LEFT,slope::REL_BOTTOM,0.03,0.04);
-    show << Latex::Add("Instantly solvable!")->at("instant_solve");
+    show << Latex::Add("Instantly solvable on the CPU!")->at("instant_solve");
+    show << Latex::Add("Recomputed only \\\\ when graph changes")->at("recompute_SPD");
     show << Gif::Add("graph_editing.gif",15)->at("graph_editing");
     show << Latex::Add(tex::center("Real time editing \\\\ of the uv-field."),slope::Options::DefaultLatexScale*0.6)->at("legend");
 }
