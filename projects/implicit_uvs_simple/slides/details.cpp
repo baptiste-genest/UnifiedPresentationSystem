@@ -47,13 +47,16 @@ void CreateDetailsSlides(slope::Slideshow& show) {
     show << newFrame << Title("Details on implicit surfaces")->at(TOP);
     show << PlaceBelow(Latex::Add("Color, roughness, normal maps"));
 
-    show << PlaceRelative(Latex::Add("Applying textures is straightforward"),ABS_LEFT,REL_BOTTOM,0.02,0.1);
+//    show << PlaceRelative(Latex::Add("Applying textures is straightforward"),ABS_LEFT,REL_BOTTOM,0.02,0.1);
 
-    show << Latex::Add("Using normal maps is also possible\\\\ using parallel transport:");
-    show << Formula::Add("n(x) = R_{\\TM{y_i}\\rightarrow\\TM{x}}\\text{TBN}(y_i)n_{\\text{map}}(\\text{uv}(x))")->at("normal_map");
+    // TODO MAKE SHORTER TEXT
 
-    show << Image::Add("robot.png",0.8)->at("robot");
+    show << Latex::Add("We use parallel transport to enable normal maps")->at("normal_maps");
+//    show << Formula::Add("n(x) = R_{\\TM{y_i}\\rightarrow\\TM{x}}\\text{TBN}(y_i)n_{\\text{map}}(\\text{uv}(x))")->at("normal_map");
+
+    show << Image::Add("robot.png",0.9)->at("robot");
     show << Gif::Add("eye_moving.gif",15,0.8)->at("mike");
+    show << Image::Add("complex_shape.png",0.8)->at("complex");
 
     show << newFrameSameTitle << PlaceBelow(Latex::Add("Displacement maps"));
 
@@ -135,8 +138,8 @@ void CreateDetailsSlides(slope::Slideshow& show) {
     show << Latex::Add(tex::center("Baking height\\\\ and textures\\\\from a sphere\\\\to a mesh"),slope::Options::DefaultLatexScale*0.6)->at("baking");
     show << inNextFrame << Latex::Add("super fast!")->at("super_fast");
     show << newFrame << Title("Implicit advantages, explicit control")->at(TOP);
-    show << inNextFrame << Latex::Add("Real time!!")->at("real_time_topo");
+    show << inNextFrame << Latex::Add("In real time!")->at("real_time_topo");
     show << Gif::Add("implicit_advantages.gif",15,1.2)->at("advantages2");
     show << Gif::Add("column_carve.gif",15,1.)->at("advantages3");
-    show << Latex::Add("We keep all the benefits of the implicit representation!\\\\(Warping, CSG, etc...)")->at("benefits");
+    show << Latex::Add(tex::center("We keep all the benefits of implicit representations: \\\\ Warping, topological changes, etc..."))->at("benefits");
 }

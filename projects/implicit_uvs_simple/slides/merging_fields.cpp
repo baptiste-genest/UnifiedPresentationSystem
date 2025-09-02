@@ -79,13 +79,19 @@ void CreateMergingFieldsSlides(slope::Slideshow& show) {
     show << PlaceBelow(Latex::Add("by weighted averages of coordinates"));
     show << newFrameSameTitle << TOP;
 
+
     auto sub = Latex::Add("Description of the workflow");
     show << PlaceBelow(sub);
-    show <<  Gif::Add("workflow.gif",30,0.8)->at("workflow");
-    show << PlaceRelative(Latex::Add("On the CPU, the user defines a graph to define\\\\ which fields are to be merged."),sub,slope::ABS_LEFT,slope::REL_BOTTOM,0.02,0.04);
-    show << PlaceRelative(Latex::Add("- From that graph, compute blending parameters."),slope::ABS_LEFT,slope::REL_BOTTOM,0.05,0.05);
-    show << PlaceRelative(Latex::Add("The graph is sent to the GPU:"),slope::ABS_LEFT,slope::REL_BOTTOM,0.02,0.2);
-    show << PlaceRelative(Latex::Add("- each point can know which fields to merge "),slope::ABS_LEFT,slope::REL_BOTTOM,0.05,0.05);
+    show <<  Gif::Add("workflow.gif",30,1)->at("workflow");
+
+    show << Latex::Add("Interactively, in real-time:")->at("workflow_thread");
+    show << PlaceRelative(Latex::Add("- Place seeds on the shape"),slope::ABS_LEFT,slope::REL_BOTTOM,0.02,0.05);
+    show << PlaceRelative(Latex::Add("- Edit the merging graph"),slope::ABS_LEFT,slope::REL_BOTTOM,0.02,0.05);
+    show << PlaceRelative(Latex::Add("$\\rightarrow$ small computations on the CPU"),slope::ABS_LEFT,slope::REL_BOTTOM,0.07,0.03);
+    show << PlaceRelative(Latex::Add("- The graph is sent to the GPU"),slope::ABS_LEFT,slope::REL_BOTTOM,0.02,0.05);
+    show << PlaceRelative(Latex::Add("- Each point can know which fields to merge "),slope::ABS_LEFT,slope::REL_BOTTOM,0.02,0.05);
+
+    //TODO make a list a summary / seed / graph / compute / sent to shader
 
     show << newFrameSameTitle;
 
@@ -135,14 +141,14 @@ void CreateMergingFieldsSlides(slope::Slideshow& show) {
         auto _e2 = ys_pts[i]->addVector(e2[i]);
         _e2->q->setVectorColor(glm::vec3(0,0,1));
         show <<ys_pts[i] << _e1 << _e2;
-        show << Formula::Add("y_" + std::to_string(i+1),Options::DefaultLatexScale*0.7)->at(ys[i],vec2(0.02,0.03));
+        show << Formula::Add("p_" + std::to_string(i+1),Options::DefaultLatexScale*0.7)->at(ys[i],vec2(0.02,0.03));
     }
     show << inNextFrame;
     for (int i = 0;i<3;i++){
         vec log_x = LogSphere(ys[i],p)*0.5;
         show << ys_pts[i]->addVector(log_x);
     }
-    show << Formula::Add("\\Log_{y_2}(x)",Options::DefaultLatexScale*0.7)->at("log_y1");
+    show << Formula::Add("\\Log_{p_2}(x)",Options::DefaultLatexScale*0.7)->at("log_y1");
     auto txt2 = Latex::Add("However, each Log map is expressed in its own referential!");
     show << PlaceRelative(txt2,txt1,slope::ABS_LEFT,slope::REL_BOTTOM,0.03,0.01);
     show << inNextFrame;
@@ -219,7 +225,7 @@ void CreateMergingFieldsSlides(slope::Slideshow& show) {
         pt->pc->setPointColor(glm::vec3(1,1,0));
         show << pt << pf1 << pf2;
         refs[i] = Formula::Add("\\left(0,0\\right)",Options::DefaultLatexScale*0.6);
-        names[i] = Formula::Add("\\Log_{y_" + std::to_string(i+1)+"}",Options::DefaultLatexScale*0.8);
+        names[i] = Formula::Add("\\Log_{p_" + std::to_string(i+1)+"}",Options::DefaultLatexScale*0.8);
         show << refs[i]->at(b_pos,vec2(-0.02,0.02))<< names[i]->at(b_pos,vec2(0,0.15));
     }
     show << inNextFrame;
@@ -253,14 +259,15 @@ void CreateMergingFieldsSlides(slope::Slideshow& show) {
 
     // TODO COLOR w(x) u_i
 
-    show << Formula::Add("u(x) = \\frac{\\sum_i {\\color{red} w_i(x)} \\left( \\Log_{y_i}(x) + {\\color{blue} u_i} \\right)}{\\sum_i {\\color{red}w_i(x)}}",Options::DefaultLatexScale*0.8)->at("merging_formula");
+    show << Formula::Add("u(x) = \\frac{\\sum_i {\\color{red} w_i(x)} \\left( \\Log_{p_i}(x) + {\\color{blue} u_i} \\right)}{\\sum_i {\\color{red}w_i(x)}}",Options::DefaultLatexScale*0.8)->at("merging_formula");
     for (int i = 0;i<3;i++)
         show >> uv_frames[i];
 
-    show << newFrame << Title("\\textbf{Not} like triplanar mapping")->at(TOP);
+    show << newFrame << Title("\\textbf{Not} blending colors")->at(TOP);
     show << Image::Add("triplanar.png",0.8)->at("triplanar");
     show << Latex::Add(tex::center("Triplanar mapping \\\\ (blending colors)"))->at("triplanar_text");
     show << Latex::Add(tex::center("Ours \\\\ (merging uvs)"))->at("ours_uv_merge_text");
+
 
 //    show << newFrame << title->at(TOP);
 

@@ -87,14 +87,18 @@ void CreateLogMapSlides(slope::Slideshow& show) {
     auto px = Point::Add(x,0.03);
     auto py = Point::Add(y,0.03);
 
-    show << px << py << Formula::Add("x")->at(x,vec2(0.02,-0.02)) << Formula::Add("y")->at(y,vec2(-0.02,-0.02));
+    // TODO P FIXED X QUERY POINT OF THE PIXEL
+
+    show << Latex::Add(tex::center("$p$ fixed \\\\ $x$ query point from ray"))->at("def points");
+
+    show << px << py << Formula::Add("x")->at(x,vec2(0.02,-0.02)) << Formula::Add("p")->at(y,vec2(-0.02,-0.02));
     show << surface;
     show << CameraView::Add("logmap_heuristic");
 
     vec d= (y-x).normalized();
 
     PrimitiveGroup labels;
-    labels << px->addVector(vec(d*0.3)) << Formula::Add("y-x")->at(x+d*0.3,vec2(0.02,-0.02));
+    labels << px->addVector(vec(d*0.3)) << Formula::Add("p-x")->at(x+d*0.3,vec2(0.02,-0.02));
 
     show << inNextFrame << labels;
     vec n = normal(x);
@@ -120,7 +124,7 @@ void CreateLogMapSlides(slope::Slideshow& show) {
 
     vec nd = (y-x1).normalized();
 
-    labels << px1->addVector(vec(nd*0.3)) << Formula::Add("y-x_1")->at(x1+nd*0.3,vec2(0.02,0.05));
+    labels << px1->addVector(vec(nd*0.3)) << Formula::Add("p-x_1")->at(x1+nd*0.3,vec2(0.02,0.05));
 
     show << inNextFrame << labels;
 
@@ -135,9 +139,9 @@ void CreateLogMapSlides(slope::Slideshow& show) {
     show << Curve3D::Add(geodesic);
     show << Formula::Add("\\gamma")->at(mid,vec2(0,-0.02));
 
-    show << Latex::Add("How to compute (polar) coordinates from $\\gamma$?")->at("gamma_cords");
+    show << Latex::Add("How to compute coordinates from $\\gamma$?")->at("gamma_cords");
 
-    show << inNextFrame << Latex::Add("$\\text{Length}(\\gamma)$ gives an approximation \\\\ of the geodesic distance $d_M(x,y)$")->at("geo_dist");
+    show << inNextFrame << Latex::Add("$\\text{Length}(\\gamma)$ gives an approximation \\\\ of the geodesic distance $d_M(x,p)$")->at("geo_dist");
     show << CameraView::Add("referential_y",true);
 
     vec ny = normal(y);
@@ -166,7 +170,7 @@ void CreateLogMapSlides(slope::Slideshow& show) {
 
 
     show << Formula::Add("\\theta")->at(vec(lx),vec2(0.045,0.01));
-    show << inNextFrame << Formula::Add("\\text{Log}_y(x) \\approx \\text{Length}(\\gamma) (\\cos(\\theta),\\sin(\\theta)) ")->at("approx_log");
+    show << inNextFrame << Formula::Add("\\text{Log}_p(x) \\approx \\text{Length}(\\gamma) (\\cos(\\theta),\\sin(\\theta)) ")->at("approx_log");
 
 
     std::vector<vec2> uvs(surface->getVertices().size());
@@ -178,7 +182,7 @@ void CreateLogMapSlides(slope::Slideshow& show) {
 
 
     auto pc = surface->pc->addVertexParameterizationQuantity("uv",uvs);
-    pc->setCheckerSize(0.05);
+    pc->setCheckerSize(0.1);
     show << inNextFrame << AddPolyscopeQuantity(pc);
-    show << inNextFrame << Latex::Add("We call $\\left(y,e_1,e_2\\right)$ \\textbf{the seed \\\\ of the uv-field}")->at("seed");
+    show << inNextFrame << Latex::Add("We call $\\left(p,e_1,e_2\\right)$ \\textbf{the seed \\\\ of the uv-field}")->at("seed");
 }

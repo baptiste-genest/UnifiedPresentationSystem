@@ -41,7 +41,7 @@ void CreateContextSlides(slope::Slideshow& show) {
     show << Image::Add("CSG.png",0.7)->at("csg");
     show << CameraView::Add("intro");
 
-    show << Formula::Add("M = \\{f(x) = 0\\}")->at("impl_formula_1");
+    show << Formula::Add("f : \\mathbb{R}^3 &\\rightarrow \\mathbb{R} \\\\ M = \\{f(x) &= 0\\}")->at("impl_formula_1");
 
     show << Latex::Add("Many advantages : geometric modeling,\\\\ shape optimization, etc...")->at("use_cases");
     show << inNextFrame;
@@ -54,8 +54,7 @@ void CreateContextSlides(slope::Slideshow& show) {
 
     show << T;
     show << CameraView::Add("sphere_tracing");
-
-    show << Latex::Add("Sphere tracing is an algorithm to compute the intersection between a ray and the surface without \\emph{any} discretization.")->at("sphere_tracing_desc");
+    show << Latex::Add("Sphere tracing: compute the intersection between a ray and the surface without \\emph{any} discretization. \\\\ \\\\ It enables real-time rendering on the GPU. ")->at("sphere_tracing_desc");
 
 
     vec p = vec(2,0,1.5);
@@ -101,7 +100,7 @@ void CreateContextSlides(slope::Slideshow& show) {
     show << PlaceRelative(Latex::Add("Perflecly fine representation of the geometry..."),slope::ABS_LEFT,slope::REL_BOTTOM,0.04,0.2);
     show << PlaceRelative(Latex::Add("...but what about textures?"),slope::ABS_LEFT,slope::REL_BOTTOM,0.1,0.04);
 
-    show << Latex::Add("Usually, one extensively use the connectivity of a mesh to compute global parameterizations.")->at("connec");
+    show << Latex::Add(tex::center("Main flaw of implicit surfaces: really hard to control their appearance! \\\\ Our goal: doing the same, per pixel, on implicit surfaces"))->at("connec");
 
 
     show << Image::Add("UVMapping.png",1.)->at("uv_map");

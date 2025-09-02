@@ -1,0 +1,91 @@
+{
+  "source_svg": "equation.svg",
+  "out_dir": "glyphs2",
+  "glyphs": [
+    {
+      "instance_id": 0,
+      "glyph_id": "g0-69",
+      "file": "g0-69.png",
+      "position": [
+        -72.000004,
+        -63.890385
+      ],
+      "anchor_crop_offset": [
+        256,
+        249
+      ],
+      "size_px": [
+        8,
+        7
+      ]
+    },
+    {
+      "instance_id": 1,
+      "glyph_id": "g1-61",
+      "file": "g1-61.png",
+      "position": [
+        -61.30408,
+        -63.890385
+      ],
+      "anchor_crop_offset": [
+        256,
+        252
+      ],
+      "size_px": [
+        8,
+        3
+      ]
+    },
+    {
+      "instance_id": 2,
+      "glyph_id": "g0-109",
+      "file": "g0-109.png",
+      "position": [
+        -50.788,
+        -63.890385
+      ],
+      "anchor_crop_offset": [
+        256,
+        251
+      ],
+      "size_px": [
+        9,
+        6
+      ]
+    },
+    {
+      "instance_id": 3,
+      "glyph_id": "g0-99",
+      "file": "g0-99.png",
+      "position": [
+        -42.040666,
+        -63.890385
+      ],
+      "anchor_crop_offset": [
+        256,
+        251
+      ],
+      "size_px": [
+        5,
+        6
+      ]
+    },
+    {
+      "instance_id": 4,
+      "glyph_id": "g2-50",
+      "file": "g2-50.png",
+      "position": [
+        -37.729269,
+        -67.505749
+      ],
+      "anchor_crop_offset": [
+        256,
+        251
+      ],
+      "size_px": [
+        4,
+        5
+      ]
+    }
+  ]
+}

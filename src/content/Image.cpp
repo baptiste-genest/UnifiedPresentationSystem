@@ -138,7 +138,6 @@ void slope::DisplayImage(const ImageData &data, const StateInSlide &sis, scalar 
         ImGui::SetCursorPos(P);
         ImGui::Image((void*)(intptr_t)data.texture, ImVec2(data.width*scale,data.height*scale), ImVec2(0.0f, 0.0f), ImVec2(1.0f, 1.0f), color_multiplier);
     }
-
 }
 
 slope::Gif::GifPtr slope::Gif::Add(std::string filename,int fps,scalar scale,bool loop)

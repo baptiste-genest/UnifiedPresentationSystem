@@ -41,7 +41,7 @@ void CreateContextSlides(slope::Slideshow& show) {
     show << Image::Add("CSG.png",0.7)->at("csg");
     show << CameraView::Add("intro");
 
-    show << Formula::Add("M = \\{f(x) = 0\\}")->at("impl_formula_1");
+    show << Formula::Add("f : \\mathbb{R^3} \\rightarrow \\mathbb{R} \\\\ M = \\{f(x) = 0\\}")->at("impl_formula_1");
 
     show << Latex::Add("Many advantages : geometric modeling,\\\\ shape optimization, etc...")->at("use_cases");
 
