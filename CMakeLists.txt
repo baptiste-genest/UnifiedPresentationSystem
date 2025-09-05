@@ -22,7 +22,19 @@ if (NOT Slope_CONVERT)
   message(ERROR "Could not find the 'convert' tool (imagemagick)")
 endif()
 set(Slope_PDFLATEX ${PDFLATEX_COMPILER})
-set(Slope_SOURCE ${CMAKE_CURRENT_SOURCE_DIR})
+
+#set(Slope_SOURCE ${CMAKE_CURRENT_SOURCE_DIR})
+set(Slope_SOURCE "${CMAKE_CURRENT_SOURCE_DIR}"
+    CACHE PATH "Chemin vers les sources de Slope")
+
+# Optionnel : si l'utilisateur passe un chemin relatif, on le rend absolu pour l'interne
+if(NOT IS_ABSOLUTE "${Slope_SOURCE}")
+  get_filename_component(_Slope_SOURCE_ABS
+    "${CMAKE_CURRENT_SOURCE_DIR}/${Slope_SOURCE}" ABSOLUTE)
+else()
+  set(_Slope_SOURCE_ABS "${Slope_SOURCE}")
+endif()
+
 message(STATUS "pdflatex compiler: ${Slope_PDFLATEX}")
 message(STATUS "convert tool: ${Slope_CONVERT}")
 message(STATUS "Slope source path: ${Slope_SOURCE}")
