@@ -30,6 +30,8 @@ struct LatexLoader {
     static void Init(path P);
     static LatexPtr Load(key k);
 
+    static ScreenPrimitiveInSlide LoadWithAnchor(key k);
+
     static void parseJson();
 
     static void ReloadContentAndUpdate();

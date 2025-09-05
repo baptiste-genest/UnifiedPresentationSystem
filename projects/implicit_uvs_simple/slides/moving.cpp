@@ -75,8 +75,9 @@ void CreateMovingSlides(slope::Slideshow& show) {
     vec v = -(E.first - E.second).normalized();
     auto vp = P->addVector(vec(v*0.3));
 
-    auto walk = Latex::Add("We would like to walk along the surface from a point $p$ in a direction $v$.");
+    auto walk = Latex::Add("We would like to walk along the surface from a point $p \\in M$ in a tangential direction $v$.");
     show << PlaceRelative(walk,title,slope::ABS_LEFT,slope::REL_BOTTOM,0.04,0.05);
+    vp->q->setVectorColor(glm::vec3(1,0,0));
 
     show << P << Latex::Add("p")->at(x,vec2(0.02,-0.02));
     show << vp << Latex::Add("v")->at(x + v*0.3,vec2(-0.02,-0.02));
@@ -87,12 +88,12 @@ void CreateMovingSlides(slope::Slideshow& show) {
     auto taylor = [E, n, x](const Vertex &V, const TimeObject &t)
     {
         vec v = V.pos;
-        if (t.relative_frame_number <= 3)
+        if (t.relative_frame_number <= 2)
         {
             vec p = x + (E.first * v(0) + E.second * v(1)) * 0.5 + n * 0.01;
             return p;
         }
-        else if (t.relative_frame_number == 4)
+        else if (t.relative_frame_number == 3)
         {
             vec p = order2(x, 0.5 * (E.first * v(0) + E.second * v(1)), smoothstep(t.from_action)) + n * 0.01;
             return p;
@@ -108,7 +109,7 @@ void CreateMovingSlides(slope::Slideshow& show) {
     show << inNextFrame << approx->at(0.9) << TM->at(vec(x - E.second*0.5),vec2(0.02,-0.02));
 
     auto normal_legend = Formula::Add("n(p) = \\nabla f(p)");
-    show << inNextFrame << np << normal_legend->at(x+n,vec2(0.02,-0.02));
+    show << np << normal_legend->at(x+n,vec2(0.02,-0.02));
     
     auto O1 = Latex::Add("Order 1 approximation:");
     auto order1_approx = Formula::Add("p + \\tau v");
@@ -117,7 +118,7 @@ void CreateMovingSlides(slope::Slideshow& show) {
     show >> TM;
 
     auto O2 = Latex::Add("Order 2 approximation:");
-    auto order2_approx = Formula::Add("p + \\tau v - \\frac{\\tau^2}{2||\\nabla f||} \\langle v, H_f v\\rangle n");
+    auto order2_approx = Formula::Add("p + \\tau v - \\frac{\\tau^2 }{2||\\nabla f||}\\partial^2_v f n");
     show << inNextFrame << PlaceRelative(O2,ABS_LEFT,REL_BOTTOM,0.04,0.05) << PlaceRelative(order2_approx,slope::ABS_LEFT,slope::REL_BOTTOM,0.04,0.02);
 
     auto gamma = [v,n,x](scalar t,const TimeObject &time) {
@@ -125,6 +126,7 @@ void CreateMovingSlides(slope::Slideshow& show) {
     };
     show << inNextFrame << CameraView::Add("moving_far",true);
     auto W = slope::Curve3D::Add(gamma);
+    W->pc->setColor(glm::vec3(1,0,0));
     show << inNextFrame << W;
     //show << inNextFrame << PlaceRelative(Formula::Add("\\langle v, H_f v\\rangle = \\frac{f(x-hv) - 2f(x) + f(x+hv)}{h^2} + o(h^2)"),order2_approx,slope::ABS_LEFT,slope::REL_BOTTOM,0.04,0.02);
 }

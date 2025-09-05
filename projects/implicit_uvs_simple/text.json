@@ -1,5 +1,5 @@
 {
-"conclusion":[0,"We introduce the first method to compute uvs \\ on implicit surface \textbf{without discretization} \\ \textbf{in real time}",0.8],
+"conclusion":[0,"We introduce the first method to compute uvs \\ on implicit surfaces \textbf{without discretization} \\ \textbf{in real time}",0.8],
 "appli":[0,"It enables to combine the advantages of implicit \\ \textbf{and} explicit representations",0.8],
 "limitations":[0,"Limitation : Very complex geometry $\rightarrow$ lot of seeds \\ $\rightarrow$ decrease in performance",0.8],
 "futurwork":[0,"Future work: Automatic generation of seeds\\ and merging graph",0.8]

@@ -35,22 +35,23 @@ void CreateMultipleSeedsSlides(slope::Slideshow& show) {
     show << newFrame << Title("Multiple local fields")->at(TOP);
     auto multiple = Latex::Add("When multiple seeds are placed, we pick the uv of the closest seed with respect to the geodesic distance.");
 
+    // TODO ONE BUNNY LARGER
+
     show << PlaceRelative(multiple,slope::ABS_LEFT,slope::REL_BOTTOM,0.04,0.05);
-    show << Image::Add("multiple_seeds_bunny_single.png")->at("multiple_seeds_single");
-    show << newFrameSameTitle << multiple;
-    show << Latex::Add(tex::center("Implicit decals \n\n [de Groot et al. 2014]"))->at("impl_decals");
-    show << PlaceBelow(Latex::Add("Euclidean distance",0.7));
-    show << PlaceBottom(Image::Add("geodesic_voronoi_cells.png",0.5),0.5,0.2);
-    show << Latex::Add("Ours")->at("ours 1");
-    show << PlaceBelow(Latex::Add(tex::center("Geodesic distance \\\\ + segmentation"),0.7));
-    show << newFrameSameTitle;
-    show << PlaceBelow(Latex::Add("A lot of seams!"));
-    //show << multiple;
-    auto seams = Image::Add("seams.png",0.8);
+    show << Image::Add("multiple_seeds_bunny_single.png",1.2)->at("multiple_seeds_single");
+//    show << newFrameSameTitle << multiple;
+//    show << Latex::Add(tex::center("Implicit decals \n\n [de Groot et al. 2014]"))->at("impl_decals");
+//    show << PlaceBelow(Latex::Add("Euclidean distance",0.7));
+//    show << PlaceBottom(Image::Add("geodesic_voronoi_cells.png",0.5),0.5,0.2);
+//    show << Latex::Add("Ours")->at("ours 1");
+//    show << PlaceBelow(Latex::Add(tex::center("Geodesic distance \\\\ + segmentation"),0.7));
+    auto seams = Image::Add("multiple_seeds_bunny_single_seams.png",1.2);
     seams->setDepth(1);
-    show << Image::Add("multiple_seeds_bunny.png",0.8)->at("multiple_seeds_bunny");
-    show << Latex::Add(tex::center("Already enough to paint on the surface \\\\ but not pratical to apply structured textures."))->at("paint");
-    show << inNextFrame << seams->at("multiple_seeds_bunny");
+    show << inNextFrame << Latex::Add("A lot of seams!")->at("lot_seams");
+    show << seams->at("multiple_seeds_single");
+    //show << multiple;
+    show << inNextFrame  << Latex::Add("Already enough to paint on the surface \\\\ but not pratical to apply structured textures...")->at("paint");
+    show << inNextFrame  << Latex::Add("What if we could remove the discontinuities?")->at("what_if");
     /*
     show << newFrame << Title("Kernel techniques")->at(TOP);
     show << Image::Add("vector_kernel_diffusion.png")->at("kernel_techniques_img");

@@ -10,7 +10,7 @@ void CreateCompactSupportSlides(slope::Slideshow& show) {
     auto Context = ImplicitUVsSlides::getContext();
 
     show << newFrame << Title("Compact support interpolation")->at(TOP);
-    show << Formula::Add("u(x) = \\frac{\\sum_i \\textcolor{red}{w_i(x)} \\left( \\Log_{y_i}(x) + u_i \\right)}{\\sum_i \\textcolor{red}{w_i(x)}}",Options::DefaultLatexScale*2)->at(CENTER);
+    show << Formula::Add("u(x) = \\frac{\\sum_i \\textcolor{red}{w_i(x)} \\left( \\Log_{p_i}(x) + u_i \\right)}{\\sum_i \\textcolor{red}{w_i(x)}}",Options::DefaultLatexScale*2)->at(CENTER);
 
     show << newFrameSameTitle;
 
@@ -37,14 +37,16 @@ void CreateCompactSupportSlides(slope::Slideshow& show) {
             scalar d0 = DistSphere(x,ps1->getCurrentPos());
             scalar d1 = DistSphere(x,s2);
             scalar d10 = DistSphere(ps1->getCurrentPos(),s2);
-            return dVij(d0,d1,d10);
+            return -dVij(d0,d1,d10);
         }));
     };
 
     show << Sp << geo_dist;
-    show << Image::Add("band_weight_labeled.png",0.25)->at("wij_formula");
+
+    show << Image::Add("step_function.png",0.6)->at("wij_formula");
 
     show << Latex::Add("What is important: \\\\ - we only blend at interfaces \\\\ - it only depends on distances between the points. \\\\ - simple test to avoid useless computations.")->at("voro_cell");
+
 //    auto Context = ImplicitUVsSlides::getContext();
 
 //    show << newFrame << Title("Compact support interpolation")->at(TOP);

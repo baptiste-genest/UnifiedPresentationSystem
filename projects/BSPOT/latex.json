@@ -1,0 +1,6 @@
+{
+"title":[0,"BSP-OT: Sparse transport plans between \\ discrete measure in loglinear time.",1],
+"authors":[0,"Baptiste Genest, Vincent Nivoliers, Nicolas Bonneel, David Coeurjolly",1],
+"ot_definition":[0,"Given two point-sets $X,Y$ of $n$ points, what is the assignment $T$ that minimizes the transport cost?",1],
+"ot_problem":[1,"\min_{T : X \rightarrow Y} \sum_{x \in X} c(x, T(x))",1]
+}

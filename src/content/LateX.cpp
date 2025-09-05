@@ -115,6 +115,11 @@ void slope::LatexLoader::Init(path P)
     initialized = true;
 }
 
+slope::ScreenPrimitiveInSlide slope::LatexLoader::LoadWithAnchor(key k)
+{
+    return Load(k)->at(k);
+}
+
 slope::LatexPtr slope::LatexLoader::Load(key k)
 {
     auto obj = source[k];
@@ -169,10 +174,14 @@ void slope::LatexLoader::ReloadContentAndUpdate()
 
 void slope::LatexLoader::HotReloadIfModified()
 {
-    auto last_write = std::filesystem::last_write_time(source_path);
-    if (source_last_modified < last_write) {
-        source_last_modified = last_write;
-        ReloadContentAndUpdate();
+    try {
+        auto last_write = std::filesystem::last_write_time(source_path);
+        if (source_last_modified < last_write) {
+            source_last_modified = last_write;
+            ReloadContentAndUpdate();
+        }
+    } catch (...) {
+        spdlog::warn("Latex source unavailable");
     }
 }
 

@@ -109,6 +109,11 @@ file(GLOB implicit_uvs_slides_simple
 add_executable(implicit_uvs_simple projects/implicit_uvs_simple/main.cpp ${implicit_uvs_slides_simple})
 target_link_libraries(implicit_uvs_simple slope)
 
-endif()
+file(GLOB BSPOT_slides
+     "projects/BSPOT/slides/*"
+)
+add_executable(BSPOT projects/BSPOT/main.cpp ${BSPOT_slides})
+target_link_libraries(BSPOT slope)
 
+endif()
 

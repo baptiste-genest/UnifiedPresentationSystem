@@ -3,9 +3,9 @@
 using namespace slope;
 
 void CreateAtlasComputeSlides(slope::Slideshow& show) {
-    show << newFrame << Title("Optimal frames and uv-offsets")->at(TOP);
+    show << newFrame << Title("Bringing everyone in the same referential")->at(TOP);
 
-    show << Formula::Add("u(x) = \\frac{\\sum_i w_i(x) \\left( \\Log_{y_i}(x) + \\textcolor{blue}{u_i} \\right)}{\\sum_i w_i(x)}",Options::DefaultLatexScale*2)->at(CENTER);
+    show << Formula::Add("u(x) = \\frac{\\sum_i w_i(x) \\left( \\Log_{p_i}(x) + \\textcolor{blue}{u_i} \\right)}{\\sum_i w_i(x)}",Options::DefaultLatexScale*2)->at(CENTER);
 
     vec center = vec(0,0,0);
     auto sphere = Point::Add(center,1);
@@ -38,7 +38,8 @@ void CreateAtlasComputeSlides(slope::Slideshow& show) {
         geos[i]->pc->setColor(glm::vec3(1,1,0));
     }
 
-    show << inNextFrame << PlaceRelative(Latex::Add("First, we compute the frames by minimizing a similarity energy: "),slope::ABS_LEFT,slope::REL_BOTTOM,0.03,0.04);
+    show << inNextFrame << PlaceRelative(Latex::Add("Frames must be as compatible as possible: "),slope::ABS_LEFT,slope::REL_BOTTOM,0.03,0.04);
+    show << PlaceRelative(Latex::Add("- First: smoothest vector field "),slope::ABS_LEFT,slope::REL_BOTTOM,0.06,0.04);
     auto e_frame = Formula::Add("\\min_{t_i} \\sum_{(i,j) \\in E} \\frac{||R_{i\\rightarrow j} t_i - t_j||^2}{d_{ij}^2}");
     show << e_frame->at("frame_energy");
 
@@ -73,9 +74,11 @@ void CreateAtlasComputeSlides(slope::Slideshow& show) {
     show << inNextFrame << pts[0]->addVector(rt0);
 
     show << Formula::Add("n(y_i) \\times t_i")->at(x[0] + rt0,vec2(0.02,-0.02));
-    show << Latex::Add("Once the $t_i$ are computed, the frames \\\\  are completed by a 90° rotation.")->at("90_rotation");
-    show << inNextFrame << PlaceRelative(Latex::Add("Then, we compute the uv-offsets by trying\\\\ to respect each referential as much as possible: "),slope::ABS_LEFT,slope::REL_BOTTOM,0.03,0.04);
-    show << Formula::Add("\\min_{u_i} \\sum_{(i,j) \\in E} \\frac{||\\Log_{y_i}(y_j) - u_j - u_i||^2}{d_{ij}^2}")->at("offset_energy");
+    show << PlaceRelative(Latex::Add("- then complete into frame field "),e_frame,slope::ABS_LEFT,slope::REL_BOTTOM,0.06,0.04);
+
+//    show << Latex::Add("Once the $t_i$ are computed, the frames \\\\  are completed by a 90° rotation.")->at("90_rotation");
+    show << inNextFrame << PlaceRelative(Latex::Add("Then, we compute the uv-offsets by trying\\\\ to respect each referential as much as possible: "),slope::ABS_LEFT,slope::REL_BOTTOM,0.03,0.05);
+    show << Formula::Add("\\min_{u_i} \\sum_{(i,j) \\in E} \\frac{||\\Log_{p_i}(p_j) - u_j - u_i||^2}{d_{ij}^2}")->at("offset_energy");
 
     /*
     show  << PlaceRelative(Latex::Add("In order to minimize distortion, we compute optimal frames and\\\\ uv-offsets of each seeds by minimizing quadratic energies: "),slope::ABS_LEFT,slope::REL_BOTTOM,0.03,0.04);
@@ -118,9 +121,9 @@ void CreateAtlasComputeSlides(slope::Slideshow& show) {
 
     show << newFrameSameTitle << PlaceBelow(Latex::Add("Solving small linear systems"));
     show << PlaceRelative(Latex::Add("Solving least-square problems $\\implies$ solving SPD linear systems "),slope::ABS_LEFT,slope::REL_BOTTOM,0.03,0.04);
-    show << inNextFrame << PlaceRelative(Latex::Add("Of the size of the number of seeds \\\\ in the graph \\textbf{rarely more than 10!}."),slope::ABS_LEFT,slope::REL_BOTTOM,0.03,0.04);
+    show << inNextFrame << PlaceRelative(Latex::Add("Of the size of the number of seeds \\\\ merged together, \\textbf{rarely more than 10!}."),slope::ABS_LEFT,slope::REL_BOTTOM,0.03,0.08);
     show << Latex::Add("Instantly solvable on the CPU!")->at("instant_solve");
-    show << Latex::Add("Recomputed only \\\\ when graph changes")->at("recompute_SPD");
+    show << Latex::Add("Recomputed only when graph changes")->at("recompute_SPD");
     show << Gif::Add("graph_editing.gif",15)->at("graph_editing");
     show << Latex::Add(tex::center("Real time editing \\\\ of the uv-field."),slope::Options::DefaultLatexScale*0.6)->at("legend");
 }

@@ -1,0 +1,192 @@
+{
+  "source_svg": "eqn.svg",
+  "svg_meta": {
+    "viewBox": [
+      156.777563,
+      -48.863672,
+      46.935868,
+      11.234791
+    ],
+    "width": "46.935868pt",
+    "height": "11.234791pt"
+  },
+  "ppu": 8.0,
+  "glyph_viewbox_units": 512.0,
+  "bounds_units": [
+    -99.72243700000001,
+    -295.483037,
+    46.72631000000001,
+    16.863495999999998
+  ],
+  "out_dir": "glyphs",
+  "glyphs": [
+    {
+      "instance_id": 0,
+      "glyph_id": "g0-102",
+      "file": "g0-102.png",
+      "pos_units": [
+        156.777563,
+        -40.119541
+      ],
+      "anchor_units": [
+        256.5,
+        248.875
+      ],
+      "size_units": [
+        5.0,
+        9.25
+      ],
+      "size_px": [
+        40,
+        74
+      ]
+    },
+    {
+      "instance_id": 1,
+      "glyph_id": "g1-40",
+      "file": "g1-40.png",
+      "pos_units": [
+        162.72751,
+        -40.119541
+      ],
+      "anchor_units": [
+        256.875,
+        248.5
+      ],
+      "size_units": [
+        2.5,
+        10.0
+      ],
+      "size_px": [
+        20,
+        80
+      ]
+    },
+    {
+      "instance_id": 2,
+      "glyph_id": "g0-120",
+      "file": "g0-120.png",
+      "pos_units": [
+        166.601884,
+        -40.119541
+      ],
+      "anchor_units": [
+        256.25,
+        251.5
+      ],
+      "size_units": [
+        5.0,
+        4.625
+      ],
+      "size_px": [
+        40,
+        37
+      ]
+    },
+    {
+      "instance_id": 3,
+      "glyph_id": "g1-41",
+      "file": "g1-41.png",
+      "pos_units": [
+        172.295816,
+        -40.119541
+      ],
+      "anchor_units": [
+        256.5,
+        248.5
+      ],
+      "size_units": [
+        2.5,
+        10.0
+      ],
+      "size_px": [
+        20,
+        80
+      ]
+    },
+    {
+      "instance_id": 4,
+      "glyph_id": "g1-61",
+      "file": "g1-61.png",
+      "pos_units": [
+        178.937522,
+        -40.119541
+      ],
+      "anchor_units": [
+        256.5,
+        252.25
+      ],
+      "size_units": [
+        6.75,
+        2.5
+      ],
+      "size_px": [
+        54,
+        20
+      ]
+    },
+    {
+      "instance_id": 5,
+      "glyph_id": "g1-56",
+      "file": "g1-56.png",
+      "pos_units": [
+        189.453602,
+        -40.119541
+      ],
+      "anchor_units": [
+        256.375,
+        249.25
+      ],
+      "size_units": [
+        4.25,
+        7.0
+      ],
+      "size_px": [
+        34,
+        56
+      ]
+    },
+    {
+      "instance_id": 6,
+      "glyph_id": "g0-120",
+      "file": "g0-120.png",
+      "pos_units": [
+        194.434941,
+        -40.119541
+      ],
+      "anchor_units": [
+        256.25,
+        251.5
+      ],
+      "size_units": [
+        5.0,
+        4.625
+      ],
+      "size_px": [
+        40,
+        37
+      ]
+    },
+    {
+      "instance_id": 7,
+      "glyph_id": "g2-51",
+      "file": "g2-51.png",
+      "pos_units": [
+        200.128873,
+        -44.233037
+      ],
+      "anchor_units": [
+        256.375,
+        251.25
+      ],
+      "size_units": [
+        3.25,
+        5.0
+      ],
+      "size_px": [
+        26,
+        40
+      ]
+    }
+  ]
+}

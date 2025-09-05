@@ -25,7 +25,7 @@ void CreateCurveBasedSlides(slope::Slideshow& show) {
     auto ptx = Point::Add(p1,0.05);
     show << ptx;
     show << Formula::Add("x")->at(p1,vec2(0.03,0.03));
-    show << Formula::Add("y")->at(p2,vec2(-0.03,0.03));
+    show << Formula::Add("p")->at(p2,vec2(-0.03,0.03));
     auto pty = Point::Add(p2,0.05);
     show << pty;
 
@@ -101,11 +101,14 @@ void CreateCurveBasedSlides(slope::Slideshow& show) {
         };
         auto pt =Point::Add(geo,0.);
         show << pt << pt->addVector(normal_mapped) << pt->addVector(tangent_mapped) << inNextFrame;
-        show << Latex::Add("It can be discretized by aligning \\\\ consecutive normals along the curve, \\\\ using the smallest rotation \\\\ between $n(x_i)$ and $n(x_{i+1})$.")->at("discretization");
-        show << Formula::Add("R_{n(x_i)\\rightarrow n(x_{i+1})}")->at("smallest_rot");
+//        show << Latex::Add("It can be discretized by aligning \\\\ consecutive normals along the curve, \\\\ using the smallest rotation \\\\ between $n(x_i)$ and $n(x_{i+1})$.")->at("discretization");
+//        show << Formula::Add("R_{n(x_i)\\rightarrow n(x_{i+1})}")->at("smallest_rot");
 
         show << inNextFrame ;
-        show << Formula::Add("R_{\\TM{x} \\rightarrow \\TM{y}} = \\prod_{i = 1}^{N-1} R_{n(x_i)\\rightarrow n(x_{i+1})}")->at("parallel_transport_mat");
+        show << Latex::Add("Rotation matrix:")->at("rot_mat");
+        show << Formula::Add("R_{x \\rightarrow p} : \\TM{x} \\rightarrow \\TM{p}")->at("rot_mat_f");
+
+//        show << Formula::Add("R_{\\TM{x} \\rightarrow \\TM{y}} = \\prod_{i = 1}^{N-1} R_{n(x_i)\\rightarrow n(x_{i+1})}")->at("parallel_transport_mat");
         show << inNextFrame << ptx->addVector(v) << Formula::Add("v")->at(vec(p1+v),vec2(0.0,-0.02));
         vp = SmallestRotation(p1,p2)*v;
         show << inNextFrame << pty->addVector(vp) << Formula::Add("v'")->at(vec(p2+vp),vec2(0.01,-0.03));
@@ -113,7 +116,7 @@ void CreateCurveBasedSlides(slope::Slideshow& show) {
 
     show << newFrameSameTitle << PlaceBelow(Latex::Add("Detection of sharp features"),0.02);
 
-    show << inNextFrame << PlaceRelative(Latex::Add("Since the way we walk on the surface assumes differentiability of $f$, \\\\ our method cannot cross sharp features in a robust way."),slope::ABS_LEFT,slope::REL_BOTTOM,0.04,0.05);
+    show << inNextFrame << PlaceRelative(Latex::Add("Our method cannot cross sharp features in a robust way."),slope::ABS_LEFT,slope::REL_BOTTOM,0.04,0.05);
     show << inNextFrame << PlaceRelative(Latex::Add("But we provide a way to detect \\\\ them to stop the computation:"),slope::ABS_LEFT,slope::REL_BOTTOM,0.04,0.05);
 
     {
@@ -161,7 +164,7 @@ void CreateCurveBasedSlides(slope::Slideshow& show) {
 
     show << newFrame << Title("Everything is \\textit{realtime!}")->at(TOP);
 
-    show << Latex::Add("Since everything is recomputed at each frame, one can change \\emph{any} parameter \\\\ and see the result immediately.")->at("advantages");
+    show << Latex::Add("Since everything is recomputed at each frame, per pixel, one can change \\emph{any} parameter and see the result immediately.")->at("advantages");
 
     show << inNextFrame << Gif::Add("uv_on_moving.gif",30,0.6)->at("uv_on_moving");
     show << PlaceBelow(Latex::Add(tex::center("change of shape \\\\ parameter"),slope::Options::DefaultLatexScale*0.6));
