@@ -1,8 +1,8 @@
 #ifndef UTILS_H
 #define UTILS_H
-#include "../UPS.h"
+#include "../libslope.h"
 
-namespace UPS {
+namespace slope {
 
 inline std::function<scalar(scalar)> buildRangeMapper(scalar a,scalar b,scalar c,scalar d) {
     return [a,b,c,d] (scalar x) {

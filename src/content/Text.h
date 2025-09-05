@@ -6,7 +6,7 @@
 #include "../style/Style.h"
 #include "../style/FontManager.h"
 
-namespace UPS {
+namespace slope {
 
 class Text : public TextualPrimitive
 {

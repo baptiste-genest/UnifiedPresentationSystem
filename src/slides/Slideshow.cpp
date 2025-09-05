@@ -1,7 +1,10 @@
 #include "Slideshow.h"
+#include "content/LateX.h"
+#include "spdlog/spdlog.h"
+#include "polyscope/pick.h"
 
 
-void UPS::Slideshow::nextFrame()
+void slope::Slideshow::nextFrame()
 {
     if (current_slide == slides.size()-1)
         return;
@@ -12,7 +15,7 @@ void UPS::Slideshow::nextFrame()
     transition_done = false;
 }
 
-void UPS::Slideshow::previousFrame()
+void slope::Slideshow::previousFrame()
 {
     if (!current_slide)
         return;
@@ -33,7 +36,7 @@ void UPS::Slideshow::previousFrame()
     locked = true;
 }
 
-void UPS::Slideshow::forceNextFrame()
+void slope::Slideshow::forceNextFrame()
 {
     if (current_slide == slides.size()-1)
         return;
@@ -54,9 +57,9 @@ void UPS::Slideshow::forceNextFrame()
     locked = false;
 }
 
-void UPS::Slideshow::play() {
+void slope::Slideshow::play() {
     ImGuiWindowConfig();
-    ImGui::Begin("Unified Presentation System",NULL,window_flags);
+    ImGui::Begin("Slope",NULL,window_flags);
 
     if (!initialized)
         initializeSlides();
@@ -124,11 +127,16 @@ void UPS::Slideshow::play() {
         }
     }
 
+
     prompt();
 
     handleInputs();
 
     displayPopUps();
+
+    if (LatexLoader::initialized)
+        LatexLoader::HotReloadIfModified();
+
 
     if (display_slide_number)
         displaySlideNumber();
@@ -136,7 +144,7 @@ void UPS::Slideshow::play() {
     ImGui::End();
 }
 
-void UPS::Slideshow::setInnerTime()
+void slope::Slideshow::setInnerTime()
 {
     if (visited_slide == current_slide)
         return;
@@ -145,34 +153,108 @@ void UPS::Slideshow::setInnerTime()
     visited_slide = current_slide;
 }
 
-void UPS::Slideshow::handleDragAndDrop()
+void slope::Slideshow::handleDragAndDrop()
 {
     auto io = ImGui::GetIO();
-    if (!ImGui::IsKeyPressed(341) || io.MouseReleased[0] > 0){//CTRL {
+
+    static double x_offset = 0;
+    static double y_offset = 0;
+    static double original_alpha = 0;
+    static auto time_at_pick = Time::now();
+    static polyscope::PersistentValue<glm::mat4> transform("gizmo transform", glm::mat4(1.0f));
+    static polyscope::TransformationGizmo guizmo("slope guizmo",transform.get(),&transform);//("slope transfo",transform);
+
+    bool ctrl = ImGui::IsKeyDown(ImGuiKey_LeftCtrl);
+    bool click = io.MouseClicked[0];
+//    spdlog::info("ctrl {} click {}",ctrl,click);
+
+    if (ctrl && click && selected_primitive == nullptr){//CTRL {
+        auto S = ImGui::GetWindowSize();
+        auto x = double(io.MousePos.x)/S.x;
+        auto y = double(io.MousePos.y)/S.y;
+        selected_primitive = getPrimitiveUnderMouse(x,y);
+        if (selected_primitive != nullptr) {
+            auto& pis = slides[current_slide][selected_primitive];
+            LabelAnchorPtr lab = std::dynamic_pointer_cast<LabelAnchor>(pis.anchor);
+            if (lab != nullptr) {
+                x_offset = lab->getPos()(0) - x;
+                y_offset = lab->getPos()(1) - y;
+                original_alpha = pis.alpha;
+                time_at_pick = Time::now();
+            }
+        }
+        auto pick = polyscope::pick::pickAtScreenCoords(glm::vec2(io.MousePos.x,io.MousePos.y));
+        if (pick.first) {
+            spdlog::info("Picked primitive: {}", pick.first->getName());
+            pick.first->drawPick();
+            transform = pick.first->getTransform();
+            guizmo.prepare();
+//            guizmo.draw();
+        }
+
+    }
+
+    if (!ctrl && click && selected_primitive != nullptr) {
+//        spdlog::info("unselected {}",selected_primitive->pid);
+        slides[current_slide][selected_primitive].alpha = original_alpha;
         selected_primitive = nullptr;
-        io.WantCaptureMouse = false;
         return;
     }
 
-    io.WantCaptureMouse = true;
+
+    if (selected_primitive != nullptr) {
+        guizmo.draw();
+        ImGui::SetNextFrameWantCaptureKeyboard(false);
+        auto S = ImGui::GetWindowSize();
+        auto x = double(io.MousePos.x)/S.x;
+        auto y = double(io.MousePos.y)/S.y;
+//        spdlog::info("offset {} {}",x_offset,y_offset);
+        auto& pis = slides[current_slide][selected_primitive];
+        LabelAnchorPtr lab = std::dynamic_pointer_cast<LabelAnchor>(pis.anchor);
+        lab->writeAtLabel(x+x_offset,y+y_offset,true);
+        pis.alpha = (std::cos(TimeFrom(time_at_pick)*5) + 1)*0.8 + 0.2;
+    }
+    return;
+
+    if (!ImGui::IsKeyDown(ImGuiKey_LeftCtrl) || io.MouseReleased[0] > 0){//CTRL {
+//    if (!ImGui::IsKeyPressed(ImGuiKey_LeftCtrl) || io.MouseReleased[0] > 0){//CTRL {
+        selected_primitive = nullptr;
+     //   io.WantCaptureMouse = false;
+        ImGui::SetNextFrameWantCaptureMouse(false);
+
+        return;
+    }
+
+    ImGui::SetNextFrameWantCaptureMouse(true);
+//    io.WantCaptureMouse = true;
+
 
     auto S = ImGui::GetWindowSize();
     auto x = double(io.MousePos.x)/S.x;
     auto y = double(io.MousePos.y)/S.y;
     if (selected_primitive == nullptr && io.MouseDown[0] > 0){
         selected_primitive = getPrimitiveUnderMouse(x,y);
+        if (selected_primitive != nullptr) {
+            auto& pis = slides[current_slide][selected_primitive];
+            LabelAnchorPtr lab = std::dynamic_pointer_cast<LabelAnchor>(pis.anchor);
+            if (lab != nullptr) {
+                x_offset = lab->getPos()(0) - x;
+                y_offset = lab->getPos()(1) - y;
+            }
+        }
     }
     else if (io.MouseReleased[0] > 0. && selected_primitive != nullptr) {
         selected_primitive = nullptr;
     }
     if (io.MouseDown[0] > 0 && selected_primitive != nullptr) {
+        spdlog::info("offset {} {}",x_offset,y_offset);
         auto& pis = slides[current_slide][selected_primitive];
         LabelAnchorPtr lab = std::dynamic_pointer_cast<LabelAnchor>(pis.anchor);
-        lab->writeAtLabel(x,y,true);
+        lab->writeAtLabel(x+x_offset,y+y_offset,true);
     }
 }
 
-void UPS::Slideshow::prompt()
+void slope::Slideshow::prompt()
 {
     if (prompter_ptr == nullptr)
         return;
@@ -184,7 +266,7 @@ void UPS::Slideshow::prompt()
     prompter_ptr->erase(from_begin);
 }
 
-void UPS::Slideshow::handleTransition()
+void slope::Slideshow::handleTransition()
 {
     if (transition_done || current_slide == 0)
         return;
@@ -201,35 +283,36 @@ void UPS::Slideshow::handleTransition()
 
 
 
-void UPS::Slideshow::ImGuiWindowConfig()
+void slope::Slideshow::ImGuiWindowConfig()
 {
     ImGuiIO& io = ImGui::GetIO(); (void)io;
-    io.WantCaptureMouse = false;
-    io.WantCaptureKeyboard = true;
+//    io.WantCaptureMouse = true;
     ImGui::SetNextWindowPos(ImVec2(0,0));
     ImGui::SetNextWindowSize(ImVec2(io.DisplaySize.x,io.DisplaySize.y));
+    ImGui::SetNextFrameWantCaptureMouse(false);
+    ImGui::SetNextFrameWantCaptureKeyboard(true);
 }
 
-void UPS::Slideshow::init(std::string project_name,int argc,char** argv)
+void slope::Slideshow::init(std::string project_name,int argc,char** argv)
 {
     if (parseCLI(argc,argv))
-        assert(false);
+        throw std::runtime_error("exiting for option checking");
     from_action = Time::now();
     from_begin = Time::now();
 
-    //UPS::Options::UPSPath = TOSTRING(UPS_SOURCE);
-    UPS::Options::UPSPath = Options::UPSPath;
-    UPS::Options::DataPath = Options::UPSPath + "/data/";
-    UPS::Options::ProjectName = project_name;
-    UPS::Options::ProjectPath = UPS::Options::UPSPath+std::string("/projects/")+UPS::Options::ProjectName+std::string("/");
-    UPS::Options::ProjectViewsPath = UPS::Options::ProjectPath+std::string("views/");
+    //slope::Options::UPSPath = TOSTRING(Slope_SOURCE);
+    slope::Options::SlopePath = Options::SlopePath;
+    slope::Options::DataPath = Options::SlopePath + "/data/";
+    slope::Options::ProjectName = project_name;
+    slope::Options::ProjectPath = slope::Options::SlopePath+std::string("/projects/")+slope::Options::ProjectName+std::string("/");
+    slope::Options::ProjectViewsPath = slope::Options::ProjectPath+std::string("views/");
 
-    std::cout << "			[ UPS PROJECT : " << UPS::Options::ProjectName << " ]" << std::endl;
+    std::cout << "			[ slope PROJECT : " << slope::Options::ProjectName << " ]" << std::endl;
 
-    std::cout << "[ UPS PATH ] " << UPS::Options::UPSPath << std::endl;
-    std::cout << "[ PROJECT PATH ] " << UPS::Options::ProjectPath << std::endl;
-    std::cout << "[ PROJECT CACHE PATH ] " << UPS::Options::ProjectViewsPath << std::endl;
-    std::cout << "[ SCREEN RESOLUTION ] " << UPS::Options::UPS_screen_resolution_x<<"x"<<UPS::Options::UPS_screen_resolution_y  << std::endl;
+    std::cout << "[ slope PATH ] " << slope::Options::SlopePath << std::endl;
+    std::cout << "[ PROJECT PATH ] " << slope::Options::ProjectPath << std::endl;
+    std::cout << "[ PROJECT CACHE PATH ] " << slope::Options::ProjectViewsPath << std::endl;
+    std::cout << "[ SCREEN RESOLUTION ] " << slope::Options::ScreenResolutionWidth<<"x"<<slope::Options::ScreenResolutionHeight  << std::endl;
 
     std::cout << "[ KEY GUIDE ] " << std::endl;
     std::cout << "  - right arrow : next slide" << std::endl;
@@ -263,9 +346,11 @@ void UPS::Slideshow::init(std::string project_name,int argc,char** argv)
     window_flags |= ImGuiWindowFlags_NoBackground;
     window_flags |= ImGuiWindowFlags_NoScrollbar;
 
+    ImPlot::CreateContext();
+
 }
 
-void UPS::Slideshow::slideMenu()
+void slope::Slideshow::slideMenu()
 {
     ImGui::Begin("Slides");
     std::set<std::string> done;
@@ -280,7 +365,7 @@ void UPS::Slideshow::slideMenu()
     ImGui::End();
 }
 
-std::string UPS::Slideshow::getSlideTitle(int i)
+std::string slope::Slideshow::getSlideTitle(int i)
 {
     auto title = slides[i].getTitle();
     if (title == "")
@@ -288,7 +373,7 @@ std::string UPS::Slideshow::getSlideTitle(int i)
     return title;
 }
 
-void UPS::Slideshow::goToSlide(int slide_nb)
+void slope::Slideshow::goToSlide(int slide_nb)
 {
     if (slide_nb == current_slide)
         return;
@@ -301,21 +386,26 @@ void UPS::Slideshow::goToSlide(int slide_nb)
     from_action = Time::now();
 }
 
-void UPS::Slideshow::saveCamera(std::string file)
+void slope::Slideshow::saveCamera(std::string file)
 {
     std::ofstream camfile(file);
     camfile << removeResolutionFromCamfile(polyscope::view::getCameraJson());
-    std::cout << "current camera view exported at " << file << std::endl;
+    spdlog::info("current camera view exported at {}",file);
 }
 
-void UPS::Slideshow::initializeSlides()
+void slope::Slideshow::initializeSlides()
 {
     precomputeTransitions();
     loadSlides();
+    for (int i = 0;const auto& v : slides){
+        for (auto& p : v)
+            p.first->upFirstSlideNumber(i);
+        i++;
+    }
     from_begin = Time::now();
 }
 
-void UPS::Slideshow::loadSlides()
+void slope::Slideshow::loadSlides()
 {
     slide_numbers.resize(slides.size());
     std::set<std::string> done;
@@ -326,7 +416,7 @@ void UPS::Slideshow::loadSlides()
     }
     nb_distinct_slides = done.size();
 
-    std::cout << "[ number of distinct slides ] " << nb_distinct_slides << std::endl;
+    spdlog::info("[ number of distinct slides : {} ]",nb_distinct_slides);
 
     slide_number_display.resize(nb_distinct_slides);
     for (int i = 0;i<nb_distinct_slides;i++){
@@ -336,7 +426,7 @@ void UPS::Slideshow::loadSlides()
 }
 
 
-UPS::PrimitivePtr UPS::Slideshow::getPrimitiveUnderMouse(scalar x,scalar y) const
+slope::PrimitivePtr slope::Slideshow::getPrimitiveUnderMouse(scalar x,scalar y) const
 {
     auto io = ImGui::GetIO();
     auto S = ImGui::GetWindowSize();
@@ -350,47 +440,50 @@ UPS::PrimitivePtr UPS::Slideshow::getPrimitiveUnderMouse(scalar x,scalar y) cons
     return nullptr;
 }
 
-void UPS::Slideshow::displaySlideNumber()
+void slope::Slideshow::displaySlideNumber()
 {
     const auto& DSN = slide_number_display[slide_numbers[current_slide]];
     DSN.first->play(TimeObject(),DSN.second);
 }
 
-void UPS::Slideshow::handleInputs()
+void slope::Slideshow::handleInputs()
 {
     handleDragAndDrop();
 
     if (!keyboardOpen())
         return;
 
-    if (ImGui::IsKeyPressed(262) && !locked){ // RIGHT ARROW
+    if (ImGui::IsKeyPressed(ImGuiKey_RightArrow) && !locked){
         nextFrame();
     }
-    else if (ImGui::IsKeyPressed(263)){// LEFT ARROW
+    else if (ImGui::IsKeyPressed(ImGuiKey_LeftArrow)){
         previousFrame();
-    }else if (ImGui::IsKeyPressed(264)){// DOWN ARROW
+    }else if (ImGui::IsKeyPressed(ImGuiKey_DownArrow)){
         forceNextFrame();
     }
-    if (ImGui::IsKeyDown(258))//TABS
+    if (ImGui::IsKeyDown(ImGuiKey_Tab))
         slideMenu();
-    if (ImGui::IsKeyPressed(67)){// C
+    if (ImGui::IsKeyPressed(ImGuiKey_C)){
         camera_popup = true;
     }
-    if (ImGui::IsKeyPressed(68)){// D
+    if (ImGui::IsKeyPressed(ImGuiKey_D)){
         polyscope::options::buildGui = !polyscope::options::buildGui;
     }
-    if (ImGui::IsKeyPressed(80)){ // P
+    if (ImGui::IsKeyPressed(ImGuiKey_P)){
         static int screenshot_count = 0;
         constexpr int nb_zeros = 6;
         auto n = std::to_string(screenshot_count++);
-        std::string file =  "/tmp/screenshot_" + std::string(nb_zeros-n.size(),'0') + n + ".png";
-        UPS::screenshot(file);
-        std::cout << "screenshot saved at " << file << std::endl;
+        path file =  "/tmp/screenshot_" + std::string(nb_zeros-n.size(),'0') + n + ".png";
+        slope::screenshot(file.string());
+        spdlog::info("screenshot saved at {}", file.string());
+    }
+    if (ImGui::IsKeyPressed(ImGuiKey_R)){
+        slope::LatexLoader::ReloadContentAndUpdate();
     }
 
 }
 
-void UPS::Slideshow::displayPopUps()
+void slope::Slideshow::displayPopUps()
 {
     std::string file;
 

@@ -7,7 +7,7 @@
 #include "SlideManager.h"
 #include "Slide.h"
 
-namespace UPS {
+namespace slope {
 
 class SlideManager;
 
@@ -67,7 +67,7 @@ public:
     }
 };
 
-SlideManager& operator<<(SlideManager& sm,Panel& p) {
+inline SlideManager& operator<<(SlideManager& sm,Panel& p) {
     p.addToSlideManager(sm);
     return sm;
 }

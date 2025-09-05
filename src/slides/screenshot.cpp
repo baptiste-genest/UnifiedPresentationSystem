@@ -1,7 +1,7 @@
 #include "screenshot.h"
 
 #ifdef __APPLE__
-void UPS::screenshot(std::string file)
+void slope::screenshot(std::string file)
 {
 }
 #else
@@ -16,7 +16,7 @@ Window get_focus_window(Display* d){
     }
     return w;
 }
-void UPS::screenshot(std::string file)
+void slope::screenshot(std::string file)
 {
     Display* display = XOpenDisplay(nullptr);
     Window root = get_focus_window(display);

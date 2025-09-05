@@ -1,7 +1,7 @@
 #include "vector_field.h"
 
 
-namespace UPS {
+namespace slope {
 VectorField::VectorField(const vecs &X, const vecs &V,double l) : V(V),
     X(X),length(l)
 {

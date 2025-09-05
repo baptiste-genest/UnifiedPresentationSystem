@@ -1,8 +1,8 @@
 #include "polyscope/polyscope.h"
 
-#include "../../src/UnifiedPresentationSystem.h"
+#include "../../src/slope.h"
 #include "imgui.h"
-using namespace UPS;
+using namespace slope;
 
 //#include <gif_lib.h>
 
@@ -37,7 +37,7 @@ mapping offset(const vec& x){
     return [x] (const vec& X){return X+x;};
 }
 
-vecs randomSmoothVectorField(int N,const UPS::Mesh::MeshPtr& quad) {
+vecs randomSmoothVectorField(int N,const slope::Mesh::MeshPtr& quad) {
     vecs result(N*N*N);
     for (int k = 0;k<N;k++)
         for (int j = 0;j<N;j++)
@@ -87,7 +87,7 @@ vecs randomSmoothVectorField(int N,const UPS::Mesh::MeshPtr& quad) {
     return result;
 }
 
-void shape_evolution(int N,const UPS::Mesh::MeshPtr& quad) {
+void shape_evolution(int N,const slope::Mesh::MeshPtr& quad) {
     auto coord = buildRangeMapper(0,N-1,-0.5,0.5);
     auto l = 0.5/N;
     for (int k = 0;k<N;k++)
@@ -141,7 +141,7 @@ std::pair<vec,vec> getOrtho(const vec &v)
 }
 
 
-void sample_curve(int N,const UPS::Parametrization& curve) {
+void sample_curve(int N,const slope::Parametrization& curve) {
     double dt = 2*M_PI/N;
     double t = 0;
     for (int i = 0;i<N;i++){
@@ -169,7 +169,7 @@ vec biot_savard_field(const vec& p) {
 
 void init () {
 
-    using namespace UPS;
+    using namespace slope;
     auto CMFONTID = FontManager::addFont(Options::DataPath + "fonts/ComputerModernSR.ttf",80);
     auto grid = Mesh::Add(Options::DataPath + "meshes/grid_quad_50.obj");
     auto quad = Mesh::Add(Options::DataPath + "meshes/quad.obj");
@@ -203,7 +203,7 @@ void init () {
         show << newFrame << Title("Minimal surface")->at(TOP);
         show << PlaceBelow(Latex::Add("Plateau's problem"));
 
-        show << CameraView::Add(UPS::Options::ProjectViewsPath + "catenoid.json");
+        show << CameraView::Add(slope::Options::ProjectViewsPath + "catenoid.json");
         show << inNextFrame;
         auto border = Formula::Add("\\Gamma",0.08);
         show << border->at("border");
@@ -217,7 +217,7 @@ void init () {
     }
     {
         show << newFrame << Title("How to represent a shape in a computer?")->at(CENTER) << inNextFrame << TOP;
-        show << CameraView::Add(UPS::Options::ProjectViewsPath + "shape.json");
+        show << CameraView::Add(slope::Options::ProjectViewsPath + "shape.json");
         scalar off = 3;
         auto bco =bunny_coarse;
         bco->pc->setEdgeWidth(1.);
@@ -252,7 +252,7 @@ void init () {
         show << newFrame << Title("k-vectors")->at(TOP);
         auto algebra = Formula::Add("\\bigwedge V");
         show << PlaceNextTo(algebra,1,0.1);
-        show << CameraView::Add(UPS::Options::ProjectViewsPath + "kvectors.json");
+        show << CameraView::Add(slope::Options::ProjectViewsPath + "kvectors.json");
         auto origin = Point::Add((vec)vec::Zero(),0.01);
         vec u(1,0,0);
         vec v(0,1,0);
@@ -344,8 +344,8 @@ void init () {
         show << newFrame << Title("The article's approach")->at(TOP);
         show << inNextFrame << Formula::Add("\\argmin_{\\Sigma : \\partial \\Sigma = \\Gamma} \\area(\\Sigma)")->at("opti");
         show << inNextFrame << PlaceNextTo(Formula::Add(" = \\argmin_{\\Sigma : d \\delta_{\\Sigma} = \\delta_\\Gamma} ||\\delta_\\Sigma||_{\\text{dual}}"),1);
-        //show << CameraView::Add(UPS::Options::ProjectViewsPath + "currents.json");
-        show << CameraView::Add(UPS::Options::ProjectViewsPath + "field.json");
+        //show << CameraView::Add(slope::Options::ProjectViewsPath + "currents.json");
+        show << CameraView::Add(slope::Options::ProjectViewsPath + "field.json");
         show << surface;
         show << inNextFrame >> surface;
         int N = 6;
@@ -376,7 +376,7 @@ void init () {
     }
     {
         show << newFrame << Title("Imposing the boundary constraint")->at(TOP);
-        show << CameraView::Add(UPS::Options::ProjectViewsPath + "biot_savard.json");
+        show << CameraView::Add(slope::Options::ProjectViewsPath + "biot_savard.json");
         show << PlaceBelow(Latex::Add("The \\textit{Biot-Savard Law}"));
         Parametrization K(knot);
         int N = 40;
@@ -420,7 +420,7 @@ void init () {
         show << PlaceLeft(Latex::Add(tex::enumerate("The article aims at an efficient computation of the solution",
                                           "To do so, they propose the use of the FFT",
                                           "This has theoretical consequences that they fully cover",
-                                                    "The final optimization problem can be solved very efficiently"),Options::UPS_default_height_ratio*0.9),0.4) << Image::Add("mini_surf.png",0.7)->at("final");
+                                                    "The final optimization problem can be solved very efficiently"),Options::DefaultLatexScale*0.9),0.4) << Image::Add("mini_surf.png",0.7)->at("final");
     }
 }
 

@@ -5,7 +5,7 @@
 #include "../io.h"
 #include "../../extern/svg.hpp"
 
-namespace UPS {
+namespace slope {
 
 struct Figure
 {

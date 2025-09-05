@@ -1,9 +1,9 @@
 #ifndef SECTION_H
 #define SECTION_H
 
-#include "../UPS.h"
+#include "../libslope.h"
 
-namespace UPS {
+namespace slope {
 
 class Section
 {

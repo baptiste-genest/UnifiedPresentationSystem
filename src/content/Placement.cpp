@@ -1,7 +1,7 @@
 #include "Placement.h"
 
 
-UPS::StateInSlide UPS::PlaceRelative::computePlacement(const ScreenPrimitiveInSlide &other) const {
+slope::StateInSlide slope::PlaceRelative::computePlacement(const ScreenPrimitiveInSlide &other) const {
 
     ScreenPrimitivePtr ptr = this->ptr;
     auto paddingx = this->paddingx;

@@ -1,7 +1,7 @@
 #include "Curve2D.h"
 #include "../Options.h"
 
-UPS::Figure &UPS::Figure::PlotFunction(scalar x1, scalar x2, const scalar_function &f, int N)
+slope::Figure &slope::Figure::PlotFunction(scalar x1, scalar x2, const scalar_function &f, int N)
 {
     root.style("path").set_attr("fill-opacity", "0")
         .set_attr("stroke", "#000000").set_attr("stroke-width","2");
@@ -23,7 +23,7 @@ UPS::Figure &UPS::Figure::PlotFunction(scalar x1, scalar x2, const scalar_functi
     return *this;
 }
 
-UPS::Figure::FigurePtr UPS::Figure::Add(Figure& F,vec2 rel_size)
+slope::Figure::FigurePtr slope::Figure::Add(Figure& F,vec2 rel_size)
 {
     std::string content = std::string(F.root);
     auto H = std::hash<std::string>{}(content);

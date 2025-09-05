@@ -2,26 +2,26 @@
 
 
 
-namespace UPS
+namespace slope
 {
 
-std::string UPS::Options::UPSPath = "@UPS_SOURCE@";
-std::string Options::DataPath = UPSPath + "/data/";
+std::string Options::SlopePath = "@Slope_SOURCE@";
+std::string Options::DataPath = SlopePath + "/";
 
 std::string Options::ProjectName;
 std::string Options::ProjectPath;
 std::string Options::ProjectViewsPath;
 
-size_t Options::UPS_screen_resolution_x = 1920;
-size_t Options::UPS_screen_resolution_y = 1080;
+size_t Options::ScreenResolutionWidth = 1920;
+size_t Options::ScreenResolutionHeight = 1080;
 
-std::string Options::UPS_PDFLATEX = "@UPS_PDFLATEX@";
-std::string Options::UPS_CONVERT = "@UPS_CONVERT@";
+std::string Options::PathToPDFLATEX = "@Slope_PDFLATEX@";
+std::string Options::PathToCONVERT = "@Slope_CONVERT@";
 
-size_t Options::UPS_density = 800;
+size_t Options::PDFtoPNGDensity = 600;
 
-double Options::UPS_TITLE = 0.07;
-double Options::UPS_default_height_ratio = 0.04;
+double Options::TitleScale = 1.5;
+double Options::DefaultLatexScale = 1.;
 
 bool Options::ignore_cache = false;
 

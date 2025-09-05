@@ -1,6 +1,6 @@
 #ifndef IO_H
 #define IO_H
-#include "../UPS.h"
+#include "../libslope.h"
 #include <geometrycentral/surface/vertex_position_geometry.h>
 #include <geometrycentral/surface/meshio.h>
 #include <iostream>
@@ -10,7 +10,7 @@
 
 #include <fstream>
 
-namespace UPS {
+namespace slope {
 
 namespace io {
 
@@ -27,12 +27,22 @@ using namespace Eigen;
 
 //https://aleksandarhaber.com/eigen-matrix-library-c-tutorial-saving-and-loading-data-in-from-a-csv-file/
 void SaveMatrix(string fileName,const Mat& M);
+void SaveVec(string fileName,const Vec& V);
 
 Mat LoadMatrix(string fileToOpen);
+Vec LoadVec(string fileToOpen);
 
 inline bool MatrixCache(std::string file,Mat& M){
     if (file_exists(file)){
         M = LoadMatrix(file);
+        return true;
+    }
+    return false;
+}
+
+inline bool VecCache(std::string file,Vec& V){
+    if (file_exists(file)){
+        V = LoadMatrix(file);
         return true;
     }
     return false;

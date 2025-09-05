@@ -5,7 +5,7 @@
 #include "polyscope/curve_network.h"
 #include "../math/Parametrization.h"
 
-namespace UPS {
+namespace slope {
 
 class Curve3D : public PolyscopePrimitive
 {
@@ -15,6 +15,7 @@ public:
 
     static Curve3DPtr Add(const vecs& nodes, bool loop = false, scalar r = -0.01);
     static Curve3DPtr Add(const curve_param& param,int N = 100,bool loop = false,scalar r = -0.01);
+    static Curve3DPtr Add(const dynamic_curve_param& param,int N = 100,bool loop = false,scalar r = -0.01);
     using edge = std::array<int,2>;
     using edges = std::vector<edge>;
 
@@ -23,6 +24,13 @@ public:
 
 
     Curve3DPtr apply(const mapping& phi,bool loop = false) const;
+
+    void updateNodes(const vecs& X) {
+        nodes = X;
+        pc->updateNodePositions(nodes);
+    }
+
+    const vecs& getNodes() const {return nodes;}
 
     scalar radius = 0.01;
 protected:
@@ -53,10 +61,6 @@ public:
 
 };
 
-struct Plot {
-    using Curve3DPtr = std::shared_ptr<Curve3D>;
-    static Curve3DPtr Add(const scalar_function& f,scalar x0,scalar x1,const Vec2& size,const vec& anchor,int N = 100);
-};
 
 }
 

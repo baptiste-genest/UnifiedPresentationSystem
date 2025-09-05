@@ -4,7 +4,7 @@
 #include "Prompter.h"
 #include "SlideManager.h"
 
-namespace UPS {
+namespace slope {
 
 class PrompterModule : public SlideManager
 {

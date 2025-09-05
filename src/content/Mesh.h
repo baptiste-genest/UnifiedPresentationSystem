@@ -1,12 +1,12 @@
 #ifndef MESH_H
 #define MESH_H
-#include "../UPS.h"
+#include "../libslope.h"
 #include "PolyscopePrimitive.h"
 #include "polyscope/surface_mesh.h"
 #include "geometrycentral/surface/meshio.h"
 #include "../math/geometry.h"
 
-namespace UPS {
+namespace slope {
   
   class Mesh : public PolyscopePrimitive
   {
@@ -48,9 +48,11 @@ namespace UPS {
     void setSmooth(bool set);
     
     using scalar_func = std::function<scalar(const vec&)>;
+    using vertex_func = std::function<scalar(const Vertex&)>;
     using vector_func = std::function<vec(const vec&)>;
     
     Vec eval(const scalar_func& f) const;
+    Vec eval(const vertex_func& f) const;
     vecs eval(const vector_func& f) const;
     
     polyscope::SurfaceMesh* pc;
@@ -68,6 +70,7 @@ namespace UPS {
       return apply([x](const vec& v) {return vec(x*v);});
     }
 
+    MeshPtr copy() const { return translate(vec::Zero());}
 
 private:
     vecs vertices,original_vertices;

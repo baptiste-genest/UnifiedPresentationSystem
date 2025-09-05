@@ -1,22 +1,22 @@
 #include "polyscope/polyscope.h"
-#include "../../src/UnifiedPresentationSystem.h"
+#include "../../src/slope.h"
 
 
-UPS::Slideshow show;
+slope::Slideshow show;
 
 int main(int argc,char** argv)
 {
-  show.init("tutorials");
+  show.init("tutorials",argc,argv);
   
   //Slideshow title
-  show << UPS::Latex::Add("Hello World!",UPS::Options::UPS_TITLE)->at(UPS::CENTER);
+  show << slope::Latex::Add("Hello World!",slope::Options::TitleScale)->at(slope::CENTER);
   
   //New slide
-  auto title = UPS::Title("The beauty of $\\pi$ ")->at(UPS::TOP);
-  show << UPS::newFrame << title;
+  auto title = slope::Title("The beauty of $\\pi$ ")->at(slope::TOP);
+  show << slope::newFrame << title;
   
   //Plain latex forumla
-  auto formula = UPS::Formula::Add("\\pi = 4 \\int_0^1 \\frac{1}{1+x^2}dx");
+  auto formula = slope::Formula::Add("\\pi = 4 \\int_0^1 \\frac{1}{1+x^2}dx");
   show << formula;
   
   polyscope::state::userCallback = [](){

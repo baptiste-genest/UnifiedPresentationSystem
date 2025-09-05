@@ -5,7 +5,7 @@
 #include "PolyscopePrimitive.h"
 #include <fstream>
 
-namespace UPS {
+namespace slope {
 
 
 std::string formatCameraFilename(std::string file);

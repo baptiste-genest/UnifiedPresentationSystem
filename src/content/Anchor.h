@@ -4,7 +4,7 @@
 #include "Options.h"
 #include "io.h"
 
-namespace UPS {
+namespace slope {
 
 class Anchor;
 using AnchorPtr = std::shared_ptr<Anchor>;
@@ -67,31 +67,13 @@ public:
     virtual void updatePos(const vec2& p) override {
         std::cerr << "[WARNING] cannot change labeled anchor position by hand" << std::endl;
     }
-    void writeAtLabel(double x, double y,bool overwrite) const
-    {
-        system(("mkdir " + UPS::Options::ProjectViewsPath + " 2>/dev/null").c_str());
-        std::string filepath = UPS::Options::ProjectViewsPath + label + ".pos";
-        if (!io::file_exists(filepath) || overwrite){
-            std::ofstream file(filepath);
-            if (!file.is_open()){
-                std::cerr << "couldn't open file" << std::endl;
-                exit(1);
-            }
-            file << x << " " << y << std::endl;
-        }
-    }
-    vec2 readFromLabel() const
-    {
-        std::ifstream file (UPS::Options::ProjectViewsPath + label + ".pos");
-        if (!file.is_open()){
-            std::cerr << "couldn't read label file" << std::endl;
-            exit(1);
-        }
-        vec2 rslt;
-        file >> rslt(0) >> rslt(1);
-        return rslt;
-    }
+    void writeAtLabel(double x, double y,bool overwrite) const;
+    vec2 readFromLabel() const;
 };
+
+vec2 WorldToScreen(const vec& p);
+
+vec ScreenToWorld(const vec2& p);
 
 class DynamicAnchor : public Anchor
 {
@@ -99,14 +81,8 @@ protected:
     std::function<vec2()> anchor;
 
     static std::function<vec2()> trackScreen(const std::function<vec()>& track) {
-        return [track] () {
-            auto p = track();
-            glm::vec4 pos = glm::vec4(p(0),p(1),p(2),1);
-            glm::vec4 screenPos = polyscope::view::getCameraPerspectiveMatrix()*polyscope::view::viewMat * pos;
-            screenPos /= screenPos.w;
-            screenPos = (screenPos + glm::vec4(1,1,1,1))/2.f;
-            screenPos.y = 1-screenPos.y;
-            return vec2(screenPos.x,screenPos.y);
+        return [track] () -> vec2 {
+            return WorldToScreen(track());
         };
     }
 

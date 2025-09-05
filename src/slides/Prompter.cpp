@@ -4,7 +4,7 @@
 #include <unistd.h>
 #include <sys/wait.h>
 
-UPS::Prompter::Prompter(std::string script_file) : script_file(script_file)
+slope::Prompter::Prompter(std::string script_file) : script_file(script_file)
 {
 
     prompt_pid = fork();
@@ -17,12 +17,12 @@ UPS::Prompter::Prompter(std::string script_file) : script_file(script_file)
     if (prompt_pid == 0) {
         system("touch /tmp/prompt.txt");
         system("xterm -fg white -bg black -fa 'Monospace' -fs 25 -e \"watch -n 0.5 cat /tmp/prompt.txt\"");
-        //execlp("xterm", "xterm_ups_prompt", "-e ", "\"watch", "-n","1","cat","/tmp/prompt.txt\"",NULL);
+        //execlp("xterm", "xterm_Slope_prompt", "-e ", "\"watch", "-n","1","cat","/tmp/prompt.txt\"",NULL);
         abort();
     }
 }
 
-void UPS::Prompter::write(promptTag tag,TimeStamp fromBegin) const
+void slope::Prompter::write(promptTag tag,TimeStamp fromBegin) const
 {
     if (!scripts.contains(tag)){
         //std::cerr << "[INVALID TAG] " << tag << std::endl;
@@ -31,13 +31,13 @@ void UPS::Prompter::write(promptTag tag,TimeStamp fromBegin) const
     }
     std::ofstream file("/tmp/prompt.txt");
     file << "|----------------------------------------------------------------|" << std::endl;
-    file << "                    UPS PROMPT : TIME "<<std::to_string(std::chrono::duration_cast<std::chrono::minutes>(Time::now()-fromBegin).count()) << " Mns                               " << std::endl;
+    file << "                    slope PROMPT : TIME "<<std::to_string(std::chrono::duration_cast<std::chrono::minutes>(Time::now()-fromBegin).count()) << " Mns                               " << std::endl;
     file << "|----------------------------------------------------------------|" << std::endl;
     file << scripts.at(tag);
     file.close();
 }
 
-void UPS::Prompter::loadScript()
+void slope::Prompter::loadScript()
 {
     std::ifstream script(script_file);
     std::string line;
@@ -61,11 +61,11 @@ void UPS::Prompter::loadScript()
     }
 }
 
-void UPS::Prompter::erase(TimeStamp fromBegin) const
+void slope::Prompter::erase(TimeStamp fromBegin) const
 {
     std::ofstream file("/tmp/prompt.txt");
     file << "|----------------------------------------------------------------|" << std::endl;
-    file << "                    UPS PROMPT : TIME "<<std::to_string(std::chrono::duration_cast<std::chrono::minutes>(Time::now()-fromBegin).count()) << " Mns                               " << std::endl;
+    file << "                    slope PROMPT : TIME "<<std::to_string(std::chrono::duration_cast<std::chrono::minutes>(Time::now()-fromBegin).count()) << " Mns                               " << std::endl;
     file << "|----------------------------------------------------------------|" << std::endl;
     file.close();
     return;

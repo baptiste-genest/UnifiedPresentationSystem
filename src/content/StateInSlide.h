@@ -1,11 +1,13 @@
 #ifndef STATEINSLIDE_H
 #define STATEINSLIDE_H
-#include "../UPS.h"
+#include "../libslope.h"
 #include "io.h"
 #include "Options.h"
 #include "Anchor.h"
 
-namespace UPS {
+#include "Transform.h"
+
+namespace slope {
 
 using RelativePlacer = std::function<vec2(vec2)>;
 
@@ -16,6 +18,9 @@ struct StateInSlide {
     };
     AnchorPtr anchor = GlobalAnchor;
     scalar angle=0;
+    bool offseted = false;
+
+    Transform LocalToWorld;
 
     StateInSlide() {
     }
@@ -27,11 +32,25 @@ struct StateInSlide {
         anchor = AbsoluteAnchor::Add(x);
     }
 
+    StateInSlide(const Transform& T) {
+        LocalToWorld = T;
+    }
+
     void setOffset(const vec2& x) {
+        offseted = true;
         placer = [x] (const vec2& p) {
             return p + x;
         };
     }
+
+    void addOffset(const vec2& x) {
+        auto old = placer;
+        offseted = true;
+        placer = [old,x] (const vec2& p) {
+            return old(p) + x;
+        };
+    }
+
 
     vec2 getPosition() const {
         return placer(anchor->getPos());

@@ -1,14 +1,14 @@
 #include "Image.h"
 
-size_t UPS::Image::count = 0;
-std::vector<UPS::Image> UPS::Image::images;
+size_t slope::Image::count = 0;
+std::vector<slope::Image> slope::Image::images;
 
 //#define STB_IMAGE_IMPLEMENTATION
 #include "../extern/stb_image.h"
 
 #include <spdlog/spdlog.h>
 
-UPS::Image::ImagePtr UPS::Image::Add(std::string file,scalar scale)
+slope::Image::ImagePtr slope::Image::Add(std::string file,scalar scale)
 {
     ImagePtr rslt = NewPrimitive<Image>();
     rslt->data = loadImage(formatPath(file));
@@ -16,7 +16,7 @@ UPS::Image::ImagePtr UPS::Image::Add(std::string file,scalar scale)
     return rslt;
 }
 
-ImVec2 UPS::Image::getSize(std::string filename)
+ImVec2 slope::Image::getSize(std::string filename)
 {
     int w,h;
     // Load from file
@@ -24,18 +24,18 @@ ImVec2 UPS::Image::getSize(std::string filename)
     return ImVec2(w,h);
 }
 
-UPS::Primitive::Size UPS::Image::getScaledSize(const ImageData &data, scalar scale)
+slope::Primitive::Size slope::Image::getScaledSize(const ImageData &data, scalar scale)
 {
     double sx = scale,sy = scale;
-    bool notFullHD = (Options::UPS_screen_resolution_x != 1920) ||(Options::UPS_screen_resolution_y != 1080);
+    bool notFullHD = (Options::ScreenResolutionWidth != 1920) ||(Options::ScreenResolutionHeight != 1080);
     if (notFullHD){
-        sx *=  Options::UPS_screen_resolution_x/1920.;
-        sy *=  Options::UPS_screen_resolution_y/1080.;
+        sx *=  Options::ScreenResolutionWidth/1920.;
+        sy *=  Options::ScreenResolutionHeight/1080.;
     }
     return Size(sx*data.width,sy*data.height);
 }
 
-UPS::ImageData UPS::loadImage(std::string file)
+slope::ImageData slope::loadImage(path file)
 {
     auto filename = file.c_str();
     int w,h;
@@ -71,36 +71,32 @@ UPS::ImageData UPS::loadImage(std::string file)
     return data;
 }
 
-void UPS::Image::draw(const TimeObject &, const StateInSlide &sis)
+void slope::Image::draw(const TimeObject &, const StateInSlide &sis)
 {
     display(sis);
 }
 
-void UPS::Image::playIntro(const TimeObject& t, const StateInSlide &sis)
+void slope::Image::playIntro(const TimeObject& t, const StateInSlide &sis)
 {
-    auto sist = sis;
-    sist.alpha = smoothstep(t.transitionParameter)*sis.alpha;
-    display(sist);
+    display(sis);
 }
 
-void UPS::Image::playOutro(const TimeObject& t, const StateInSlide &sis)
+void slope::Image::playOutro(const TimeObject& t, const StateInSlide &sis)
 {
-    auto sist = sis;
-    sist.alpha = smoothstep(1-t.transitionParameter)*sis.alpha;
-    display(sist);
+    display(sis);
 }
 
-UPS::Primitive::Size UPS::Image::getSize() const {
+slope::Primitive::Size slope::Image::getSize() const {
     return getScaledSize(data,scale);
 }
 
-void UPS::Image::display(const StateInSlide &sis) const
+void slope::Image::display(const StateInSlide &sis) const
 {
     anchor->updatePos(sis.getPosition());
     DisplayImage(data,sis,scale);
 }
 
-void UPS::ImageRotated(ImTextureID tex_id, ImVec2 center, ImVec2 size, float angle, const RGBA &color_mult)
+void slope::ImageRotated(ImTextureID tex_id, ImVec2 center, ImVec2 size, float angle, const RGBA &color_mult)
 {
     ImDrawList* draw_list = ImGui::GetWindowDrawList();
 
@@ -124,35 +120,34 @@ void UPS::ImageRotated(ImTextureID tex_id, ImVec2 center, ImVec2 size, float ang
     draw_list->AddImageQuad(tex_id, pos[0], pos[1], pos[2], pos[3], uvs[0], uvs[1], uvs[2], uvs[3], color_mult);
 }
 
-void UPS::DisplayImage(const ImageData &data, const StateInSlide &sis, scalar scale)
+void slope::DisplayImage(const ImageData &data, const StateInSlide &sis, scalar scale)
 {
     RGBA color_multiplier = ImColor(1.f,1.f,1.f,sis.alpha);
     auto P = sis.getAbsolutePosition();
 
-    bool notfullHD = (Options::UPS_screen_resolution_x != 1920) ||(Options::UPS_screen_resolution_y != 1080);
+    bool notfullHD = (Options::ScreenResolutionWidth != 1920) ||(Options::ScreenResolutionHeight != 1080);
 
     if (std::abs(sis.angle) > 0.001 || std::abs(1-scale) > 1e-2 || notfullHD){
-        double sx =  Options::UPS_screen_resolution_x/1920.;
-        double sy =  Options::UPS_screen_resolution_y/1080.;
+        double sx =  Options::ScreenResolutionWidth/1920.;
+        double sy =  Options::ScreenResolutionHeight/1080.;
         ImageRotated((void*)(intptr_t)data.texture,P,ImVec2(sx*data.width*scale,sy*data.height*scale),sis.angle,color_multiplier);
     }
     else {
-        P.x -= data.width*0.5;
-        P.y -= data.height*0.5;
+        P.x -= data.width*0.5*scale;
+        P.y -= data.height*0.5*scale;
         ImGui::SetCursorPos(P);
-        ImGui::Image((void*)(intptr_t)data.texture, ImVec2(data.width,data.height), ImVec2(0.0f, 0.0f), ImVec2(1.0f, 1.0f), color_multiplier);
+        ImGui::Image((void*)(intptr_t)data.texture, ImVec2(data.width*scale,data.height*scale), ImVec2(0.0f, 0.0f), ImVec2(1.0f, 1.0f), color_multiplier);
     }
-
 }
 
-UPS::Gif::GifPtr UPS::Gif::Add(std::string filename,int fps,scalar scale,bool loop)
+slope::Gif::GifPtr slope::Gif::Add(std::string filename,int fps,scalar scale,bool loop)
 {
     auto data = loadGif(formatPath(filename));
     GifPtr rslt = NewPrimitive<Gif>(data,fps,scale,loop);
     return rslt;
 }
 
-void UPS::Gif::draw(const TimeObject &t, const StateInSlide &sis)
+void slope::Gif::draw(const TimeObject &t, const StateInSlide &sis)
 {
     if (loop)
         current_img = (int)std::floor(t.inner_time*fps) % int(images.size());
@@ -161,16 +156,16 @@ void UPS::Gif::draw(const TimeObject &t, const StateInSlide &sis)
     display(sis);
 }
 
-std::vector<UPS::ImageData> UPS::loadGif(std::string filename)
+std::vector<slope::ImageData> slope::loadGif(path filename)
 {
     auto H = std::to_string(std::hash<std::string>{}(filename));
-    std::vector<UPS::ImageData> data;
-    std::string folder = UPS::Options::DataPath + "cache/" + H;
+    std::vector<slope::ImageData> data;
+    std::string folder = slope::Options::DataPath + "cache/" + H;
     if (!io::folder_exists(folder) || Options::ignore_cache){
-        spdlog::info("Decomposing gif " + filename);
+        spdlog::info("Decomposing gif " + filename.string());
         system(("rm -rf " + folder + " 2> /dev/null").data());
         system(("mkdir " + folder).data());
-        system(("convert "+filename+" -coalesce " + folder + "/gif_%05d.png").data());
+        system(("convert "+filename.string()+" -coalesce " + folder + "/gif_%05d.png").data());
     }
     auto images = io::list_directory(folder);
     for (auto& f : images){

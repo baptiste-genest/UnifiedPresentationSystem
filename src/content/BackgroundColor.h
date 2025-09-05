@@ -4,7 +4,7 @@
 #include "PolyscopePrimitive.h"
 #include "../math/utils.h"
 
-namespace UPS {
+namespace slope {
 
 
 class BackgroudColor;

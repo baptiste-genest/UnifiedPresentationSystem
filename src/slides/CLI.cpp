@@ -6,7 +6,7 @@
 #include <cassert>
 
 int parseCLI(int argc,char** argv) {
-    using namespace UPS;
+    using namespace slope;
     CLI::App app("Unified Presentation System");
     bool clear_cache = false;
 
@@ -44,8 +44,8 @@ int parseCLI(int argc,char** argv) {
         std::cerr << "invalid resolution format" << std::endl;
         assert(false);
     }
-    Options::UPS_screen_resolution_x = std::stoi(resolution.substr(0,pos));
-    Options::UPS_screen_resolution_y = std::stoi(resolution.substr(pos+1));
+    Options::ScreenResolutionWidth = std::stoi(resolution.substr(0,pos));
+    Options::ScreenResolutionHeight = std::stoi(resolution.substr(pos+1));
 
     return 0; //ok
 

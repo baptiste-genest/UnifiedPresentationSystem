@@ -5,9 +5,10 @@
 #include "PrompterModule.h"
 #include "screenshot.h"
 #include "../content/Text.h"
+#include "../content/plots/Plot.h"
 #include "CLI.h"
 
-namespace UPS {
+namespace slope {
 
 class Slideshow : public PrompterModule
 {
@@ -23,7 +24,9 @@ public:
 
     void play();
 
-    TimeTypeSec transitionTime = 0.5;
+    void setTransitionTimeSecond(TimeTypeSec s) {
+        transitionTime = s;
+    }
 
     void setInnerTime();
 
@@ -51,6 +54,7 @@ public:
     bool display_slide_number = true;
 
 private:
+    TimeTypeSec transitionTime = 0.5;
 
     void saveCamera(std::string file);
 

@@ -1,7 +1,10 @@
 build/**
+build_qt/**
 b2/**
 .DS_Store
 
+.idea/**
+.vscode/**
 
 src/content/Options.cpp
 

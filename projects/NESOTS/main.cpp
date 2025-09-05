@@ -1,6 +1,6 @@
-#include "../../src/UnifiedPresentationSystem.h"
+#include "../../src/slope.h"
 
-using namespace UPS;
+using namespace slope;
 
 Slideshow show;
 
@@ -136,15 +136,15 @@ void GramSchmidt(const vec& x,vec& a,vec& b) {
     b.normalize();
 }
 
-std::shared_ptr<UPS::CurveNetwork> plotLines(const vecs& p,scalar l = 2) {
+std::shared_ptr<slope::CurveNetwork> plotLines(const vecs& p,scalar l = 2) {
     std::vector<vec> L(p.size()*2);
-    UPS::Curve3D::edges E(p.size());
+    slope::Curve3D::edges E(p.size());
     for (int i = 0;i<p.size();i++){
         L[2*i] = p[i]*2;
         L[2*i+1] = -p[i]*2;
         E[i] = {2*i,2*i+1};
     }
-    return UPS::CurveNetwork::Add(L,E);
+    return slope::CurveNetwork::Add(L,E);
 }
 
 std::vector<scalar> readLayoutBelong(std::string path,int N) {
@@ -187,22 +187,22 @@ void init() {
     int N = 20;
 
     {
-//        show << Title("Non Euclidean Sliced \\\\ Optimal Transport Sampling")->at(UPS::CENTER);
-//        show << PlaceBelow(Latex::Add(tex::center("Baptiste Genest \\\\  Nicolas Courty \\\\ David Coeurjolly"),Options::UPS_default_height_ratio*0.8),0.1);
-//        show << PlaceBelow(Latex::Add("Eurographics 2024",Options::UPS_default_height_ratio*0.7),0.1);
-//        show << PlaceBottomLeft(Latex::Add("aaaaa",Options::UPS_default_height_ratio*0.7),0.01);
+//        show << Title("Non Euclidean Sliced \\\\ Optimal Transport Sampling")->at(slope::CENTER);
+//        show << PlaceBelow(Latex::Add(tex::center("Baptiste Genest \\\\  Nicolas Courty \\\\ David Coeurjolly"),Options::Slope_default_height_ratio*0.8),0.1);
+//        show << PlaceBelow(Latex::Add("Eurographics 2024",Options::Slope_default_height_ratio*0.7),0.1);
+//        show << PlaceBottomLeft(Latex::Add("aaaaa",Options::Slope_default_height_ratio*0.7),0.01);
         show << Image::Add("welcome_2.jpeg",1);
         show << BackgroudColor::Add(0,0,0);
     }
 
     {
         show << newFrame << Title("Context")->at(TOP);
-        show << PlaceRelative(Latex::Add("We contribute to the \\textcolor{blue}{blue-noise} sampling techniques that use \\textcolor{blue}{optimal transport} by extending those techniques to \\textcolor{blue}{non-Euclidean} domains ($\\Sp^d,\\Hy^d,\\Pp^d$)"),ABS_LEFT,UPS::REL_BOTTOM,0.03,0.1);
+        show << PlaceRelative(Latex::Add("We contribute to the \\textcolor{blue}{blue-noise} sampling techniques that use \\textcolor{blue}{optimal transport} by extending those techniques to \\textcolor{blue}{non-Euclidean} domains ($\\Sp^d,\\Hy^d,\\Pp^d$)"),ABS_LEFT,slope::REL_BOTTOM,0.03,0.1);
         show << PlaceBottom(Image::Add("teaser.png"),0.5,0.1);
     }
 
     {
-        show << newFrame << Title("Optimal Transport")->at(UPS::TOP);
+        show << newFrame << Title("Optimal Transport")->at(slope::TOP);
         show << PlaceBelow(Latex::Add("Discrete to discrete"));
         show << PlaceBottom(Latex::Add(tex::center("Which assignation $\\gamma$ minimizes the effort to move each $x_i$ to $\\gamma(x_i)$?")),0.5,0.1);
 
@@ -214,19 +214,19 @@ void init() {
         show << newFrame;
         show << PlaceBottomLeft(Image::Add("article.png",.3),0.01)     ;
         show << PlaceNextTo(Latex::Add("\\scriptsize \\color{orange}[Kantorovitch 1939], [Peyré et al. 2019], [Villani 2008]"),1,0.01);
-        show << Title("Optimal Transport")->at(UPS::TOP);
+        show << Title("Optimal Transport")->at(slope::TOP);
         show << PlaceBelow(Latex::Add("The Wasserstein distance"));
-        show << PlaceRelative(Latex::Add("Given two probability measures $\\mu$ and $\\nu$"),placeX::ABS_LEFT,UPS::REL_BOTTOM,0.05,0.1);
-        show << PlaceRelative(Formula::Add(R"(\W_p^p(\mu,\nu) = \inf_{\gamma \in \Pi(\mu,\nu)} \int d(x,y)^p d\gamma)"),placeX::CENTER_X,UPS::REL_BOTTOM,0.05,0.1);
-        show << inNextFrame << PlaceRelative(Latex::Add("Very importantly, $\\mu$ and $\\nu$ can be discrete or continuous!"),placeX::ABS_LEFT,UPS::REL_BOTTOM,0.05,0.1);
-        show << PlaceRelative(Image::Add("OT_discrete_conti_2.png"),placeX::CENTER_X,UPS::REL_BOTTOM,0.05,0.01);
-        show << PlaceRelative(Latex::Add("Image by Gabriel Peyré",Options::UPS_default_height_ratio*0.6),placeX::ABS_RIGHT,UPS::REL_BOTTOM,0.01,0.005);
+        show << PlaceRelative(Latex::Add("Given two probability measures $\\mu$ and $\\nu$"),placeX::ABS_LEFT,slope::REL_BOTTOM,0.05,0.1);
+        show << PlaceRelative(Formula::Add(R"(\W_p^p(\mu,\nu) = \inf_{\gamma \in \Pi(\mu,\nu)} \int d(x,y)^p d\gamma)"),placeX::CENTER_X,slope::REL_BOTTOM,0.05,0.1);
+        show << inNextFrame << PlaceRelative(Latex::Add("Very importantly, $\\mu$ and $\\nu$ can be discrete or continuous!"),placeX::ABS_LEFT,slope::REL_BOTTOM,0.05,0.1);
+        show << PlaceRelative(Image::Add("OT_discrete_conti_2.png"),placeX::CENTER_X,slope::REL_BOTTOM,0.05,0.01);
+        show << PlaceRelative(Latex::Add("Image by Gabriel Peyré",Options::DefaultLatexScale*0.6),placeX::ABS_RIGHT,slope::REL_BOTTOM,0.01,0.005);
     }
     {
         show << newFrame;
         show << PlaceBottomLeft(Image::Add("article.png",.3),0.01)     ;
         show << PlaceNextTo(Latex::Add("\\scriptsize \\color{orange}[Kantorovitch 1939]"),1,0.01);
-        show << Title("How hard is it?")->at(UPS::TOP);
+        show << Title("How hard is it?")->at(slope::TOP);
         show << inNextFrame << PlaceRelative(Latex::Add("Exact discrete to discrete: Linear Programming $\\implies \\mathcal{O}(N^3)$"),placeX::ABS_LEFT,REL_BOTTOM,0.051,0.1);
         show << inNextFrame << PlaceRelative(Latex::Add("Trivial in 1 case: 1D-OT"),placeX::ABS_LEFT,REL_BOTTOM,0.05,0.1);
         show << CameraView::Add("1DOT");
@@ -253,11 +253,11 @@ void init() {
             show << inNextFrame << Assignments;
         }
         //show << inNextFrame << PlaceBelow(Image::Add("OT_1D.png",0.7),0.05);
-        show << inNextFrame << PlaceBottom(Latex::Add("$\\mathcal{O}(N\\log(N))$",Options::UPS_default_height_ratio*1.5));
+        show << inNextFrame << PlaceBottom(Latex::Add("$\\mathcal{O}(N\\log(N))$",Options::DefaultLatexScale*1.5));
     }
 
     {
-        show << newFrame << Title("Sliced Optimal Transport")->at(UPS::TOP);
+        show << newFrame << Title("Sliced Optimal Transport")->at(slope::TOP);
 
         show << PlaceBottomLeft(Image::Add("article.png",.3),0.01)     ;
         show << PlaceNextTo(Latex::Add("\\scriptsize \\color{orange}[Pitié at al. 2005], [Rabin et al. 2011], [Bonnotte 2011], [Bonneel et al. 2015], [Nadjahi et al. 2020]"),1,0.01);
@@ -313,7 +313,7 @@ void init() {
         show << newFrame << Title("Sampling Continuous Densities")->at(TOP);
         show << inNextFrame << PlaceRelative(Latex::Add("We approximate semi-discrete OT by targeting a large number of samples:"),ABS_LEFT,REL_BOTTOM,0.02,0.12);
         auto app = Formula::Add("\\approx");
-        show  << app->at(0.5,0.7) << PlaceRelative(Image::Add("gaussian_density.png"),app,UPS::REL_LEFT,placeY::SAME_Y) << PlaceRelative(Image::Add("gaussian_samples.png"),app,UPS::REL_RIGHT,placeY::SAME_Y);
+        show  << app->at(0.5,0.7) << PlaceRelative(Image::Add("gaussian_density.png"),app,slope::REL_LEFT,placeY::SAME_Y) << PlaceRelative(Image::Add("gaussian_samples.png"),app,slope::REL_RIGHT,placeY::SAME_Y);
         show << PlaceNextTo(Formula::Add(R"(\tilde{\nu} = \frac{1}{N}\sum_{i=1}^N \delta_{y_i} )"),1,0.05) << PlaceBelow(Formula::Add(R"(y_i \sim \nu)"),0.03) << PlaceLeft(Formula::Add("\\nu"),0.7,0.18);
 
     }
@@ -324,13 +324,13 @@ void init() {
         auto uniform = Image::Add("uniform.png");
         auto blue_noise = Image::Add("blue_noise.png");
 
-        show << newFrame << Title("The Blue Noise Sampling Problem")->at(UPS::TOP);
+        show << newFrame << Title("The Blue Noise Sampling Problem")->at(slope::TOP);
         show << inNextFrame << Formula::Add("\\mu_1")->at("mu1") << Formula::Add("\\mu_2")->at("mu2");
         show << Formula::Add("\\U")->at("unif_den");// << Latex::Add(tex::center("$\\mu_1, \\mu_2 \\sim \\U$,\\\\ where $\\U$ \\\\ is the uniform\\\\ distribution"))->at("follow_u");
         show << Formula::Add(R"(\mu = \frac{1}{N}\sum_{i=1}^N \delta_{x_i} )")->at("discrete_mu");
         show << beginCenter << Image::Add("unif.png") << PlaceNextTo(Image::Add("uniform.png"),1) << PlaceNextTo(Image::Add("blue_noise.png"),1) << endCenter;
         show << inNextFrame << PlaceRelative(Formula::Add("\\W(\\mu_1,\\U) > \\W(\\mu_2,\\U)"),CENTER_X,placeY::REL_BOTTOM,0,0.08);
-        show << inNextFrame << PlaceBelow(Latex::Add("Idea: Optimize $\\mu$ by gradient descent on $SW(\\mu,\\U)$!",UPS::Options::UPS_default_height_ratio*1.4),0.05);
+        show << inNextFrame << PlaceBelow(Latex::Add("Idea: Optimize $\\mu$ by gradient descent on $SW(\\mu,\\U)$!",slope::Options::DefaultLatexScale*1.4),0.05);
     }
 
     auto grad = Formula::Add("\\nabla_{x_i} SW^{\\theta} = T^{\\theta}(x_i) - x_i");
@@ -480,7 +480,7 @@ void init() {
         auto offset = 1.5;
         auto T = Title("Non-Euclidean Sliced \\\\ Optimal Transport Sampling");
         show << newFrame;
-        show << T->at(UPS::TOP);
+        show << T->at(slope::TOP);
         show << Image::Add("nesots_model2.png",1)->at("models");
         show << PlaceBottomLeft(Image::Add("article.png",.3),0.01)     ;
         show << PlaceNextTo(Latex::Add("\\scriptsize \\color{orange}[Bonet et al. 2023]"),1,0.01);
@@ -659,7 +659,7 @@ $\textbf{P}^\theta(x)$ &
 \end{tabular}%
 }
 \end{table}
-)",Options::UPS_default_height_ratio*1);
+)",Options::DefaultLatexScale*1);
         show << PlaceBottom(Latex::Add("See details in paper."));
     }
     {
@@ -694,9 +694,9 @@ $\textbf{P}^\theta(x)$ &
             return vec(0.5*x);
         };
         auto M = Mesh::Add(Options::ProjectPath + "macaca.obj")->apply(N);
-        show << M << Formula::Add("\\mathbb{R}^3",Options::UPS_default_height_ratio*1.5)->at("R3");
+        show << M << Formula::Add("\\mathbb{R}^3",Options::DefaultLatexScale*1.5)->at("R3");
         show << inNextFrame;
-        show  << Formula::Add("\\Hy^2",Options::UPS_default_height_ratio*1.5)->at("H2");
+        show  << Formula::Add("\\Hy^2",Options::DefaultLatexScale*1.5)->at("H2");
         for (int i = 1;i<=3;i++) {
             PrimitiveGroup L;
             L << PointCloud::Add(readPointCloud(Options::ProjectPath + "mu_"+std::to_string(i) + ".pts"))->apply(N);
@@ -719,10 +719,10 @@ $\textbf{P}^\theta(x)$ &
     {
         show << newFrame << Title("Projective Plane Sampling");
         show << CameraView::Add("line_sampling");
-        show << inNextFrame << UPS::TOP;
+        show << inNextFrame << slope::TOP;
         show << PlaceBelow(Latex::Add("How to sample lines?"));
         show << S;
-        auto fibo = readPointCloud(UPS::Options::ProjectPath+"fibo.pts");
+        auto fibo = readPointCloud(slope::Options::ProjectPath+"fibo.pts");
         auto fibopc = PointCloud::Add(fibo,0.05);
 
         auto hearth_eyes = Image::Add("thumbs_up.png",0.45);
@@ -744,7 +744,7 @@ $\textbf{P}^\theta(x)$ &
         show << inNextFrame;
 
 
-        auto good = readPointCloud(UPS::Options::ProjectPath+"good.pts");
+        auto good = readPointCloud(slope::Options::ProjectPath+"good.pts");
         auto goodpc = PointCloud::Add(good,0.05);
         auto mgood = PointCloud::Add(opposite(good),0.05);
         show >> fibopc >> mfibo << goodpc << mgood >> pts >> proj_pts >> hearth_eyes >> puke;

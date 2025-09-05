@@ -1,11 +1,11 @@
 #ifndef REFERENTIAL_H
 #define REFERENTIAL_H
 
-#include "../UPS.h"
+#include "../libslope.h"
 #include "Options.h"
 #include "io.h"
 
-namespace UPS {
+namespace slope {
 
 class Slide;
 

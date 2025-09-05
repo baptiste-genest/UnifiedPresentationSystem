@@ -5,7 +5,7 @@
 #include "../content/ScreenPrimitive.h"
 #include "../content/CameraView.h"
 
-namespace UPS {
+namespace slope {
 
 struct Transition{
     PrimitiveID pid;

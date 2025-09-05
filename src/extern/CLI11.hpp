@@ -4899,7 +4899,7 @@ class Formatter : public FormatterBase {
     /// This prints out just the positionals "group"
     virtual std::string make_positionals(const App *app) const;
 
-    /// This prints out all the groups of options
+    /// This prints out all the groslope of options
     std::string make_groups(const App *app, AppFormatMode mode) const;
 
     /// This prints out all the subcommands
@@ -4911,7 +4911,7 @@ class Formatter : public FormatterBase {
     /// This prints out a subcommand in help-all
     virtual std::string make_expanded(const App *sub) const;
 
-    /// This prints out all the groups of options
+    /// This prints out all the groslope of options
     virtual std::string make_footer(const App *app) const;
 
     /// This displays the description line
@@ -6565,7 +6565,7 @@ class App {
     /// not be
     std::set<Option *> exclude_options_{};
 
-    /// this is a list of subcommands or option groups that are required by this one, the list is not mutual,  the
+    /// this is a list of subcommands or option groslope that are required by this one, the list is not mutual,  the
     /// listed subcommands do not require this one
     std::set<App *> need_subcommands_{};
 
@@ -7550,7 +7550,7 @@ class App {
     /// Check the name, case insensitive and underscore insensitive if set
     CLI11_NODISCARD bool check_name(std::string name_to_check) const;
 
-    /// Get the groups available directly from this option (in order)
+    /// Get the groslope available directly from this option (in order)
     CLI11_NODISCARD std::vector<std::string> get_groups() const;
 
     /// This gets a vector of pointers with the original parse order
@@ -7690,13 +7690,13 @@ class App {
     void _move_option(Option *opt, App *app);
 };  // namespace CLI
 
-/// Extension of App to better manage groups of options
+/// Extension of App to better manage groslope of options
 class Option_group : public App {
   public:
     Option_group(std::string group_description, std::string group_name, App *parent)
         : App(std::move(group_description), "", parent) {
         group(group_name);
-        // option groups should have automatic fallthrough
+        // option groslope should have automatic fallthrough
     }
     using App::add_option;
     /// Add an existing option to the Option_group
@@ -8925,7 +8925,7 @@ CLI11_INLINE void App::_process_env() {
 CLI11_INLINE void App::_process_callbacks() {
 
     for(App_p &sub : subcommands_) {
-        // process the priority option_groups first
+        // process the priority option_groslope first
         if(sub->get_name().empty() && sub->parse_complete_callback_) {
             if(sub->count_all() > 0) {
                 sub->_process_callbacks();
@@ -10766,7 +10766,7 @@ CLI11_INLINE std::string Formatter::make_usage(const App *app, std::string name)
 
     out << get_label("Usage") << ":" << (name.empty() ? "" : " ") << name;
 
-    std::vector<std::string> groups = app->get_groups();
+    std::vector<std::string> groslope = app->get_groups();
 
     // Print an Options badge if any options exist
     std::vector<const Option *> non_pos_options =
@@ -10840,8 +10840,8 @@ CLI11_INLINE std::string Formatter::make_subcommands(const App *app, AppFormatMo
 
     std::vector<const App *> subcommands = app->get_subcommands({});
 
-    // Make a list in definition order of the groups seen
-    std::vector<std::string> subcmd_groups_seen;
+    // Make a list in definition order of the groslope seen
+    std::vector<std::string> subcmd_groSlope_seen;
     for(const App *com : subcommands) {
         if(com->get_name().empty()) {
             if(!com->get_group().empty()) {
@@ -10851,14 +10851,14 @@ CLI11_INLINE std::string Formatter::make_subcommands(const App *app, AppFormatMo
         }
         std::string group_key = com->get_group();
         if(!group_key.empty() &&
-           std::find_if(subcmd_groups_seen.begin(), subcmd_groups_seen.end(), [&group_key](std::string a) {
+           std::find_if(subcmd_groSlope_seen.begin(), subcmd_groSlope_seen.end(), [&group_key](std::string a) {
                return detail::to_lower(a) == detail::to_lower(group_key);
-           }) == subcmd_groups_seen.end())
-            subcmd_groups_seen.push_back(group_key);
+           }) == subcmd_groSlope_seen.end())
+            subcmd_groSlope_seen.push_back(group_key);
     }
 
     // For each group, filter out and print subcommands
-    for(const std::string &group : subcmd_groups_seen) {
+    for(const std::string &group : subcmd_groSlope_seen) {
         out << "\n" << group << ":\n";
         std::vector<const App *> subcommands_group = app->get_subcommands(
             [&group](const App *sub_app) { return detail::to_lower(sub_app->get_group()) == detail::to_lower(group); });
