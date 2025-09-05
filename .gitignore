@@ -6,8 +6,6 @@ b2/**
 .idea/**
 .vscode/**
 
-src/content/Options.cpp
-
 .cache/**
 compile_commands.json
 

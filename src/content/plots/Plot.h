@@ -2,7 +2,8 @@
 #define PLOT_H
 
 #include "../ScreenPrimitive.h"
-#include "../../extern/implot.h"
+#include "implot.h"
+//#include "../../extern/implot.h"
 
 namespace slope {
 

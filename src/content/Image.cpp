@@ -130,13 +130,14 @@ void slope::DisplayImage(const ImageData &data, const StateInSlide &sis, scalar 
     if (std::abs(sis.angle) > 0.001 || std::abs(1-scale) > 1e-2 || notfullHD){
         double sx =  Options::ScreenResolutionWidth/1920.;
         double sy =  Options::ScreenResolutionHeight/1080.;
-        ImageRotated((void*)(intptr_t)data.texture,P,ImVec2(sx*data.width*scale,sy*data.height*scale),sis.angle,color_multiplier);
+        ImageRotated((intptr_t)data.texture,P,ImVec2(sx*data.width*scale,sy*data.height*scale),sis.angle,color_multiplier);
     }
     else {
         P.x -= data.width*0.5*scale;
         P.y -= data.height*0.5*scale;
         ImGui::SetCursorPos(P);
-        ImGui::Image((void*)(intptr_t)data.texture, ImVec2(data.width*scale,data.height*scale), ImVec2(0.0f, 0.0f), ImVec2(1.0f, 1.0f), color_multiplier);
+        ImGui::ImageWithBg(data.texture, ImVec2(data.width*scale,data.height*scale), ImVec2(0.0f, 0.0f), ImVec2(1.0f, 1.0f),ImVec4(0, 0, 0, 0), color_multiplier);
+//        ImGui::Image((intptr_t)data.texture, ImVec2(data.width*scale,data.height*scale), ImVec2(0.0f, 0.0f), ImVec2(1.0f, 1.0f), color_multiplier);
     }
 }
 
