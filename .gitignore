@@ -43,3 +43,5 @@ compile_commands.json
 *.exe
 *.out
 *.app
+
+CMakeLists.txt.user
