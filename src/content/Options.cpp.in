@@ -5,8 +5,8 @@
 namespace slope
 {
 
-std::string Options::SlopePath = "@Slope_SOURCE@";
-std::string Options::DataPath = SlopePath + "/";
+//std::string Options::SlopePath = "@Slope_SOURCE@";
+//std::string Options::DataPath = SlopePath + "/";
 
 std::string Options::ProjectName;
 std::string Options::ProjectPath;

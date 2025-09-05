@@ -11,11 +11,12 @@ namespace slope {
 struct Options{
 
 /// Global slope build prefix
-static   std::string SlopePath;
-static   std::string DataPath;
+//static   std::string SlopePath;
+static   std::string ProjectDataPath;
 static   std::string ProjectName;
 static   std::string ProjectPath;
 static   std::string ProjectViewsPath;
+static   std::string CachePath;
 
 /// Latex paths
 static std::string PathToPDFLATEX;

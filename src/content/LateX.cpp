@@ -51,7 +51,8 @@ slope::path slope::GetLatexPath(const TexObject &tex,bool formula)
 {
     std::string bit = formula ? "1" : "0";
     auto H = std::hash<std::string>{}(Latex::context + tex+ bit +std::to_string(slope::Options::PDFtoPNGDensity));
-    return Options::DataPath + "formulas/" + std::to_string(H) + ".png";
+    return Options::CachePath + std::to_string(H) + ".png";
+//    return Options::ProjectDataPath + "formulas/" + std::to_string(H) + ".png";
 }
 
 slope::TexObject slope::Latex::context = "";

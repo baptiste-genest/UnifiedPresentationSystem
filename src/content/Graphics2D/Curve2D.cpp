@@ -27,7 +27,7 @@ slope::Figure::FigurePtr slope::Figure::Add(Figure& F,vec2 rel_size)
 {
     std::string content = std::string(F.root);
     auto H = std::hash<std::string>{}(content);
-    std::string filename = Options::DataPath + "figures/" + std::to_string(H) + ".png";
+    std::string filename = Options::ProjectDataPath + "figures/" + std::to_string(H) + ".png";
 
 
     if (!io::file_exists(filename)){

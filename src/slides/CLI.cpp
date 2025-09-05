@@ -7,7 +7,7 @@
 
 int parseCLI(int argc,char** argv) {
     using namespace slope;
-    CLI::App app("Unified Presentation System");
+    CLI::App app("slope - 3D slides generator");
     bool clear_cache = false;
 
     argv = app.ensure_utf8(argv);
@@ -16,6 +16,11 @@ int parseCLI(int argc,char** argv) {
 
     std::string resolution = "1920x1080";
     app.add_option("--resolution",resolution,"screen resolution (default 1920x1080)");
+
+    app.add_option("--project_path",Options::ProjectPath,"path to project")->required();
+
+    std::string data_path;
+    app.add_option("--data_path",data_path,"path to data (default same as project)");
 
     int seed = -1;
     app.add_option("--seed",seed,"seed for random generator");
@@ -27,6 +32,18 @@ int parseCLI(int argc,char** argv) {
         app.exit(e);
     }
 
+    Options::ProjectPath += std::string("/");
+
+    slope::Options::ProjectViewsPath = slope::Options::ProjectPath+std::string("views/");
+
+    slope::Options::CachePath = std::filesystem::path(argv[0]).parent_path().string()+std::string("/slope_cache/");
+    system(("mkdir " + slope::Options::CachePath).data());
+
+    if (data_path.empty())
+        slope::Options::ProjectDataPath = slope::Options::ProjectPath;
+    else
+        slope::Options::ProjectDataPath = data_path;
+
     if (seed == -1)
         srand(time(NULL));
     else{
@@ -35,8 +52,8 @@ int parseCLI(int argc,char** argv) {
 
     if (clear_cache){
         spdlog::info("clearing cache");
-        system(("rm -rf " + Options::DataPath + "cache/*").data());
-        system(("rm -rf " + Options::DataPath + "formulas/*").data());
+        system(("rm -rf " + Options::ProjectDataPath + "cache/*").data());
+        system(("rm -rf " + Options::ProjectDataPath + "formulas/*").data());
     }
 
     auto pos = resolution.find('x');

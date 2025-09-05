@@ -300,18 +300,16 @@ void slope::Slideshow::init(std::string project_name,int argc,char** argv)
     from_action = Time::now();
     from_begin = Time::now();
 
-    //slope::Options::UPSPath = TOSTRING(Slope_SOURCE);
-    slope::Options::SlopePath = Options::SlopePath;
-    slope::Options::DataPath = Options::SlopePath + "/data/";
     slope::Options::ProjectName = project_name;
-    slope::Options::ProjectPath = slope::Options::SlopePath+std::string("/projects/")+slope::Options::ProjectName+std::string("/");
-    slope::Options::ProjectViewsPath = slope::Options::ProjectPath+std::string("views/");
+//    slope::Options::ProjectPath = slope::Options::SlopePath+std::string("/projects/")+slope::Options::ProjectName+std::string("/");
 
     std::cout << "			[ slope PROJECT : " << slope::Options::ProjectName << " ]" << std::endl;
 
-    std::cout << "[ slope PATH ] " << slope::Options::SlopePath << std::endl;
+//    std::cout << "[ slope PATH ] " << slope::Options::SlopePath << std::endl;
     std::cout << "[ PROJECT PATH ] " << slope::Options::ProjectPath << std::endl;
-    std::cout << "[ PROJECT CACHE PATH ] " << slope::Options::ProjectViewsPath << std::endl;
+    std::cout << "[ PROJECT DATA PATH ] " << slope::Options::ProjectDataPath << std::endl;
+    std::cout << "[ PROJECT CACHE PATH ] " << slope::Options::CachePath << std::endl;
+    std::cout << "[ PROJECT VIEWS PATH ] " << slope::Options::ProjectViewsPath << std::endl;
     std::cout << "[ SCREEN RESOLUTION ] " << slope::Options::ScreenResolutionWidth<<"x"<<slope::Options::ScreenResolutionHeight  << std::endl;
 
     std::cout << "[ KEY GUIDE ] " << std::endl;
