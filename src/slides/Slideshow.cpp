@@ -225,7 +225,7 @@ void slope::Slideshow::ImGuiWindowConfig()
 void slope::Slideshow::init(std::string project_name,int argc,char** argv)
 {
     if (parseCLI(argc,argv))
-        assert(false);
+        throw std::runtime_error("exiting for option checking");
     from_action = Time::now();
     from_begin = Time::now();
 
