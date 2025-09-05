@@ -202,17 +202,27 @@ void slope::Slideshow::handleDragAndDrop()
     }
 
 
+    bool horizontal = ImGui::IsKeyDown(ImGuiKey_H);
+
     if (selected_primitive != nullptr) {
         guizmo.draw();
         ImGui::SetNextFrameWantCaptureKeyboard(false);
         auto S = ImGui::GetWindowSize();
         auto x = double(io.MousePos.x)/S.x;
         auto y = double(io.MousePos.y)/S.y;
-//        spdlog::info("offset {} {}",x_offset,y_offset);
-        auto& pis = slides[current_slide][selected_primitive];
-        LabelAnchorPtr lab = std::dynamic_pointer_cast<LabelAnchor>(pis.anchor);
-        lab->writeAtLabel(x+x_offset,y+y_offset,true);
-        pis.alpha = (std::cos(TimeFrom(time_at_pick)*5) + 1)*0.8 + 0.2;
+        if (horizontal) {
+            x_offset = 0.5-x;
+            x = 0.5;
+            auto& pis = slides[current_slide][selected_primitive];
+            LabelAnchorPtr lab = std::dynamic_pointer_cast<LabelAnchor>(pis.anchor);
+            lab->writeAtLabel(x,y+y_offset,true);
+        }
+        else {
+            auto& pis = slides[current_slide][selected_primitive];
+            LabelAnchorPtr lab = std::dynamic_pointer_cast<LabelAnchor>(pis.anchor);
+            lab->writeAtLabel(x+x_offset,y+y_offset,true);
+            pis.alpha = (std::cos(TimeFrom(time_at_pick)*5) + 1)*0.8 + 0.2;
+        }
     }
     return;
 
