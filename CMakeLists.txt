@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.14 FATAL_ERROR)
 
 project(slope LANGUAGES CXX)
 
-list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/src/cmake)
+list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -22,12 +22,12 @@ if (NOT Slope_CONVERT)
   message(ERROR "Could not find the 'convert' tool (imagemagick)")
 endif()
 set(Slope_PDFLATEX ${PDFLATEX_COMPILER})
-set(Slope_SOURCE ${PROJECT_SOURCE_DIR})
+set(Slope_SOURCE ${CMAKE_CURRENT_SOURCE_DIR})
 message(STATUS "pdflatex compiler: ${Slope_PDFLATEX}")
 message(STATUS "convert tool: ${Slope_CONVERT}")
 message(STATUS "Slope source path: ${Slope_SOURCE}")
-configure_file(${PROJECT_SOURCE_DIR}/src/content/Options.cpp.in
-               ${PROJECT_SOURCE_DIR}/src/content/Options.cpp)
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/src/content/Options.cpp.in
+               ${CMAKE_CURRENT_SOURCE_DIR}/src/content/Options.cpp)
 
 
 file(GLOB SRC_lib
