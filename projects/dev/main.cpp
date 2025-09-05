@@ -115,11 +115,18 @@ public:
 void init () {
     LatexLoader::Init(Options::ProjectPath + "test.json");
 
-    auto cairo_test = CairoGraphics::Add();
+//    auto cairo_test = CairoGraphics::Add();
 
 
-    show << cairo_test;
-    show << Formula::Add("f(x) = 3x^3");
+//    show << cairo_test;
+    show << Formula::Add("f(x) = 3x^3")->at("test");
+
+    auto pc = Point::Add(vec(0,0,0));
+//    pc.pc.getT
+    show << pc;
+
+    show << inNextFrame << Latex::Add("test")->at("test2");
+//    polyscope::pickAtScreenCoords(0.5, 0.5); // This will trigger the pick callback
 }
 
 
@@ -133,6 +140,7 @@ int main(int argc,char** argv) {
     polyscope::state::userCallback = [](){
 //        ImPlot::ShowDemoWindow();
         show.play();
+//        ImGui::ShowDemoWindow();
     };
     polyscope::show();
     return 0;

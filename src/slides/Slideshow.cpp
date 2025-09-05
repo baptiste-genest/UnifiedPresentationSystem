@@ -1,6 +1,7 @@
 #include "Slideshow.h"
 #include "content/LateX.h"
 #include "spdlog/spdlog.h"
+#include "polyscope/pick.h"
 
 
 void slope::Slideshow::nextFrame()
@@ -155,7 +156,67 @@ void slope::Slideshow::setInnerTime()
 void slope::Slideshow::handleDragAndDrop()
 {
     auto io = ImGui::GetIO();
-    if (!ImGui::IsKeyPressed(ImGuiKey_LeftCtrl) || io.MouseReleased[0] > 0){//CTRL {
+
+    static double x_offset = 0;
+    static double y_offset = 0;
+    static double original_alpha = 0;
+    static auto time_at_pick = Time::now();
+    static polyscope::PersistentValue<glm::mat4> transform("gizmo transform", glm::mat4(1.0f));
+    static polyscope::TransformationGizmo guizmo("slope guizmo",transform.get(),&transform);//("slope transfo",transform);
+
+    bool ctrl = ImGui::IsKeyDown(ImGuiKey_LeftCtrl);
+    bool click = io.MouseClicked[0];
+//    spdlog::info("ctrl {} click {}",ctrl,click);
+
+    if (ctrl && click && selected_primitive == nullptr){//CTRL {
+        auto S = ImGui::GetWindowSize();
+        auto x = double(io.MousePos.x)/S.x;
+        auto y = double(io.MousePos.y)/S.y;
+        selected_primitive = getPrimitiveUnderMouse(x,y);
+        if (selected_primitive != nullptr) {
+            auto& pis = slides[current_slide][selected_primitive];
+            LabelAnchorPtr lab = std::dynamic_pointer_cast<LabelAnchor>(pis.anchor);
+            if (lab != nullptr) {
+                x_offset = lab->getPos()(0) - x;
+                y_offset = lab->getPos()(1) - y;
+                original_alpha = pis.alpha;
+                time_at_pick = Time::now();
+            }
+        }
+        auto pick = polyscope::pick::pickAtScreenCoords(glm::vec2(io.MousePos.x,io.MousePos.y));
+        if (pick.first) {
+            spdlog::info("Picked primitive: {}", pick.first->getName());
+            pick.first->drawPick();
+            transform = pick.first->getTransform();
+            guizmo.prepare();
+//            guizmo.draw();
+        }
+
+    }
+
+    if (!ctrl && click && selected_primitive != nullptr) {
+//        spdlog::info("unselected {}",selected_primitive->pid);
+        slides[current_slide][selected_primitive].alpha = original_alpha;
+        selected_primitive = nullptr;
+        return;
+    }
+
+
+    if (selected_primitive != nullptr) {
+        guizmo.draw();
+        ImGui::SetNextFrameWantCaptureKeyboard(false);
+        auto S = ImGui::GetWindowSize();
+        auto x = double(io.MousePos.x)/S.x;
+        auto y = double(io.MousePos.y)/S.y;
+//        spdlog::info("offset {} {}",x_offset,y_offset);
+        auto& pis = slides[current_slide][selected_primitive];
+        LabelAnchorPtr lab = std::dynamic_pointer_cast<LabelAnchor>(pis.anchor);
+        lab->writeAtLabel(x+x_offset,y+y_offset,true);
+        pis.alpha = (std::cos(TimeFrom(time_at_pick)*5) + 1)*0.8 + 0.2;
+    }
+    return;
+
+    if (!ImGui::IsKeyDown(ImGuiKey_LeftCtrl) || io.MouseReleased[0] > 0){//CTRL {
 //    if (!ImGui::IsKeyPressed(ImGuiKey_LeftCtrl) || io.MouseReleased[0] > 0){//CTRL {
         selected_primitive = nullptr;
      //   io.WantCaptureMouse = false;
@@ -167,19 +228,29 @@ void slope::Slideshow::handleDragAndDrop()
     ImGui::SetNextFrameWantCaptureMouse(true);
 //    io.WantCaptureMouse = true;
 
+
     auto S = ImGui::GetWindowSize();
     auto x = double(io.MousePos.x)/S.x;
     auto y = double(io.MousePos.y)/S.y;
     if (selected_primitive == nullptr && io.MouseDown[0] > 0){
         selected_primitive = getPrimitiveUnderMouse(x,y);
+        if (selected_primitive != nullptr) {
+            auto& pis = slides[current_slide][selected_primitive];
+            LabelAnchorPtr lab = std::dynamic_pointer_cast<LabelAnchor>(pis.anchor);
+            if (lab != nullptr) {
+                x_offset = lab->getPos()(0) - x;
+                y_offset = lab->getPos()(1) - y;
+            }
+        }
     }
     else if (io.MouseReleased[0] > 0. && selected_primitive != nullptr) {
         selected_primitive = nullptr;
     }
     if (io.MouseDown[0] > 0 && selected_primitive != nullptr) {
+        spdlog::info("offset {} {}",x_offset,y_offset);
         auto& pis = slides[current_slide][selected_primitive];
         LabelAnchorPtr lab = std::dynamic_pointer_cast<LabelAnchor>(pis.anchor);
-        lab->writeAtLabel(x,y,true);
+        lab->writeAtLabel(x+x_offset,y+y_offset,true);
     }
 }
 
